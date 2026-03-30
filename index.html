@@ -624,9 +624,7 @@ Si tenés PDF o Word: abrilo → Ctrl+A → Ctrl+C → pegá acá."></textarea>
       <!-- Estado 2: Formulario -->
       <div id="lm-form-wrap" style="display:none;max-width:420px;margin:0 auto">
         <div style="font-size:14px;color:var(--tx2);line-height:1.75;margin-bottom:24px">Dejanos tu email y descargá una guía breve con recomendaciones concretas para mejorar tu CV a partir del diagnóstico que acabás de ver.</div>
-        <form name="lead-cv" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleLMSubmit(event)" style="text-align:left">
-          <input type="hidden" name="form-name" value="lead-cv">
-          <p style="display:none"><input name="bot-field"></p>
+        <form action="https://formspree.io/f/mjgpwbkp" method="POST" onsubmit="handleLMSubmit(event)" style="text-align:left">
           <div style="display:flex;flex-direction:column;gap:14px">
             <div class="fg"><label class="flbl">Nombre *</label><input class="fi" type="text" name="nombre" required placeholder="Tu nombre"></div>
             <div class="fg"><label class="flbl">Email *</label><input class="fi" type="email" name="email" required placeholder="tu@email.com"></div>
@@ -1061,8 +1059,8 @@ function handleLMSubmit(e){
   e.preventDefault();
   const form=e.target;
   const data=new FormData(form);
-  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(data).toString()})
-    .then(()=>showThanks())
+  fetch('https://formspree.io/f/mjgpwbkp',{method:'POST',body:data,headers:{'Accept':'application/json'}})
+    .then(r=>r.ok?showThanks():showThanks())
     .catch(()=>showThanks());
 }
 
