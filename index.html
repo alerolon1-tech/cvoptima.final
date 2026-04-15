@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de CV — Empleabilidad en Clave Social</title>
+
+<!-- Open Graph -->
+<meta property="og:title" content="Analizador Profesional de CV">
+<meta property="og:description" content="Subí tu CV y obtené un diagnóstico profesional con Score de Empleabilidad, radar de competencias y oportunidades de mejora.">
+<meta property="og:image" content="https://cvoptima-final.pages.dev/preview-cv.png">
+<meta property="og:url" content="https://cvoptima-final.pages.dev/">
+<meta property="og:type" content="website">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Analizador Profesional de CV">
+<meta name="twitter:description" content="Diagnóstico automático de CV con análisis ATS, radar de competencias y recomendaciones profesionales.">
+<meta name="twitter:image" content="https://cvoptima-final.pages.dev/preview-cv.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #0D2137;
+  --petrol: #0E5C8A;
+  --teal:   #0891B2;
+  --teal2:  #0DB4C4;
+  --ice:    #F0F7FA;
+  --gold:   #F5A623;
+
+  --bg:     #080F16;
+  --bg2:    #0C1824;
+  --bg3:    #102030;
+  --bg4:    #152840;
+  --b1:     rgba(13,180,196,0.07);
+  --b2:     rgba(13,180,196,0.14);
+  --b3:     rgba(13,180,196,0.26);
+  --tx:     #E4F0F6;
+  --tx2:    #6BA8C0;
+  --tx3:    #2E6080;
+  --tx4:    #163550;
+
+  --gr:     #22C55E;
+  --gr-d:   rgba(34,197,94,0.1);
+  --gr-b:   rgba(34,197,94,0.24);
+  --rd:     #EF4444;
+  --rd-d:   rgba(239,68,68,0.1);
+  --rd-b:   rgba(239,68,68,0.24);
+  --am:     #F59E0B;
+  --am-d:   rgba(245,158,11,0.1);
+  --am-b:   rgba(245,158,11,0.24);
+  --go-d:   rgba(245,166,35,0.1);
+  --go-b:   rgba(245,166,35,0.28);
+  --tc-d:   rgba(8,145,178,0.1);
+  --tc-b:   rgba(8,145,178,0.26);
+
+  --serif: 'Fraunces', Georgia, serif;
+  --sans:  'DM Sans', sans-serif;
+  --mono:  'DM Mono', monospace;
+  --r: 10px; --r2: 16px; --r3: 20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100vh;line-height:1.6;font-size:15px}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--b1) 1px,transparent 1px),linear-gradient(90deg,var(--b1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* HDR */
+.hdr{padding:18px 44px;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(8,15,22,0.95);backdrop-filter:blur(16px);z-index:100;flex-wrap:wrap;gap:10px}
+.logo-name{font-family:var(--serif);font-size:19px;letter-spacing:-.3px}
+.logo-name b{color:var(--teal2);font-weight:600}
+.logo-sub{font-size:10px;color:var(--tx3);letter-spacing:1.8px;text-transform:uppercase;margin-top:1px}
+.hdr-badge{font-size:11px;color:var(--tx3);background:var(--bg3);border:1px solid var(--b2);padding:4px 13px;border-radius:20px}
+
+.page{display:none;position:relative;z-index:1}.page.active{display:block}
+
+/* HOME */
+.home{max-width:720px;margin:0 auto;padding:80px 24px 100px}
+.home-eyebrow{display:inline-block;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);background:var(--tc-d);border:1px solid var(--tc-b);padding:5px 14px;border-radius:20px;margin-bottom:22px}
+.home h1{font-family:var(--serif);font-size:50px;line-height:1.08;letter-spacing:-1.5px;margin-bottom:20px;font-weight:700}
+.home h1 i{font-style:italic;color:var(--teal2);font-weight:600}
+.home-p{color:var(--tx2);font-size:16px;max-width:500px;margin:0 auto 48px;line-height:1.7;text-align:center}
+.feats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:48px}
+.feat{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:18px 20px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s}
+.feat:hover{border-color:var(--b3)}
+.feat-ico{width:36px;height:36px;border-radius:10px;background:var(--tc-d);border:1px solid var(--tc-b);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.feat-t{font-size:13px;font-weight:500;margin-bottom:3px}
+.feat-d{font-size:12px;color:var(--tx2);line-height:1.5}
+.home-cta{width:100%;padding:18px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+.home-cta:hover{background:var(--teal);transform:translateY(-1px);box-shadow:0 8px 28px rgba(8,145,178,.2)}
+.home-credit{text-align:center;font-size:12px;color:var(--tx3);margin-top:18px}
+.home-credit b{color:var(--teal2);font-weight:500}
+
+/* UPLOAD */
+.up{max-width:660px;margin:0 auto;padding:52px 24px 100px}
+.back-btn{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--tx3);cursor:pointer;margin-bottom:28px;background:none;border:none;font-family:var(--sans);transition:color .2s}
+.back-btn:hover{color:var(--tx2)}
+.up h2{font-family:var(--serif);font-size:32px;letter-spacing:-.8px;margin-bottom:6px}
+.up-sub{color:var(--tx2);font-size:14px;margin-bottom:30px}
+.card{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r3);padding:32px;box-shadow:0 20px 48px rgba(0,0,0,.35)}
+.tabs{display:flex;background:var(--bg3);border-radius:var(--r);padding:3px;border:1px solid var(--b1);margin-bottom:18px}
+.tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;background:none;color:var(--tx3);border:none;font-family:var(--sans);border-radius:8px;transition:all .2s}
+.tab.active{background:var(--bg4);color:var(--tx);border:1px solid var(--b2)}
+.tab:hover:not(.active){color:var(--tx2)}
+.drop{border:1.5px dashed var(--b2);border-radius:var(--r2);padding:44px 24px;text-align:center;cursor:pointer;transition:all .25s;background:var(--bg3);position:relative}
+.drop:hover,.drop.drag{border-color:var(--teal);background:var(--tc-d)}
+.drop.ready{border-color:var(--gr);border-style:solid;background:var(--gr-d)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-ico{font-size:32px;margin-bottom:12px;display:block}
+.drop-t{font-size:14px;font-weight:500;margin-bottom:5px}
+.drop-s{font-size:12px;color:var(--tx3)}
+.fpill{display:none;align-items:center;gap:10px;background:var(--gr-d);border:1px solid var(--gr-b);border-radius:var(--r);padding:10px 14px;margin-top:12px;font-size:13px;color:var(--gr)}
+.fpill.show{display:flex}
+.fname{flex:1;font-weight:500}
+.fclear{background:none;border:none;color:var(--tx3);font-size:18px;cursor:pointer;line-height:1;padding:0}
+.fclear:hover{color:var(--rd)}
+.cv-ta{width:100%;min-height:220px;padding:16px;background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r2);color:var(--tx);font-family:var(--sans);font-size:13px;line-height:1.7;resize:vertical;outline:none;transition:border-color .2s}
+.cv-ta:focus{border-color:var(--teal)}
+.cv-ta::placeholder{color:var(--tx4);line-height:1.8}
+.frow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.flbl{font-size:10px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--tx3)}
+.fi{padding:9px 13px;background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.fi:focus{border-color:var(--teal)}
+select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%232E6080' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-color:var(--bg3);cursor:pointer}
+select.fi option{background:var(--bg3)}
+.go{width:100%;margin-top:20px;padding:17px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px}
+.go:hover{background:var(--teal);transform:translateY(-1px);box-shadow:0 8px 24px rgba(8,145,178,.2)}
+.go:active{transform:translateY(0)}
+.go:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.err{background:var(--rd-d);border:1px solid var(--rd-b);border-radius:var(--r);padding:13px 16px;font-size:13px;color:#F87171;margin-top:14px;display:none;line-height:1.5}
+.disclaim{text-align:center;font-size:11px;color:var(--tx4);margin-top:13px}
+
+/* LOADING */
+.load{max-width:420px;margin:0 auto;padding:110px 24px;text-align:center}
+.spin{width:64px;height:64px;margin:0 auto 28px;position:relative}
+.spin::before,.spin::after{content:'';position:absolute;border-radius:50%}
+.spin::before{inset:0;border:2px solid var(--b2)}
+.spin::after{inset:0;border:2px solid transparent;border-top-color:var(--teal);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load h2{font-family:var(--serif);font-size:26px;letter-spacing:-.5px;margin-bottom:8px}
+.load p{color:var(--tx2);font-size:13px;margin-bottom:32px}
+.steps{list-style:none;display:flex;flex-direction:column;gap:5px;text-align:left}
+.step{font-size:12px;color:var(--tx4);padding:7px 13px;border-radius:8px;display:flex;align-items:center;gap:9px;transition:all .3s}
+.step.on{background:var(--bg3);color:var(--tx2);border:1px solid var(--b2)}
+.step.ok{color:var(--gr)}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* DASHBOARD */
+.dash{max-width:1060px;margin:0 auto;padding:44px 24px 100px}
+.dh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:40px;gap:20px;flex-wrap:wrap}
+.dh-name{font-family:var(--serif);font-size:32px;letter-spacing:-1px;line-height:1.1;margin-bottom:6px}
+.dh-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dtag{display:inline-flex;align-items:center;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.tag-s{background:var(--tc-d);color:var(--teal2);border:1px solid var(--tc-b)}
+.tag-e{background:var(--go-d);color:var(--gold);border:1px solid var(--go-b)}
+.tag-r{background:var(--bg3);color:var(--tx2);border:1px solid var(--b2)}
+.dlrow{display:flex;gap:9px;flex-wrap:wrap}
+.dbtn{padding:9px 16px;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.dbtn-p{background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b)}.dbtn-p:hover{background:var(--teal)}
+.dbtn-s{background:var(--bg3);color:var(--tx2);border:1px solid var(--b2)}.dbtn-s:hover{color:var(--tx);border-color:var(--b3)}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.gf{margin-bottom:14px}
+.pn{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:26px 28px}
+.pn-t{font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.pn-t span{color:var(--teal2);font-size:11px;letter-spacing:.5px;text-transform:none;font-weight:400}
+
+/* SCORE CARDS */
+.sc-hero{display:grid;grid-template-columns:auto 1fr 1fr;gap:14px;margin-bottom:14px;align-items:stretch}
+.sc-main{background:var(--bg2);border:1px solid var(--tc-b);border-radius:var(--r2);padding:28px 32px;background:linear-gradient(135deg,var(--bg2),rgba(8,145,178,0.05));display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-width:160px}
+.sc-big{font-family:var(--serif);font-size:80px;line-height:1;letter-spacing:-4px;color:var(--tx)}
+.sc-of{font-size:13px;color:var(--tx3);margin-top:4px}
+.sc-lbl{font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);margin-bottom:8px}
+.sc-pot{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:22px 26px;display:flex;flex-direction:column;justify-content:center}
+.sc-pot-num{font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-2px;color:var(--teal2);margin-bottom:4px}
+.sc-ids{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:22px 26px;display:flex;flex-direction:column;justify-content:center}
+.ids-num{font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-2px;margin-bottom:4px}
+.ids-low{color:var(--rd)}.ids-med{color:var(--am)}.ids-hi{color:var(--gr)}
+.ids-badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:6px}
+.ids-b-lo{background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b)}
+.ids-b-md{background:var(--am-d);color:var(--am);border:1px solid var(--am-b)}
+.ids-b-hi{background:var(--gr-d);color:var(--gr);border:1px solid var(--gr-b)}
+.ids-diag{font-size:12px;color:var(--tx2);line-height:1.5}
+
+/* RESUMEN */
+.resumen{font-size:14px;color:var(--tx2);line-height:1.78;border-left:3px solid var(--teal);padding-left:18px;font-style:italic}
+
+/* ATS DETAIL */
+.ats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ats-item{display:flex;flex-direction:column;gap:5px}
+.ats-name{font-size:11px;color:var(--tx2);font-weight:500}
+.ats-track{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.ats-fill{height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.ats-val{font-size:11px;font-family:var(--mono);color:var(--tx3)}
+
+/* RADAR */
+.chart-wrap{position:relative;height:240px}
+.prog-wrap{position:relative;height:160px}
+
+/* SECCIONES */
+.secs{display:flex;flex-wrap:wrap;gap:7px}
+.sec-pill{font-size:11px;padding:4px 12px;border-radius:20px;font-weight:500}
+.sec-ok{background:var(--gr-d);color:var(--gr);border:1px solid var(--gr-b)}
+.sec-no{background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b)}
+
+/* LOGROS */
+.logro-card{border-radius:var(--r);padding:14px 16px;margin-bottom:8px;position:relative}
+.logro-card:last-child{margin-bottom:0}
+.logro-fuerte{background:var(--gr-d);border:1px solid var(--gr-b)}
+.logro-debil{background:var(--am-d);border:1px solid var(--am-b)}
+.logro-resp{background:var(--bg3);border:1px solid var(--b2)}
+.logro-badge{font-size:9px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
+.lb-f{color:var(--gr)}.lb-d{color:var(--am)}.lb-r{color:var(--tx3)}
+.logro-frase{font-size:13px;line-height:1.5;margin-bottom:6px;font-family:var(--mono);font-size:12px}
+.logro-frase.f{color:var(--gr)}.logro-frase.d{color:var(--am)}.logro-frase.r{color:var(--tx2)}
+.logro-motivo{font-size:12px;color:var(--tx2);line-height:1.5}
+.logro-sug{font-size:11px;color:var(--teal2);margin-top:5px;display:flex;align-items:flex-start;gap:5px}
+
+/* VERBOS */
+.verbo-row{border:1px solid var(--b1);border-radius:var(--r);padding:12px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.verbo-row:last-child{margin-bottom:0}
+.verbo-tag-w{background:var(--am-d);color:var(--am);border:1px solid var(--am-b);font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px;font-family:var(--mono);flex-shrink:0;margin-top:1px}
+.verbo-body{flex:1}
+.verbo-ctx{font-size:11px;color:var(--tx3);margin-bottom:5px;font-family:var(--mono)}
+.verbo-alts{display:flex;flex-wrap:wrap;gap:5px}
+.verbo-alt{font-size:11px;background:var(--tc-d);color:var(--teal2);border:1px solid var(--tc-b);padding:2px 9px;border-radius:20px;font-family:var(--mono)}
+
+/* DETECTADOS */
+.verbos-detectados{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.vd-tag{font-size:11px;background:var(--gr-d);color:var(--gr);border:1px solid var(--gr-b);padding:3px 10px;border-radius:20px;font-family:var(--mono)}
+
+/* NARRATIVA */
+.narr-tipo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;margin-bottom:14px}
+.nt-consistente{background:var(--gr-d);color:var(--gr);border:1px solid var(--gr-b)}
+.nt-crecimiento{background:var(--tc-d);color:var(--teal2);border:1px solid var(--tc-b)}
+.nt-transicion{background:var(--am-d);color:var(--am);border:1px solid var(--am-b)}
+.nt-dispersa{background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b)}
+.narr-txt{font-size:13px;color:var(--tx2);line-height:1.65;margin-bottom:12px}
+.narr-prog{font-size:12px;color:var(--tx2);line-height:1.6;padding:10px 14px;background:var(--bg3);border-radius:var(--r);border-left:2px solid var(--teal);margin-bottom:12px}
+.narr-ops{list-style:none;display:flex;flex-direction:column;gap:7px}
+.narr-op{font-size:12px;color:var(--tx2);display:flex;gap:8px;align-items:flex-start}
+.narr-op::before{content:'→';color:var(--teal2);flex-shrink:0}
+
+/* MAPA HABILIDADES */
+.hab-section{margin-bottom:16px}
+.hab-section:last-child{margin-bottom:0}
+.hab-title{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.hab-title.dec{color:var(--gr)}.hab-title.det{color:var(--teal2)}.hab-title.inc{color:var(--gold)}
+.hab-tags{display:flex;flex-wrap:wrap;gap:6px}
+.hab-tag{font-size:12px;padding:4px 12px;border-radius:20px}
+.hab-dec{background:var(--gr-d);color:var(--gr);border:1px solid var(--gr-b)}
+.hab-det{background:var(--tc-d);color:var(--teal2);border:1px solid var(--tc-b)}
+.hab-inc{background:var(--go-d);color:var(--gold);border:1px solid var(--go-b)}
+
+/* ROLES */
+.role-card{border:1px solid var(--b1);border-radius:var(--r2);padding:18px 22px;margin-bottom:10px;transition:all .2s}
+.role-card:last-child{margin-bottom:0}
+.role-card:hover{border-color:var(--b2);background:rgba(8,145,178,0.02)}
+.role-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.role-name{font-size:15px;font-weight:500;margin-bottom:4px}
+.role-tags{display:flex;gap:6px;flex-wrap:wrap}
+.role-sen{font-size:10px;padding:2px 9px;border-radius:20px;background:var(--bg4);color:var(--tx2);border:1px solid var(--b2)}
+.role-match{font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;flex-shrink:0}
+.m-hi{background:var(--gr-d);color:var(--gr);border:1px solid var(--gr-b)}
+.m-md{background:var(--am-d);color:var(--am);border:1px solid var(--am-b)}
+.m-lo{background:var(--tc-d);color:var(--teal2);border:1px solid var(--tc-b)}
+.role-why{font-size:12px;color:var(--tx2);line-height:1.55;margin-bottom:10px}
+.role-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:10px;background:var(--bg3);color:var(--tx3);padding:3px 9px;border-radius:20px;border:1px solid var(--b1)}
+
+/* FORTALEZAS DEBILIDADES */
+.fb-list{list-style:none;display:flex;flex-direction:column;gap:12px}
+.fb-item{display:flex;gap:12px;align-items:flex-start}
+.fb-ico{flex-shrink:0;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:1px}
+.fb-ico.s{background:var(--gr-d);color:var(--gr)}
+.fb-ico.g{background:var(--rd-d);color:var(--rd)}
+.fb-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.fb-detail{font-size:12px;color:var(--tx2);line-height:1.5}
+.fb-accion{font-size:11px;color:var(--teal2);margin-top:4px;display:flex;gap:5px;align-items:flex-start}
+
+/* ALERTAS */
+.alerta{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:var(--r);margin-bottom:8px;font-size:13px;line-height:1.5}
+.alerta:last-child{margin-bottom:0}
+.al-e{background:var(--rd-d);border:1px solid var(--rd-b);color:#F87171}
+.al-w{background:var(--am-d);border:1px solid var(--am-b);color:var(--am)}
+.al-i{background:var(--tc-d);border:1px solid var(--tc-b);color:var(--teal2)}
+.al-ico{flex-shrink:0;font-size:14px}
+
+/* RECOMENDACIONES */
+.rec-card{border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s}
+.rec-card:last-child{margin-bottom:0}
+.rec-card:hover{border-color:var(--b2)}
+.rec-pri{flex-shrink:0;width:8px;height:8px;border-radius:50%;margin-top:5px}
+.p-a{background:var(--rd)}.p-m{background:var(--am)}.p-b{background:var(--teal)}
+.rec-body{flex:1}
+.rec-cat{font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:3px}
+.rec-t{font-size:13px;font-weight:500;margin-bottom:4px}
+.rec-d{font-size:12px;color:var(--tx2);line-height:1.55}
+.rec-imp{font-size:10px;color:var(--gr);font-family:var(--mono);margin-top:6px;background:var(--gr-d);display:inline-block;padding:2px 8px;border-radius:10px}
+
+/* POTENTIAL */
+.pot-row{display:flex;align-items:center;gap:24px}
+.pot-ring{position:relative;width:100px;height:100px;flex-shrink:0}
+.pot-ring svg{transform:rotate(-90deg)}
+.pot-lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pot-n{font-family:var(--serif);font-size:28px;line-height:1;font-weight:600}
+.pot-s{font-size:9px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.pot-txt{font-size:13px;color:var(--tx2);line-height:1.65}
+
+/* AREAS */
+.areas{display:flex;flex-wrap:wrap;gap:7px}
+.area-tag{font-size:12px;background:var(--go-d);color:var(--gold);border:1px solid var(--go-b);padding:4px 13px;border-radius:20px;font-weight:500}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fu{opacity:0;animation:fadeUp .5s ease forwards}
+.fu:nth-child(1){animation-delay:.04s}.fu:nth-child(2){animation-delay:.08s}
+.fu:nth-child(3){animation-delay:.12s}.fu:nth-child(4){animation-delay:.16s}
+.fu:nth-child(5){animation-delay:.2s}.fu:nth-child(6){animation-delay:.24s}
+.fu:nth-child(7){animation-delay:.28s}.fu:nth-child(8){animation-delay:.32s}
+.fu:nth-child(9){animation-delay:.36s}.fu:nth-child(10){animation-delay:.4s}
+.fu:nth-child(11){animation-delay:.44s}.fu:nth-child(12){animation-delay:.48s}
+
+@media(max-width:768px){
+  .hdr{padding:14px 18px}
+  .sc-hero,.g2,.g3,.frow,.ats-grid{grid-template-columns:1fr}
+  .sc-hero{grid-template-columns:1fr}
+  .feats{grid-template-columns:1fr !important;margin-bottom:20px}
+  .dash,.home,.up{padding-left:16px;padding-right:16px}
+  .home{padding-top:20px;padding-bottom:40px}
+  .home h1{font-size:34px;margin-bottom:12px}
+  .home-p{margin-bottom:20px;font-size:14px}
+  .pn{padding:18px 16px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div>
+    <div class="logo-name">CV<b>Optima</b></div>
+    <div class="logo-sub">Empleabilidad en Clave Social</div>
+  </div>
+  <span class="hdr-badge">Por Alejandra Rolón</span>
+</header>
+
+<!-- ══ HOME ══ -->
+<div id="pg-home" class="page active">
+<div class="home" style="text-align:center">
+  <div style="font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--teal2);margin-bottom:22px">Diagnóstico profesional · Empleabilidad en Clave Social</div>
+  <h1>Conocé el impacto<br><i>real</i> de tu perfil</h1>
+  <p class="home-p">Un CV no es solo un documento. Es la forma en que tu trayectoria se vuelve visible en un mercado laboral en transformación. Lo mismo vale para tu perfil de LinkedIn.</p>
+
+  <!-- Selector de análisis -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;max-width:560px;margin-left:auto;margin-right:auto">
+    <button class="home-cta" onclick="goToUpload('cv')" style="margin-bottom:0;flex-direction:column;gap:6px;padding:22px 16px;border-radius:var(--r2)">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span style="font-size:14px;font-weight:600">Analizar CV</span>
+      <span style="font-size:11px;opacity:.7;font-weight:400">Diagnóstico completo de tu currículum</span>
+    </button>
+    <button class="home-cta" onclick="goToUpload('li')" style="margin-bottom:0;flex-direction:column;gap:6px;padding:22px 16px;border-radius:var(--r2);background:var(--bg4);border-color:rgba(10,102,194,0.4)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      <span style="font-size:14px;font-weight:600">Analizar perfil LinkedIn</span>
+      <span style="font-size:11px;opacity:.7;font-weight:400">Diagnóstico de tu presencia digital</span>
+    </button>
+    <button class="home-cta" onclick="goToUpload('ambos')" style="margin-bottom:0;grid-column:1/-1;background:var(--navy);border-color:var(--tc-b);flex-direction:row;gap:10px;padding:16px 20px">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/></svg>
+      Analizar CV + LinkedIn (comparativa)
+    </button>
+  </div>
+
+  <div class="feats" style="grid-template-columns:1fr 1fr 1fr;max-width:560px;margin:0 auto 0">
+    <div class="feat"><div class="feat-ico">🗂</div><div><div class="feat-t">Estructura del CV</div><div class="feat-d">Cómo se organiza la información y qué tan claro resulta tu perfil.</div></div></div>
+    <div class="feat"><div class="feat-ico">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    </div><div><div class="feat-t">Perfil LinkedIn</div><div class="feat-d">Completitud, narrativa y coherencia de tu presencia digital.</div></div></div>
+    <div class="feat"><div class="feat-ico">🔗</div><div><div class="feat-t">Coherencia CV ↔ LinkedIn</div><div class="feat-d">Alineación entre ambos documentos y brechas a resolver.</div></div></div>
+  </div>
+  <p style="color:var(--tx2);font-size:15px;max-width:480px;margin:32px auto 0;line-height:1.7">Recibí un diagnóstico claro sobre qué funciona en tu CV y tu perfil de LinkedIn, y qué coherencia presentan entre sí.</p>
+
+  <div style="max-width:560px;margin:52px auto 0;padding:36px 40px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);text-align:center">
+    <div style="font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:16px">Sobre el enfoque</div>
+    <p style="font-size:14px;color:var(--tx2);line-height:1.85;margin:0">El análisis de CVOptima parte de la idea de que un CV no es solo un documento técnico. También refleja decisiones, trayectorias y formas de narrar la experiencia profesional. Lo mismo vale para el perfil de LinkedIn: ambos construyen la empleabilidad de manera relacional y social. Por eso el sistema evalúa estructura, narrativa, legibilidad y coherencia entre documentos para detectar oportunidades de mejora.</p>
+  </div>
+
+  <p class="home-credit" style="margin-top:24px">Herramienta de <b>Alejandra Rolón — Desarrollo profesional y Empleabilidad</b></p>
+</div>
+</div>
+
+<!-- ══ UPLOAD ══ -->
+<div id="pg-upload" class="page">
+<div class="up">
+  <button class="back-btn" onclick="showPage('pg-home')">← Volver</button>
+  <h2 id="up-title">Subí tu CV</h2>
+  <p class="up-sub" id="up-sub">PDF o texto. El diagnóstico completo tarda unos 20 segundos.</p>
+
+  <!-- Selector de modo (visible solo en modo 'ambos') -->
+  <div id="modo-bar" style="display:none;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);padding:16px 20px;margin-bottom:20px">
+    <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px">Modo de análisis: CV + LinkedIn</div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.6">Subí tu CV y tu perfil de LinkedIn para obtener el diagnóstico de cada uno y una comparativa de coherencia entre ambos.</div>
+  </div>
+
+  <div class="card">
+
+    <!-- ── CV SECTION ───────────────────────────────────────── -->
+    <div id="cv-section">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px" id="cv-sec-lbl">Tu CV</div>
+      <div class="tabs">
+        <button class="tab active" id="tab-t" onclick="setTab('t')">✏ Pegar texto</button>
+        <button class="tab" id="tab-p" onclick="setTab('p')">📄 Subir PDF</button>
+      </div>
+      <div id="pan-t">
+        <textarea class="cv-ta" id="cv-ta" placeholder="Pegá aquí el texto completo de tu CV...
+
+Incluí: nombre, contacto, experiencia con fechas, educación, habilidades y logros.
+Si tenés PDF o Word: abrilo → Ctrl+A → Ctrl+C → pegá acá."></textarea>
+      </div>
+      <div id="pan-p" style="display:none">
+        <div class="drop" id="drop" ondragover="dOver(event)" ondragleave="dLeave()" ondrop="dDrop(event)">
+          <input type="file" accept=".pdf" id="finp" onchange="fSel(event)">
+          <span class="drop-ico">📄</span>
+          <div class="drop-t">Arrastrá tu PDF o hacé clic para seleccionar</div>
+          <div class="drop-s">Solo .pdf · Máximo 10 MB</div>
+        </div>
+        <div class="fpill" id="fpill">
+          <span style="font-size:18px">📄</span>
+          <span class="fname" id="fname"></span>
+          <button class="fclear" onclick="fClear()">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LINKEDIN SECTION ─────────────────────────────────── -->
+    <div id="li-section" style="display:none;margin-top:20px;padding-top:20px;border-top:1px solid var(--b1)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <span style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3)" id="li-sec-lbl">Perfil de LinkedIn</span>
+      </div>
+
+      <!-- Guía descarga -->
+      <details style="margin-bottom:14px;border:1px solid var(--b1);border-radius:var(--r);overflow:hidden">
+        <summary style="cursor:pointer;padding:9px 14px;font-size:12px;color:var(--teal2);font-weight:500;list-style:none;display:flex;align-items:center;gap:6px;background:var(--bg3);user-select:none">
+          <span style="font-size:10px;opacity:.7">▸</span> ¿Cómo descargo el PDF de LinkedIn?
+        </summary>
+        <div style="padding:14px 16px;background:var(--bg3);border-top:1px solid var(--b1)">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--tx2)"><span style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--petrol);border:1px solid var(--tc-b);color:var(--teal2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">1</span>Ingresá a tu perfil en LinkedIn desde una computadora.</div>
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--tx2)"><span style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--petrol);border:1px solid var(--tc-b);color:var(--teal2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">2</span>Hacé clic en <strong style="color:var(--tx)">"Más"</strong> debajo de tu foto y nombre.</div>
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--tx2)"><span style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--petrol);border:1px solid var(--tc-b);color:var(--teal2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span>Seleccioná <strong style="color:var(--tx)">"Guardar en PDF"</strong> del menú.</div>
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--tx2)"><span style="flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--petrol);border:1px solid var(--tc-b);color:var(--teal2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">4</span>El archivo se descarga automáticamente. Subilo aquí.</div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--tx3);padding:8px 12px;background:var(--bg4);border-left:2px solid var(--teal);border-radius:0 var(--r) var(--r) 0">Solo funciona con el PDF descargado directamente desde LinkedIn, no con capturas ni exportaciones de terceros.</div>
+        </div>
+      </details>
+
+      <div class="drop" id="li-drop" ondragover="liOver(event)" ondragleave="liLeave()" ondrop="liDrop(event)" style="padding:28px 20px">
+        <input type="file" accept=".pdf" id="li-finp" onchange="liSel(event)">
+        <span class="drop-ico" style="font-size:24px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </span>
+        <div class="drop-t" style="font-size:13px">Arrastrá tu PDF de LinkedIn o hacé clic</div>
+        <div class="drop-s">Solo .pdf · Máximo 10 MB</div>
+      </div>
+      <div class="fpill" id="li-pill" style="background:rgba(10,102,194,0.1);border-color:rgba(10,102,194,0.3);color:#6BA8C0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <span class="fname" id="li-fname"></span>
+        <button class="fclear" onclick="liClear()">×</button>
+      </div>
+    </div>
+    <!-- ── FIN LINKEDIN ──────────────────────────────────────── -->
+
+    <div class="frow" id="cv-frow">
+      <div class="fg"><label class="flbl">Rol objetivo</label><input class="fi" type="text" id="inp-role" placeholder="Ej: Coordinadora de RRHH"></div>
+      <div class="fg"><label class="flbl">Sector</label>
+        <select class="fi" id="inp-sec">
+          <option value="">Cualquier sector</option>
+          <option>Tecnología</option><option>Finanzas</option><option>Marketing</option>
+          <option>Salud</option><option>Educación</option><option>Consultoría</option>
+          <option>Sector público</option><option>Recursos Humanos</option>
+          <option>Startups</option><option>E-commerce</option><option>Legal</option><option>Operaciones</option>
+        </select>
+      </div>
+      <div class="fg"><label class="flbl">Seniority buscado</label>
+        <select class="fi" id="inp-sen">
+          <option value="">Cualquier nivel</option>
+          <option>Junior</option><option>Semi-Senior</option><option>Senior</option>
+          <option>Lead</option><option>Executive</option>
+        </select>
+      </div>
+    </div>
+    <div id="err" class="err"></div>
+    <button class="go" id="go-btn" onclick="startAnalysis()">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M8 11h6"/></svg>
+      <span id="go-label">Diagnosticar mi CV</span>
+    </button>
+    <p class="disclaim">Tu información se procesa en el momento y no se almacena.</p>
+  </div>
+</div>
+</div>
+
+<!-- ══ LOADING ══ -->
+<div id="pg-load" class="page">
+<div class="load">
+  <div class="spin"></div>
+  <h2>Analizando tu CV</h2>
+  <p>Procesando con criterios de empleabilidad reales...</p>
+  <ul class="steps">
+    <li class="step" id="s1"><span class="sdot"></span>Leyendo estructura y secciones</li>
+    <li class="step" id="s2"><span class="sdot"></span>Detectando logros vs responsabilidades</li>
+    <li class="step" id="s3"><span class="sdot"></span>Analizando verbos e impacto</li>
+    <li class="step" id="s4"><span class="sdot"></span>Calculando Score de Empleabilidad y densidad de impacto</li>
+    <li class="step" id="s5"><span class="sdot"></span>Mapeando habilidades y narrativa</li>
+    <li class="step" id="s6"><span class="sdot"></span>Analizando perfil de LinkedIn</li>
+    <li class="step" id="s7"><span class="sdot"></span>Generando recomendaciones</li>
+  </ul>
+</div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="pg-dash" class="page">
+<div class="dash">
+
+  <!-- Header -->
+  <div class="dh fu">
+    <div>
+      <div class="dh-name" id="d-name">Diagnóstico</div>
+      <div class="dh-meta">
+        <span id="d-date" style="font-size:12px;color:var(--tx3)"></span>
+        <span class="dtag tag-s" id="d-sen"></span>
+        <span class="dtag tag-e" id="d-exp"></span>
+        <span class="dtag tag-r" id="d-role"></span>
+      </div>
+    </div>
+    <div class="dlrow">
+      <a href="/instructivo.pdf" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:var(--r);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--teal2);background:var(--tc-d);border:1px solid var(--tc-b);text-decoration:none;transition:all .2s">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        ¿Cómo leer este diagnóstico?
+      </a>
+      <a id="admin-guia-btn" href="/guia-cv.pdf" download style="display:none;align-items:center;gap:8px;padding:12px 20px;border-radius:var(--r);font-family:var(--sans);font-size:14px;font-weight:500;color:var(--gold);background:var(--go-d);border:1px solid var(--go-b);text-decoration:none;transition:all .2s">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar guía para mejorar tu CV
+      </a>
+      <button class="dbtn dbtn-s" onclick="showPDFModal()" style="padding:12px 20px;font-size:14px">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar informe PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Score hero: Empleabilidad + Potencial + Impact Density -->
+  <div class="sc-hero fu">
+    <div class="sc-main">
+      <div class="sc-lbl">Score de Empleabilidad</div>
+      <div class="sc-big" id="sc-ats">—</div>
+      <div class="sc-of">/ 100</div>
+      <div style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.5;max-width:140px">Puntaje general del CV como documento de empleabilidad</div>
+    </div>
+    <div class="sc-pot">
+      <div class="pn-t" style="margin-bottom:6px">Score Potencial</div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;line-height:1.5">Nivel alcanzable con las mejoras sugeridas</div>
+      <div class="sc-pot-num" id="sc-pot">—</div>
+      <div style="font-size:12px;color:var(--tx3);margin-bottom:8px">/ 100 alcanzable</div>
+      <div class="pot-row" style="gap:0">
+        <div class="pot-ring" style="width:80px;height:80px">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="33" fill="none" stroke="var(--bg4)" stroke-width="6"/>
+            <circle id="pot-c" cx="40" cy="40" r="33" fill="none" stroke="var(--teal)" stroke-width="6"
+              stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="207"
+              style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)"/>
+          </svg>
+        </div>
+        <div class="pot-txt" id="pot-txt" style="font-size:12px;padding-left:12px"></div>
+      </div>
+    </div>
+    <div class="sc-ids">
+      <div class="pn-t" style="margin-bottom:6px">Impact Density</div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:10px;line-height:1.5">Proporción de logros cuantificables vs. tareas descritas</div>
+      <div class="ids-num" id="ids-num">—</div>
+      <div class="ids-badge" id="ids-badge">—</div>
+      <div class="ids-diag" id="ids-diag"></div>
+    </div>
+  </div>
+
+  <!-- Resumen -->
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t">Resumen ejecutivo del diagnóstico</div>
+      <div class="resumen" id="d-resumen"></div>
+    </div>
+  </div>
+
+  <!-- Panel LinkedIn coherencia -->
+  <div id="li-panel" class="gf fu" style="display:none">
+    <div class="pn" style="border-color:rgba(10,102,194,0.3);background:linear-gradient(135deg,var(--bg2),rgba(10,102,194,0.04))">
+      <div class="pn-t" style="display:flex;align-items:center;gap:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        Coherencia CV ↔ LinkedIn
+        <span id="li-cb" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:4px">—</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;margin-bottom:16px">
+        <div style="text-align:center">
+          <div style="font-family:var(--serif);font-size:52px;line-height:1;letter-spacing:-3px;color:var(--teal2)" id="li-score">—</div>
+          <div style="font-size:10px;color:var(--tx3);margin-top:4px">/ 100</div>
+        </div>
+        <div class="resumen" id="li-resumen" style="font-size:13px"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.22);border-radius:var(--r);padding:12px 14px">
+          <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--gr);margin-bottom:8px">✓ Coincidencias</div>
+          <ul id="li-coincidencias" style="list-style:none;display:flex;flex-direction:column;gap:5px"></ul>
+        </div>
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);border-radius:var(--r);padding:12px 14px">
+          <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--am);margin-bottom:8px">◆ Brechas detectadas</div>
+          <ul id="li-brechas" style="list-style:none;display:flex;flex-direction:column;gap:5px"></ul>
+        </div>
+      </div>
+      <div id="li-recs-wrap" style="border-top:1px solid var(--b1);padding-top:12px;display:none">
+        <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal2);margin-bottom:8px">Acciones para tu perfil LinkedIn</div>
+        <ol id="li-recs" style="list-style:none;display:flex;flex-direction:column;gap:6px"></ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dimensiones + Radar -->
+  <div class="g2 fu">
+    <div class="pn">
+      <div class="pn-t">Dimensiones del Diagnóstico <span style="font-size:11px;font-weight:600;color:var(--teal2);letter-spacing:0;text-transform:none;background:var(--tc-d);border:1px solid var(--tc-b);padding:2px 8px;border-radius:6px;margin-left:4px">Incluye compatibilidad ATS</span></div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.7;background:var(--bg3);border-left:3px solid var(--teal);padding:10px 14px;border-radius:0 var(--r) var(--r) 0">Los <strong style="color:var(--teal2)">ATS (Applicant Tracking Systems)</strong> son sistemas automáticos que procesan CVs antes de la revisión humana. Algunas de las dimensiones analizadas impactan directamente en su lectura técnica, mientras que otras fortalecen la evaluación posterior realizada por reclutadores.</div>
+      <div class="ats-grid" id="d-ats-det"></div>
+    </div>
+    <div class="pn">
+      <div class="pn-t">Radar Profesional <span style="font-size:11px;font-weight:400;color:var(--tx3);letter-spacing:0;text-transform:none">Visualización de las principales dimensiones del perfil</span></div>
+      <div class="chart-wrap"><canvas id="radar-c"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Secciones + Alertas -->
+  <div class="g2 fu">
+    <div class="pn">
+      <div class="pn-t">Secciones detectadas <span id="secs-n"></span></div>
+      <div class="secs" id="d-secs"></div>
+      <div id="d-faltantes" style="margin-top:12px"></div>
+    </div>
+    <div class="pn">
+      <div class="pn-t">Alertas</div>
+      <div id="d-alertas"></div>
+    </div>
+  </div>
+
+  <!-- Análisis de logros -->
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t">Análisis de logros · tareas · responsabilidades</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" id="d-logros-grid">
+        <div><div style="font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--gr);margin-bottom:10px">Logros fuertes ✓</div><div id="l-fuertes"></div></div>
+        <div><div style="font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--am);margin-bottom:10px">Logros débiles ◆</div><div id="l-debiles"></div></div>
+        <div><div style="font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:10px">Responsabilidades sin impacto</div><div id="l-resp"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verbos -->
+  <div class="g2 fu">
+    <div class="pn">
+      <div class="pn-t">Verbos de impacto detectados</div>
+      <div class="verbos-detectados" id="v-detectados"></div>
+      <div class="pn-t" style="margin-top:16px">Verbos débiles a reemplazar</div>
+      <div id="v-debiles"></div>
+    </div>
+    <div class="pn">
+      <div class="pn-t">Narrativa profesional</div>
+      <div id="d-narr"></div>
+    </div>
+  </div>
+
+  <!-- Mapa habilidades -->
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t">Mapa de habilidades</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px" id="d-habs"></div>
+    </div>
+  </div>
+
+  <!-- Áreas + Roles -->
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t" style="margin-bottom:12px">Áreas profesionales predominantes</div>
+      <div class="areas" id="d-areas"></div>
+    </div>
+  </div>
+
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t">Posicionamiento profesional sugerido</div>
+      <div id="d-roles"></div>
+    </div>
+  </div>
+
+  <!-- Fortalezas + Debilidades -->
+  <div class="g2 fu">
+    <div class="pn">
+      <div class="pn-t">Fortalezas</div>
+      <ul class="fb-list" id="d-str"></ul>
+    </div>
+    <div class="pn">
+      <div class="pn-t">Debilidades y cómo resolverlas</div>
+      <ul class="fb-list" id="d-deb"></ul>
+    </div>
+  </div>
+
+  <!-- Recomendaciones -->
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t">Recomendaciones concretas por prioridad</div>
+      <div id="d-recs"></div>
+    </div>
+  </div>
+
+  <!-- Proyección -->
+  <div class="gf fu">
+    <div class="pn">
+      <div class="pn-t">Proyección de score con mejoras</div>
+      <div class="prog-wrap"><canvas id="prog-c"></canvas></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:32px" class="fu">
+    <button class="dbtn dbtn-s" style="margin:0 auto;padding:11px 22px;font-size:13px" onclick="goBack()">← Nuevo diagnóstico</button>
+  </div>
+
+  <!-- ══ CTA DESCARGA ══ -->
+  <div id="lead-magnet" class="fu" style="margin-top:52px;border-top:1px solid var(--b2);padding-top:52px">
+    <div class="pn" style="background:linear-gradient(135deg,var(--bg2),rgba(8,145,178,0.06));border-color:var(--tc-b);text-align:center;padding:44px 36px">
+
+      <!-- Estado 1: CTA inicial -->
+      <div id="lm-cta">
+        <div style="font-family:var(--serif);font-size:26px;letter-spacing:-.5px;margin-bottom:16px;line-height:1.25">¿Querés mejorar tu CV<br>a partir de este diagnóstico?</div>
+        <button onclick="showForm()" style="display:inline-flex;align-items:center;gap:9px;padding:16px 28px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='var(--petrol)'">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar guía para mejorar tu CV
+        </button>
+      </div>
+
+      <!-- Estado 2: Formulario -->
+      <div id="lm-form-wrap" style="display:none;max-width:420px;margin:0 auto">
+        <div style="font-size:14px;color:var(--tx2);line-height:1.75;margin-bottom:24px">Dejanos tu email y descargá una guía breve con recomendaciones concretas para mejorar tu CV a partir del diagnóstico que acabás de ver.</div>
+        <form action="https://formspree.io/f/mjgpwbkp" method="POST" onsubmit="handleLMSubmit(event)" style="text-align:left">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="fg"><label class="flbl">Nombre *</label><input class="fi" type="text" name="nombre" required placeholder="Tu nombre"></div>
+            <div class="fg"><label class="flbl">Email *</label><input class="fi" type="email" name="email" required placeholder="tu@email.com"></div>
+            <button type="submit" class="go" style="margin-top:4px">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar guía para mejorar tu CV
+            </button>
+          </div>
+        </form>
+        <p style="font-size:11px;color:var(--tx4);margin-top:12px;text-align:center">Tu información no se comparte con terceros.</p>
+      </div>
+
+      <!-- Estado 3: Gracias + descarga -->
+      <div id="lm-thanks" style="display:none;width:100%;max-width:600px;margin:0 auto">
+        <div style="font-size:40px;margin-bottom:16px">🎉</div>
+        <div style="font-family:var(--serif);font-size:22px;margin-bottom:10px;letter-spacing:-.3px">¡Gracias! Ya podés descargar tu guía</div>
+        <div style="font-size:14px;color:var(--tx2);margin-bottom:28px;line-height:1.7">Encontrás recomendaciones concretas para mejorar tu CV a partir del diagnóstico.</div>
+        <a href="/guia-cv.pdf" download style="display:flex;align-items:center;justify-content:center;gap:9px;padding:18px 28px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);font-family:var(--sans);font-size:16px;font-weight:500;text-decoration:none;margin-bottom:14px;box-sizing:border-box">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar guía para mejorar tu CV
+        </a>
+        <button onclick="window.location.href='mailto:alerolon.1@gmail.com?subject=Quiero%20información%20sobre%20el%20taller%20Actualizá%20tu%20CV&body=Hola%20Alejandra%2C%0A%0AQuiero%20recibir%20información%20sobre%20el%20taller%20Actualizá%20tu%20CV.%0A%0AGracias'" style="display:flex;align-items:center;justify-content:center;gap:9px;padding:18px 28px;background:var(--teal);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);cursor:pointer;font-family:var(--sans);font-size:16px;font-weight:500;transition:all .2s;box-sizing:border-box;width:100%" onmouseover="this.style.background='var(--petrol)'" onmouseout="this.style.background='var(--teal)'">
+          Quiero conocer más sobre el taller →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TALLER ══ -->
+  <div id="taller" style="margin-top:14px;scroll-margin-top:80px;display:none" class="fu">
+    <div class="pn" style="padding:40px 36px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--go-d);border:1px solid var(--go-b);padding:5px 14px;border-radius:20px;display:inline-block;margin-bottom:18px">Taller online · Dos encuentros en vivo</div>
+      <div style="font-family:var(--serif);font-size:28px;letter-spacing:-.5px;margin-bottom:14px;line-height:1.2">Actualizá tu CV</div>
+      <div style="font-size:14px;color:var(--tx2);line-height:1.78;margin-bottom:20px">Actualizá tu CV es un espacio de trabajo donde acompañamos a las personas a revisar su trayectoria laboral y construir un CV claro, coherente y actualizado.</div>
+      <div style="font-size:14px;color:var(--tx2);line-height:1.78;margin-bottom:24px">Muchas veces el CV se escribe rápidamente o se modifica varias veces sin lograr expresar con claridad la experiencia profesional. En este taller trabajamos paso a paso para ordenar ese recorrido y transformarlo en una presentación sólida.</div>
+
+      <div style="background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);padding:22px 26px;margin-bottom:24px">
+        <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">Durante el proceso abordamos</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--teal2);flex-shrink:0">→</span><div style="font-size:13px;color:var(--tx);line-height:1.5">La lógica y estructura del CV</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--teal2);flex-shrink:0">→</span><div style="font-size:13px;color:var(--tx);line-height:1.5">Cómo presentar la experiencia y los logros</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--teal2);flex-shrink:0">→</span><div style="font-size:13px;color:var(--tx);line-height:1.5">La identificación de habilidades</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--teal2);flex-shrink:0">→</span><div style="font-size:13px;color:var(--tx);line-height:1.5">La claridad del perfil profesional</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--teal2);flex-shrink:0">→</span><div style="font-size:13px;color:var(--tx);line-height:1.5">La revisión final del documento</div></div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg3);border-left:3px solid var(--teal);padding:16px 20px;border-radius:0 var(--r) var(--r) 0;margin-bottom:24px;font-size:13px;color:var(--tx2);line-height:1.7">Al finalizar, cada persona cuenta con un <strong style="color:var(--tx)">CV revisado y listo para utilizar</strong>.</div>
+
+      <div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r2);padding:20px 24px;margin-bottom:28px;display:flex;gap:16px;align-items:flex-start">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--tc-d);border:1px solid var(--tc-b);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">👩‍💼</div>
+        <div>
+          <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:5px">Coordinado por</div>
+          <div style="font-size:14px;font-weight:500;color:var(--tx);margin-bottom:4px">Alejandra Rolón y María Inés Solé</div>
+          <div style="font-size:12px;color:var(--tx2);line-height:1.6">Combinando mirada sobre empleabilidad, herramientas de presentación profesional y acompañamiento en los procesos personales que aparecen al revisar la propia trayectoria.</div>
+        </div>
+      </div>
+
+      <div style="text-align:center">
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:16px">Las inscripciones abren pronto. Escribinos para recibir información.</div>
+        <button onclick="window.location.href='mailto:alerolon.1@gmail.com?subject=Quiero%20información%20sobre%20el%20taller%20Actualizá%20tu%20CV&body=Hola%20Alejandra%2C%0A%0AQuiero%20recibir%20información%20sobre%20el%20taller%20Actualizá%20tu%20CV.%0A%0AGracias'" style="display:inline-flex;align-items:center;gap:9px;padding:16px 28px;background:var(--teal);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;width:100%;justify-content:center" onmouseover="this.style.background='var(--petrol)'" onmouseout="this.style.background='var(--teal)'">Quiero conocer más sobre el taller</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let D=null,RC=null,PC=null,TAB='t',PFILE=null,LI_FILE=null,MODO='cv';
+
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function goToUpload(modo){
+  MODO=modo;
+  const titles={cv:'Subí tu CV',li:'Subí tu perfil de LinkedIn',ambos:'Subí tu CV y tu perfil de LinkedIn'};
+  const subs={cv:'PDF o texto. El diagnóstico completo tarda unos 20 segundos.',li:'PDF descargado desde LinkedIn · Perfil > Más > Guardar en PDF.',ambos:'Cargá ambos documentos para obtener el diagnóstico de cada uno y la comparativa de coherencia.'};
+  const labels={cv:'Diagnosticar mi CV',li:'Diagnosticar mi perfil LinkedIn',ambos:'Analizar CV + LinkedIn'};
+  document.getElementById('up-title').textContent=titles[modo];
+  document.getElementById('up-sub').textContent=subs[modo];
+  document.getElementById('go-label').textContent=labels[modo];
+  document.getElementById('modo-bar').style.display=modo==='ambos'?'block':'none';
+  document.getElementById('cv-section').style.display=modo==='li'?'none':'block';
+  document.getElementById('cv-sec-lbl').style.display=modo==='ambos'?'block':'none';
+  document.getElementById('li-section').style.display=(modo==='li'||modo==='ambos')?'block':'none';
+  document.getElementById('li-sec-lbl').textContent=modo==='ambos'?'Tu perfil de LinkedIn':'Perfil de LinkedIn';
+  document.getElementById('cv-frow').style.display=modo==='li'?'none':'flex';
+  showPage('pg-upload');
+}
+
+function setTab(t){TAB=t;document.getElementById('tab-t').classList.toggle('active',t==='t');document.getElementById('tab-p').classList.toggle('active',t==='p');document.getElementById('pan-t').style.display=t==='t'?'block':'none';document.getElementById('pan-p').style.display=t==='p'?'block':'none';}
+function dOver(e){e.preventDefault();document.getElementById('drop').classList.add('drag');}
+function dLeave(){document.getElementById('drop').classList.remove('drag');}
+function dDrop(e){e.preventDefault();document.getElementById('drop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)setF(f);}
+function fSel(e){const f=e.target.files[0];if(f)setF(f);}
+function setF(f){
+  if(!f.name.toLowerCase().endsWith('.pdf')){showErr('Solo se aceptan archivos .pdf');return;}
+  if(f.size>10*1024*1024){showErr('El archivo supera los 10 MB.');return;}
+  PFILE=f;document.getElementById('fname').textContent=f.name;
+  document.getElementById('fpill').classList.add('show');document.getElementById('drop').classList.add('ready');
+}
+function fClear(){PFILE=null;document.getElementById('finp').value='';document.getElementById('fpill').classList.remove('show');document.getElementById('drop').classList.remove('ready');}
+function liOver(e){e.preventDefault();document.getElementById('li-drop').classList.add('drag');}
+function liLeave(){document.getElementById('li-drop').classList.remove('drag');}
+function liDrop(e){e.preventDefault();document.getElementById('li-drop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)liSetF(f);}
+function liSel(e){const f=e.target.files[0];if(f)liSetF(f);}
+function liSetF(f){
+  if(!f.name.toLowerCase().endsWith('.pdf')){showErr('El perfil de LinkedIn debe ser un archivo .pdf');return;}
+  if(f.size>10*1024*1024){showErr('El PDF supera los 10 MB.');return;}
+  LI_FILE=f;document.getElementById('li-fname').textContent=f.name;
+  document.getElementById('li-pill').classList.add('show');document.getElementById('li-drop').classList.add('ready');
+}
+function liClear(){LI_FILE=null;document.getElementById('li-finp').value='';document.getElementById('li-pill').classList.remove('show');document.getElementById('li-drop').classList.remove('ready');}
+async function extractPDF(f){
+  const ab=await f.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let txt='';for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const ct=await pg.getTextContent();txt+=ct.items.map(x=>x.str).join(' ')+'\n';}
+  return txt.trim();
+}
+function showErr(msg){const e=document.getElementById('err');e.textContent=msg;e.style.display='block';}
+
+function animSteps(n){
+  const s6=document.getElementById('s6');
+  if(n<7&&s6) s6.style.display='none'; else if(s6) s6.style.display='';
+  let i=0;const ids=[];for(let k=1;k<=n;k++)ids.push('s'+k);
+  const iv=setInterval(()=>{
+    if(i>0){const p=document.getElementById(ids[i-1]);if(p){p.classList.remove('on');p.classList.add('ok');const d=p.querySelector('.sdot');if(d)d.textContent='\u2713';}}
+    if(i<ids.length){const nn=document.getElementById(ids[i]);if(nn)nn.classList.add('on');i++;}else clearInterval(iv);
+  },1900);
+}
+
+async function startAnalysis(){
+  document.getElementById('err').style.display='none';
+  const role=document.getElementById('inp-role')?document.getElementById('inp-role').value.trim():'';
+  const sector=document.getElementById('inp-sec')?document.getElementById('inp-sec').value:'';
+  const seniority=document.getElementById('inp-sen')?document.getElementById('inp-sen').value:'';
+  let cvText='';
+  if(MODO!=='li'){
+    if(TAB==='p'){
+      if(!PFILE){showErr('Seleccion\u00e1 un archivo PDF de CV primero.');return;}
+      try{document.getElementById('go-btn').disabled=true;showPage('pg-load');document.getElementById('s1').classList.add('on');cvText=await extractPDF(PFILE);if(cvText.length<80) throw new Error('No se pudo extraer texto del PDF. Us\u00e1 la pesta\u00f1a "Pegar texto".');}
+      catch(e){showPage('pg-upload');document.getElementById('go-btn').disabled=false;showErr(e.message);return;}
+    }else{
+      cvText=document.getElementById('cv-ta').value.trim();
+      if(cvText.length<80){showErr('Peg\u00e1 al menos 80 caracteres de tu CV.');return;}
+      document.getElementById('go-btn').disabled=true;showPage('pg-load');
+    }
+  }else{
+    document.getElementById('go-btn').disabled=true;showPage('pg-load');
+  }
+  if((MODO==='li'||MODO==='ambos')&&!LI_FILE){showPage('pg-upload');document.getElementById('go-btn').disabled=false;showErr('Selecci\u00f3n el PDF de tu perfil de LinkedIn.');return;}
+  const hasLi=!!((MODO==='li'||MODO==='ambos')&&LI_FILE);
+  animSteps(hasLi?7:6);
+  try{
+    const fd=new FormData();
+    fd.append('cvText',cvText);fd.append('role',role);fd.append('sector',sector);fd.append('seniority',seniority);fd.append('modo',MODO);
+    if(LI_FILE) fd.append('linkedin',LI_FILE);
+    const res=await fetch('/api/analyze',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Error '+res.status);
+    D=data;renderDash(data);showPage('pg-dash');
+  }catch(err){
+    showPage('pg-upload');document.getElementById('go-btn').disabled=false;
+    showErr(err.message||'Error al conectar. Intent\u00e1 de nuevo.');
+  }
+}
+
+function renderDash(d){
+  const titulo=MODO==='li'?'Diagn\u00f3stico LinkedIn de ':MODO==='ambos'?'Diagn\u00f3stico CV + LinkedIn \u2014 ':'Diagn\u00f3stico de ';
+  document.getElementById('d-name').textContent=titulo+(d.candidateName||'Candidato');
+  document.getElementById('d-date').textContent=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
+  if(d.seniority) document.getElementById('d-sen').textContent=d.seniority;
+  if(d.yearsExperience) document.getElementById('d-exp').textContent=d.yearsExperience+' a\u00f1os exp.';
+  if(d.currentRole) document.getElementById('d-role').textContent=d.currentRole;
+  const sc=d.atsScore||0;
+  document.getElementById('sc-ats').textContent=sc;
+  const pot=d.scorePotencial||0;
+  document.getElementById('sc-pot').textContent=pot;
+  document.getElementById('pot-txt').textContent=d.resumenEjecutivo?(d.resumenEjecutivo.split('.')[0]+'.'):'';
+  setTimeout(()=>{const circ=2*Math.PI*33;document.getElementById('pot-c').style.strokeDashoffset=circ-(pot/100)*circ;},400);
+  const ids=d.impactDensityScore||0;
+  const idsLabel=d.impactDensityLabel||'Bajo';
+  document.getElementById('ids-num').textContent=ids;
+  document.getElementById('ids-num').className='ids-num '+(idsLabel==='Alto'?'ids-hi':idsLabel==='Medio'?'ids-med':'ids-low');
+  const idsBadge=document.getElementById('ids-badge');
+  idsBadge.textContent=idsLabel;
+  idsBadge.className='ids-badge '+(idsLabel==='Alto'?'ids-b-hi':idsLabel==='Medio'?'ids-b-md':'ids-b-lo');
+  document.getElementById('ids-diag').textContent=d.impactDensityDiagnostico||'';
+  document.getElementById('d-resumen').textContent=d.resumenEjecutivo||'';
+  renderLinkedinPanel(d);
+  const det=d.atsDetalle||{};
+  const detNames={keywords:'Keywords del sector',verbosAccion:'Verbos de acci\u00f3n',metricas:'M\u00e9tricas y resultados',estructura:'Estructura del documento',densidadHabilidades:'Densidad de habilidades',claridadRoles:'Claridad de roles'};
+  const detColors={keywords:'#0DB4C4',verbosAccion:'#22C55E',metricas:'#F5A623',estructura:'#0891B2',densidadHabilidades:'#A855F7',claridadRoles:'#F59E0B'};
+  document.getElementById('d-ats-det').innerHTML=Object.entries(detNames).map(([k,n])=>{const v=det[k]||0;const col=detColors[k]||'#0891B2';return '<div class="ats-item"><div class="ats-name">'+n+'</div><div class="ats-track"><div class="ats-fill" style="background:'+col+';width:0%" data-to="'+v+'"></div></div><div class="ats-val" style="color:'+col+'">'+v+'/100</div></div>';}).join('');
+  setTimeout(()=>document.querySelectorAll('.ats-fill[data-to]').forEach(el=>{el.style.transition='width 1.3s cubic-bezier(.4,0,.2,1)';el.style.width=el.dataset.to+'%';}),300);
+  if(RC)RC.destroy();
+  RC=new Chart(document.getElementById('radar-c').getContext('2d'),{type:'radar',data:{labels:Object.values(detNames),datasets:[{label:'Score',data:Object.keys(detNames).map(k=>det[k]||0),backgroundColor:'rgba(8,145,178,0.1)',borderColor:'#0891B2',borderWidth:2,pointRadius:4,pointBackgroundColor:'#0DB4C4',pointBorderColor:'#080F16',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(8,145,178,0.07)'},pointLabels:{color:'#2E6080',font:{size:10,family:"'DM Sans',sans-serif"}},angleLines:{color:'rgba(8,145,178,0.05)'}}},plugins:{legend:{display:false}}}});
+  const secs=d.seccionesDetectadas||{};
+  const secNames={perfilProfesional:'Perfil profesional',experienciaLaboral:'Experiencia laboral',educacion:'Educaci\u00f3n',habilidades:'Habilidades',logros:'Logros',herramientas:'Herramientas',idiomas:'Idiomas'};
+  const cnt=Object.values(secs).filter(Boolean).length;
+  document.getElementById('secs-n').textContent=cnt+'/'+Object.keys(secNames).length;
+  document.getElementById('d-secs').innerHTML=Object.entries(secNames).map(([k,v])=>'<span class="sec-pill '+(secs[k]?'sec-ok':'sec-no')+'">'+(secs[k]?'\u2713':'\u2717')+' '+v+'</span>').join('');
+  const falt=d.seccionesFaltantes||[];
+  if(falt.length) document.getElementById('d-faltantes').innerHTML='<div style="margin-top:10px;font-size:11px;color:var(--rd)">'+falt.map(f=>'\u2192 Falta: '+f).join('<br>')+'</div>';
+  const alertIco={error:'\u26a0',warning:'\u25c6',info:'\u2139'};
+  document.getElementById('d-alertas').innerHTML=(d.alertas||[]).map(a=>'<div class="alerta al-'+(a.tipo||'i')+'"><span class="al-ico">'+(alertIco[a.tipo]||'\u2139')+'</span>'+a.mensaje+'</div>').join('')||'<div style="font-size:13px;color:var(--tx3)">Sin alertas cr\u00edticas detectadas.</div>';
+  const al=d.analisisLogros||{};
+  document.getElementById('l-fuertes').innerHTML=(al.logrosFuertes||[]).map(l=>'<div class="logro-card logro-fuerte"><div class="logro-badge lb-f">Logro fuerte</div><div class="logro-frase f">"'+l.frase+'"</div><div class="logro-motivo">'+l.motivo+'</div></div>').join('')||'<div style="font-size:12px;color:var(--tx3)">No detectados.</div>';
+  document.getElementById('l-debiles').innerHTML=(al.logrosDebiles||[]).map(l=>'<div class="logro-card logro-debil"><div class="logro-badge lb-d">Logro d\u00e9bil</div><div class="logro-frase d">"'+l.frase+'"</div><div class="logro-motivo">'+l.motivo+'</div><div class="logro-sug">\u2192 '+l.sugerencia+'</div></div>').join('')||'<div style="font-size:12px;color:var(--tx3)">No detectados.</div>';
+  document.getElementById('l-resp').innerHTML=(al.responsabilidadesSinImpacto||[]).map(l=>'<div class="logro-card logro-resp"><div class="logro-badge lb-r">Responsabilidad</div><div class="logro-frase r">"'+l.frase+'"</div><div class="logro-sug">\u2192 '+l.oportunidad+'</div></div>').join('')||'<div style="font-size:12px;color:var(--tx3)">No detectadas.</div>';
+  const vi=d.verbosImpacto||{};
+  document.getElementById('v-detectados').innerHTML=(vi.detectados||[]).map(v=>'<span class="vd-tag">'+v+'</span>').join('')||'<span style="font-size:12px;color:var(--tx3)">Ninguno detectado.</span>';
+  document.getElementById('v-debiles').innerHTML=(vi.debiles||[]).map(v=>'<div class="verbo-row"><span class="verbo-tag-w">'+v.verbo+'</span><div class="verbo-body"><div class="verbo-ctx">"'+v.contexto+'"</div><div class="verbo-alts">'+(v.alternativas||[]).map(a=>'<span class="verbo-alt">'+a+'</span>').join('')+'</div></div></div>').join('')||'<div style="font-size:12px;color:var(--gr)">\u2713 No se detectaron verbos d\u00e9biles.</div>';
+  const narr=d.narrativaProfesional||{};
+  const nTipoClass={consistente:'nt-consistente','en crecimiento':'nt-crecimiento','en transici\u00f3n':'nt-transicion',dispersa:'nt-dispersa'};
+  const nTipo=(narr.tipo||'').toLowerCase();
+  document.getElementById('d-narr').innerHTML='<span class="narr-tipo '+(nTipoClass[nTipo]||'nt-crecimiento')+'">'+(narr.tipo||'\u2014')+'</span><div class="narr-txt">'+(narr.descripcion||'')+'</div><div class="narr-prog">'+(narr.progresion||'')+'</div><ul class="narr-ops">'+(narr.oportunidades||[]).map(o=>'<li class="narr-op">'+o+'</li>').join('')+'</ul>';
+  const mh=d.mapaHabilidades||{};
+  document.getElementById('d-habs').innerHTML='<div class="hab-section"><div class="hab-title dec">Declaradas</div><div class="hab-tags">'+(mh.declaradas||[]).map(h=>'<span class="hab-tag hab-dec">'+h+'</span>').join('')+'</div></div><div class="hab-section"><div class="hab-title det">Detectadas en el texto</div><div class="hab-tags">'+(mh.detectadas||[]).map(h=>'<span class="hab-tag hab-det">'+h+'</span>').join('')+'</div></div><div class="hab-section"><div class="hab-title inc">A incorporar expl\u00edcitamente</div><div class="hab-tags">'+(mh.aIncorporar||[]).map(h=>'<span class="hab-tag hab-inc">'+h+'</span>').join('')+'</div></div>';
+  document.getElementById('d-areas').innerHTML=(d.areasProfesionales||[]).map(a=>'<span class="area-tag">'+a+'</span>').join('');
+  document.getElementById('d-roles').innerHTML=(d.rolesObjetivo||[]).map(r=>{const mc=r.matchPct>=80?'m-hi':r.matchPct>=60?'m-md':'m-lo';return '<div class="role-card"><div class="role-top"><div><div class="role-name">'+r.titulo+'</div><div class="role-tags"><span class="role-sen">'+r.seniority+'</span></div></div><span class="role-match '+mc+'">'+r.matchPct+'% match</span></div><div class="role-why">'+r.justificacion+'</div><div class="role-chips">'+(r.skills||[]).map(s=>'<span class="chip">'+s+'</span>').join('')+'</div></div>';}).join('');
+  document.getElementById('d-str').innerHTML=(d.fortalezas||[]).map(f=>'<li class="fb-item"><span class="fb-ico s">\u2713</span><div><div class="fb-title">'+f.titulo+'</div><div class="fb-detail">'+f.detalle+'</div></div></li>').join('');
+  document.getElementById('d-deb').innerHTML=(d.debilidades||[]).map(g=>'<li class="fb-item"><span class="fb-ico g">!</span><div><div class="fb-title">'+g.titulo+'</div><div class="fb-detail">'+g.detalle+'</div><div class="fb-accion">\u2192 '+g.accion+'</div></div></li>').join('');
+  document.getElementById('d-recs').innerHTML=(d.recomendaciones||[]).map(r=>{const pc=r.prioridad==='Alta'?'p-a':r.prioridad==='Media'?'p-m':'p-b';return '<div class="rec-card"><div class="rec-pri '+pc+'"></div><div class="rec-body"><div class="rec-cat">'+r.prioridad+' prioridad \u00b7 '+r.categoria+'</div><div class="rec-t">'+r.titulo+'</div><div class="rec-d">'+r.detalle+'</div><div class="rec-imp">\u2191 '+r.impactoScore+'</div></div></div>';}).join('');
+  if(PC)PC.destroy();
+  const recs=d.recomendaciones||[];
+  const pL=['Ahora',...recs.slice(0,4).map((_,i)=>['Sem. 1','Mes 1','Mes 3','Mes 6'][i])];
+  let run=sc;const pD=[sc];
+  recs.slice(0,4).forEach(r=>{const m=(r.impactoScore||'').match(/\+(\d+)/);run=Math.min(100,run+(m?+m[1]:3));pD.push(run);});
+  PC=new Chart(document.getElementById('prog-c').getContext('2d'),{type:'line',data:{labels:pL,datasets:[{data:pD,borderColor:'#0891B2',backgroundColor:'rgba(8,145,178,0.06)',borderWidth:2,pointRadius:5,pointBackgroundColor:'#0DB4C4',pointBorderColor:'#080F16',pointBorderWidth:2,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:Math.max(0,sc-10),max:100,grid:{color:'rgba(8,145,178,0.05)'},ticks:{color:'#2E6080',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#2E6080',font:{size:10}}}}}});
+}
+
+function renderLinkedinPanel(d){
+  const panel=document.getElementById('li-panel');
+  if(!d.has_linkedin||!d.linkedin_analysis){panel.style.display='none';return;}
+  panel.style.display='block';
+  const la=d.linkedin_analysis;
+  document.getElementById('li-score').textContent=la.coherencia_score||'\u2014';
+  const cb=document.getElementById('li-cb');
+  cb.textContent=la.coherencia_nivel||'\u2014';
+  const cbCls={Alta:'background:rgba(34,197,94,0.12);color:#22C55E;border:1px solid rgba(34,197,94,0.26)',Media:'background:rgba(245,158,11,0.12);color:#F59E0B;border:1px solid rgba(245,158,11,0.26)',Baja:'background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.26)'};
+  cb.style.cssText=(cbCls[la.coherencia_nivel]||cbCls.Media)+';font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:4px';
+  document.getElementById('li-resumen').textContent=la.resumen_coherencia||'';
+  document.getElementById('li-coincidencias').innerHTML=(la.coincidencias||[]).map(c=>'<li style="font-size:12px;color:var(--tx2);display:flex;gap:5px;align-items:flex-start"><span style="color:var(--gr);flex-shrink:0">\u2713</span>'+c+'</li>').join('')||'<li style="font-size:12px;color:var(--tx3)">Sin datos.</li>';
+  document.getElementById('li-brechas').innerHTML=(la.brechas||[]).map(b=>'<li style="font-size:12px;color:var(--tx2);display:flex;gap:5px;align-items:flex-start"><span style="color:var(--am);flex-shrink:0">\u25c6</span>'+b+'</li>').join('')||'<li style="font-size:12px;color:var(--tx3)">Sin brechas detectadas.</li>';
+  const rw=document.getElementById('li-recs-wrap');
+  if(la.recomendaciones_linkedin&&la.recomendaciones_linkedin.length){
+    rw.style.display='block';
+    document.getElementById('li-recs').innerHTML=la.recomendaciones_linkedin.map(r=>'<li style="font-size:12px;color:var(--tx2);display:flex;gap:6px;align-items:flex-start"><span style="color:var(--teal2);flex-shrink:0">\u2192</span>'+r+'</li>').join('');
+  }else rw.style.display='none';
+}
+
+function dlPDF(){
+  if(!D){alert('Informe no disponible. Por favor realiz\u00e1 un an\u00e1lisis primero.');return;}
+  const al=D.analisisLogros||{};const vi=D.verbosImpacto||{};const narr=D.narrativaProfesional||{};const mh=D.mapaHabilidades||{};const det=D.atsDetalle||{};const la=D.linkedin_analysis||null;
+  const detN={keywords:'Keywords',verbosAccion:'Verbos de acci\u00f3n',metricas:'M\u00e9tricas',estructura:'Estructura',densidadHabilidades:'Densidad habilidades',claridadRoles:'Claridad de roles'};
+  const win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Diagn\u00f3stico \u2014 '+(D.candidateName||'Candidato')+'</title><style>@import url(\'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono&display=swap\');*{box-sizing:border-box;margin:0;padding:0}body{font-family:\'DM Sans\',sans-serif;background:#fff;color:#1a2e3b;font-size:11pt;line-height:1.6}.page{max-width:780px;margin:0 auto;padding:32px 40px}h1{font-size:20pt;font-weight:700;color:#0D2137;margin-bottom:4px}.meta{font-size:9pt;color:#6BA8C0;margin-bottom:28px;padding-bottom:12px;border-bottom:2px solid #0891B2}.sec{margin:20px 0 10px;padding-bottom:4px;border-bottom:1px solid #0E5C8A;font-size:10pt;font-weight:700;color:#0E5C8A;text-transform:uppercase;letter-spacing:.8px}.txt{font-size:10pt;color:#1e3d52;margin-bottom:6px;line-height:1.65}.scores{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:12px}.score-box{background:#F0F7FA;border-radius:8px;padding:12px 16px;text-align:center}.score-n{font-size:28pt;font-weight:700;color:#0891B2;line-height:1}.score-l{font-size:8pt;color:#6BA8C0;text-transform:uppercase;letter-spacing:1px;margin-top:4px}.ats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.ats-item{display:flex;justify-content:space-between;font-size:9.5pt;padding:4px 0;border-bottom:1px solid #e8f0f5}.ats-val{font-weight:600;color:#0891B2}.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:8.5pt;font-weight:500;margin:2px}.tag-g{background:#d1fae5;color:#065f46}.tag-a{background:#fef3c7;color:#92400e}.tag-b{background:#e0f2fe;color:#0369a1}.logro{padding:8px 12px;border-radius:6px;margin-bottom:6px;font-size:9.5pt}.logro-f{background:#d1fae5;border-left:3px solid #22C55E}.logro-d{background:#fef3c7;border-left:3px solid #F59E0B}.logro-r{background:#f1f5f9;border-left:3px solid #94a3b8}.logro-label{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.lf{color:#065f46}.ld{color:#92400e}.lr{color:#475569}.frase{font-family:\'DM Mono\',monospace;font-size:9pt;margin-bottom:3px}.sug{font-size:8.5pt;color:#0891B2;margin-top:3px}.fb-item{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start}.fb-ico{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9pt;font-weight:700;flex-shrink:0;margin-top:1px}.ico-s{background:#d1fae5;color:#065f46}.ico-g{background:#fee2e2;color:#991b1b}.fb-t{font-weight:600;font-size:10pt;margin-bottom:2px}.fb-d{font-size:9.5pt;color:#475569}.fb-a{font-size:9pt;color:#0891B2;margin-top:2px}.rec{display:flex;gap:10px;padding:8px 12px;border:1px solid #e0eaf0;border-radius:6px;margin-bottom:6px}.rec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}.dot-a{background:#EF4444}.dot-m{background:#F59E0B}.dot-b{background:#0891B2}.rec-t{font-weight:600;font-size:10pt;margin-bottom:2px}.rec-d{font-size:9.5pt;color:#475569}.rec-imp{font-size:8.5pt;color:#22C55E;margin-top:3px;font-weight:600}.li-box{background:#f0f7fa;border:1px solid #bfdbfe;border-radius:8px;padding:16px 20px;margin-bottom:8px}.li-score-big{font-size:26pt;font-weight:700;color:#0891B2;line-height:1}.li-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.li-col{border-radius:6px;padding:10px 12px}.li-col-ok{background:#d1fae5}.li-col-gap{background:#fef3c7}.li-col-title{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}.li-col-ok .li-col-title{color:#065f46}.li-col-gap .li-col-title{color:#92400e}.li-col li{font-size:9pt;color:#1e3d52;margin-bottom:3px;list-style:none;padding-left:12px;position:relative}.li-col-ok li:before{content:"\u2713";position:absolute;left:0;color:#065f46}.li-col-gap li:before{content:"\u25c6";position:absolute;left:0;color:#92400e}.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e0eaf0;font-size:8pt;color:#94a3b8;text-align:center}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none}}</style></head><body><div class="page">');
+  win.document.write('<div class="no-print" style="background:#0E5C8A;color:#fff;padding:12px 20px;border-radius:8px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px">Para guardar: <strong>Ctrl+P</strong> \u2192 Destino: <strong>Guardar como PDF</strong></span><button onclick="window.print()" style="background:#fff;color:#0E5C8A;border:none;padding:8px 18px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px">Imprimir / Guardar PDF</button></div>');
+  win.document.write('<h1>Diagn\u00f3stico Profesional</h1><div class="meta">'+(D.candidateName||'Candidato')+' \u00b7 Score: '+D.atsScore+'/100 \u00b7 Potencial: '+D.scorePotencial+'/100 \u00b7 '+new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})+'</div>');
+  win.document.write('<div class="scores"><div class="score-box"><div class="score-n" style="color:#0891B2">'+D.atsScore+'</div><div class="score-l">Score de Empleabilidad</div></div><div class="score-box"><div class="score-n" style="color:#0DB4C4">'+D.scorePotencial+'</div><div class="score-l">Score potencial</div></div><div class="score-box"><div class="score-n" style="color:'+(D.impactDensityLabel==='Alto'?'#22C55E':D.impactDensityLabel==='Medio'?'#F59E0B':'#EF4444')+'">'+D.impactDensityScore+'</div><div class="score-l">Impact Density \u00b7 '+(D.impactDensityLabel||'')+'</div></div></div>');
+  win.document.write('<div class="sec">Resumen ejecutivo</div><div class="txt">'+(D.resumenEjecutivo||'')+'</div>');
+  if(la){win.document.write('<div class="sec">Coherencia CV \u2194 LinkedIn</div><div class="li-box"><div style="display:flex;align-items:center;gap:16px;margin-bottom:8px"><div><div class="li-score-big">'+la.coherencia_score+'</div><div style="font-size:8pt;color:#6BA8C0;text-transform:uppercase;letter-spacing:1px">Coherencia \u00b7 '+la.coherencia_nivel+'</div></div><div style="flex:1;font-size:10pt;color:#1e3d52;line-height:1.6;font-style:italic">'+(la.resumen_coherencia||'')+'</div></div><div class="li-cols"><div class="li-col li-col-ok"><div class="li-col-title">Coincidencias</div><ul>'+(la.coincidencias||[]).map(c=>'<li>'+c+'</li>').join('')+'</ul></div><div class="li-col li-col-gap"><div class="li-col-title">Brechas detectadas</div><ul>'+(la.brechas||[]).map(b=>'<li>'+b+'</li>').join('')+'</ul></div></div>'+(la.recomendaciones_linkedin&&la.recomendaciones_linkedin.length?'<div style="margin-top:10px"><div style="font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#0891B2;margin-bottom:6px">Acciones para LinkedIn</div>'+la.recomendaciones_linkedin.map(r=>'<div class="txt">\u2192 '+r+'</div>').join('')+'</div>':'')+'</div>');}
+  win.document.write('<div class="sec">Desglose del Score</div><div class="ats-grid">'+Object.entries(detN).map(([k,n])=>'<div class="ats-item"><span>'+n+'</span><span class="ats-val">'+(det[k]||0)+'/100</span></div>').join('')+'</div>');
+  win.document.write('<div class="sec">An\u00e1lisis de logros</div>'+(al.logrosFuertes||[]).map(l=>'<div class="logro logro-f"><div class="logro-label lf">\u2713 Logro fuerte</div><div class="frase">"'+l.frase+'"</div><div class="txt">'+l.motivo+'</div></div>').join('')+(al.logrosDebiles||[]).map(l=>'<div class="logro logro-d"><div class="logro-label ld">\u25c6 Logro d\u00e9bil</div><div class="frase">"'+l.frase+'"</div><div class="txt">'+l.motivo+'</div><div class="sug">\u2192 '+l.sugerencia+'</div></div>').join('')+(al.responsabilidadesSinImpacto||[]).map(l=>'<div class="logro logro-r"><div class="logro-label lr">Responsabilidad sin impacto</div><div class="frase">"'+l.frase+'"</div><div class="sug">\u2192 '+l.oportunidad+'</div></div>').join(''));
+  win.document.write('<div class="sec">Narrativa profesional</div><div class="txt">'+(narr.tipo||'')+' \u2014 '+(narr.descripcion||'')+'</div><div class="txt" style="background:#f1f5f9;padding:8px 12px;border-radius:6px;border-left:2px solid #0891B2">'+(narr.progresion||'')+'</div>'+(narr.oportunidades||[]).map(o=>'<div class="txt" style="color:#0891B2">\u2192 '+o+'</div>').join(''));
+  win.document.write('<div class="sec">Mapa de habilidades</div>'+((mh.declaradas||[]).length?'<div class="txt"><strong style="color:#065f46">Declaradas:</strong> '+mh.declaradas.map(h=>'<span class="tag tag-g">'+h+'</span>').join('')+'</div>':'')+((mh.detectadas||[]).length?'<div class="txt"><strong style="color:#0369a1">Detectadas:</strong> '+mh.detectadas.map(h=>'<span class="tag tag-b">'+h+'</span>').join('')+'</div>':'')+((mh.aIncorporar||[]).length?'<div class="txt"><strong style="color:#92400e">A incorporar:</strong> '+mh.aIncorporar.map(h=>'<span class="tag tag-a">'+h+'</span>').join('')+'</div>':''));
+  win.document.write('<div class="sec">Fortalezas</div>'+(D.fortalezas||[]).map(f=>'<div class="fb-item"><span class="fb-ico ico-s">\u2713</span><div><div class="fb-t">'+f.titulo+'</div><div class="fb-d">'+f.detalle+'</div></div></div>').join(''));
+  win.document.write('<div class="sec">Debilidades y c\u00f3mo resolverlas</div>'+(D.debilidades||[]).map(g=>'<div class="fb-item"><span class="fb-ico ico-g">!</span><div><div class="fb-t">'+g.titulo+'</div><div class="fb-d">'+g.detalle+'</div><div class="fb-a">\u2192 '+g.accion+'</div></div></div>').join(''));
+  win.document.write('<div class="sec">Recomendaciones</div>'+(D.recomendaciones||[]).map(r=>'<div class="rec"><div class="rec-dot '+(r.prioridad==='Alta'?'dot-a':r.prioridad==='Media'?'dot-m':'dot-b')+'"></div><div><div class="rec-t">'+r.titulo+'</div><div class="rec-d">'+r.detalle+'</div><div class="rec-imp">\u2191 '+r.impactoScore+'</div></div></div>').join(''));
+  win.document.write('<div class="footer">Diagn\u00f3stico de CV \u00b7 Empleabilidad en Clave Social \u00b7 Alejandra Rol\u00f3n \u00b7 '+new Date().toLocaleDateString('es-AR')+'</div></div></body></html>');
+  win.document.close();
+}
+
+function goBack(){showPage('pg-home');document.getElementById('go-btn').disabled=false;document.querySelectorAll('.step').forEach(s=>{s.classList.remove('on','ok');const d=s.querySelector('.sdot');if(d)d.textContent='';});}
+function showForm(){document.getElementById('lm-cta').style.display='none';document.getElementById('lm-form-wrap').style.display='block';}
+function handleLMSubmit(e){e.preventDefault();const form=e.target;const data=new FormData(form);const email=(data.get('email')||'').toLowerCase();if(email==='alerolon.1@gmail.com'){showThanks();return;}fetch('https://formspree.io/f/mjgpwbkp',{method:'POST',body:data,headers:{'Accept':'application/json'}}).then(()=>showThanks()).catch(()=>showThanks());}
+function showThanks(){document.getElementById('lm-form-wrap').style.display='none';document.getElementById('lm-thanks').style.display='block';}
+function scrollToTaller(){const el=document.getElementById('taller');if(el){el.style.display='block';setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),100);}}
+function scrollToForm(){const el=document.getElementById('lead-magnet');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+(function(){const params=new URLSearchParams(window.location.search);if(params.get('admin')==='1'){const t=document.getElementById('taller');if(t)t.style.display='block';const g=document.getElementById('admin-guia-btn');if(g)g.style.display='inline-flex';}if(params.get('notaller')==='1'){const t=document.getElementById('taller');if(t)t.style.display='none';const btn=document.querySelector('[onclick="scrollToTaller()"]');if(btn)btn.parentElement.style.display='none';}})();
+function showPDFModal(){const params=new URLSearchParams(window.location.search);if(params.get('admin')==='1'){dlPDF();return;}document.getElementById('pdf-modal').style.display='flex';}
+function closePDFModal(){document.getElementById('pdf-modal').style.display='none';document.getElementById('pdf-err').style.display='none';}
+async function submitPDFModal(){const nombre=document.getElementById('pdf-nombre').value.trim();const email=document.getElementById('pdf-email').value.trim();const errEl=document.getElementById('pdf-err');errEl.style.display='none';if(!nombre||!email){errEl.textContent='Complet\u00e1 nombre y email para continuar.';errEl.style.display='block';return;}if(!email.includes('@')){errEl.textContent='Ingres\u00e1 un email v\u00e1lido.';errEl.style.display='block';return;}if(!email.includes('+test')){fetch('https://formspree.io/f/mjgpwbkp',{method:'POST',body:new FormData(Object.assign(document.createElement('form'),{innerHTML:'<input name="nombre" value="'+nombre+'"><input name="email" value="'+email+'"><input name="origen" value="informe-pdf">'})),headers:{'Accept':'application/json'}}).catch(()=>{});}closePDFModal();dlPDF();}
+</script>
+<!-- ══ MODAL PDF ══ -->
+<div id="pdf-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;padding:24px">
+  <div style="background:var(--bg2);border:1px solid var(--tc-b);border-radius:var(--r3);padding:36px 32px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <div style="font-family:var(--serif);font-size:22px;letter-spacing:-.4px;margin-bottom:8px">Descargá tu informe</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:24px;line-height:1.6">Dejanos tu nombre y email para enviarte el informe y mantenerte al tanto de novedades.</div>
+    <div class="fg" style="margin-bottom:12px"><label class="flbl">Nombre y apellido *</label><input class="fi" type="text" id="pdf-nombre" placeholder="Tu nombre y apellido"></div>
+    <div class="fg" style="margin-bottom:16px"><label class="flbl">Email *</label><input class="fi" type="email" id="pdf-email" placeholder="tu@email.com"></div>
+    <div id="pdf-err" style="background:var(--rd-d);border:1px solid var(--rd-b);border-radius:var(--r);padding:10px 14px;font-size:13px;color:#F87171;margin-bottom:12px;display:none"></div>
+    <button onclick="submitPDFModal()" style="width:100%;padding:15px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r2);font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;margin-bottom:10px" onmouseover="this.style.background='var(--teal)'" onmouseout="this.style.background='var(--petrol)'">
+      Descargar informe PDF
+    </button>
+    <button onclick="closePDFModal()" style="width:100%;padding:10px;background:none;color:var(--tx3);border:none;font-family:var(--sans);font-size:13px;cursor:pointer">Cancelar</button>
+  </div>
+</div>
+
+</body>
+</html>
