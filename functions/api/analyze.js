@@ -85,7 +85,7 @@ export async function onRequest(context) {
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
-        max_tokens: 4000,
+        max_tokens: 6000,
       }),
     });
 
@@ -99,7 +99,7 @@ export async function onRequest(context) {
       const m = raw.match(/\{[\s\S]*\}/);
       result = JSON.parse(m ? m[0] : raw);
     } catch (e) {
-      throw new Error("No se pudo parsear la respuesta del modelo");
+      throw new Error("No se pudo parsear la respuesta del modelo: " + raw.slice(0, 300));
     }
 
     result.has_linkedin = liText.length > 30;
@@ -242,28 +242,27 @@ async function resolveUserPlan(env, token) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function liPromptDimensions() {
-  return `Incluye en tu respuesta el campo "linkedin_analysis" con esta estructura exacta (TODOS los campos son obligatorios, no omitas ninguno):
-{
-  "coherencia_score": <numero 0-100 — score general del perfil LinkedIn>,
-  "coherencia_nivel": "Alta|Media|Baja",
-  "coincidencias": ["fortalezas concretas del perfil — minimo 3"],
-  "brechas": ["oportunidades de mejora concretas — minimo 3"],
-  "recomendaciones_linkedin": ["acciones concretas ordenadas por impacto — minimo 4"],
-  "resumen_coherencia": "3-4 oraciones de diagnostico del perfil como documento de empleabilidad digital",
-  "titular_actual": "texto exacto del titular/headline actual",
-  "titular_sugerido": "propuesta de titular mejorado especifico para esta persona con rol + propuesta de valor",
-  "extracto_diagnostico": "diagnostico detallado: que comunica el extracto/about, que falta, tono, longitud, llamado a la accion",
-  "completitud_perfil": <numero 0-100>,
-  "dimensiones_li": {
-    "titular": <0-100>,
-    "extracto": <0-100>,
-    "experiencias": <0-100>,
-    "habilidades": <0-100>,
-    "completitud": <0-100>,
-    "narrativa": <0-100>
-  }
-}
-`;
+  return 'Incluye en tu respuesta el campo "linkedin_analysis" con esta estructura exacta (TODOS los campos obligatorios, no omitas ninguno):\n' +
+    '{\n' +
+    '  "coherencia_score": <numero 0-100 score general del perfil LinkedIn>,\n' +
+    '  "coherencia_nivel": "Alta|Media|Baja",\n' +
+    '  "coincidencias": ["fortaleza concreta 1", "fortaleza concreta 2", "fortaleza concreta 3"],\n' +
+    '  "brechas": ["oportunidad de mejora 1", "oportunidad de mejora 2", "oportunidad de mejora 3"],\n' +
+    '  "recomendaciones_linkedin": ["accion concreta 1", "accion concreta 2", "accion concreta 3", "accion concreta 4"],\n' +
+    '  "resumen_coherencia": "3-4 oraciones de diagnostico del perfil como documento de empleabilidad digital",\n' +
+    '  "titular_actual": "texto exacto del titular/headline actual",\n' +
+    '  "titular_sugerido": "propuesta de titular mejorado con rol + propuesta de valor especifica",\n' +
+    '  "extracto_diagnostico": "diagnostico: que comunica el extracto/about, que falta, tono, longitud, llamado a la accion",\n' +
+    '  "completitud_perfil": <numero 0-100>,\n' +
+    '  "dimensiones_li": {\n' +
+    '    "titular": <0-100>,\n' +
+    '    "extracto": <0-100>,\n' +
+    '    "experiencias": <0-100>,\n' +
+    '    "habilidades": <0-100>,\n' +
+    '    "completitud": <0-100>,\n' +
+    '    "narrativa": <0-100>\n' +
+    '  }\n' +
+    '}\n';
 }
 
 function buildPrompt(cvText, liText, modo, role, sector, seniority) {
@@ -289,25 +288,20 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
     liBlock = "\n\nPERFIL LINKEDIN (exportado como PDF desde LinkedIn):\n\"\"\"\n" + liText.slice(0, 5000) + "\n\"\"\"\n";
 
     if (modo === "li") {
-      liBlock += `
-IMPORTANTE: Este texto proviene de un PDF exportado desde LinkedIn. La estructura es diferente a un CV tradicional.
-Analiza EN PROFUNDIDAD las siguientes secciones especificas de LinkedIn:
-
-1. TITULAR (Headline): La linea debajo del nombre. Evalua especificidad, propuesta de valor, uso de keywords, diferenciacion. Es lo primero que ve un reclutador.
-2. EXTRACTO / ABOUT: El texto de presentacion personal. Evalua si comunica quien es la persona, que valor aporta, a quien va dirigido y si tiene llamado a la accion.
-3. EXPERIENCIAS: Cada posicion laboral. Evalua si tienen descripcion, si usan verbos de accion, si muestran logros cuantificados o solo listan responsabilidades.
-4. APTITUDES / HABILIDADES: Lista de skills. Evalua relevancia para el sector, si estan validadas, cuales faltan.
-5. FORMACION: Titulos y estudios. Evalua si incluye descripcion o actividades relevantes.
-6. COMPLETITUD GENERAL: Detecta secciones ausentes (foto, banner, URL personalizada, recomendaciones de terceros, certificaciones, extracto, aptitudes destacadas).
-7. NARRATIVA: Coherencia entre titular, extracto y experiencias. Evalua si cuentan la misma historia profesional.
-
-Para los scores del JSON principal: atsScore = calidad general del perfil LinkedIn (no es un CV, es una presencia digital). atsDetalle refleja dimensiones del perfil: keywords=palabras clave en titular y aptitudes, verbosAccion=verbos en experiencias, metricas=logros cuantificados, estructura=completitud de secciones, densidadHabilidades=aptitudes declaradas y relevantes, claridadRoles=claridad del titular y descripciones de roles.
-`;
+      liBlock += "\nIMPORTANTE: Este texto proviene de un PDF exportado desde LinkedIn. La estructura es diferente a un CV tradicional.\n";
+      liBlock += "Analiza EN PROFUNDIDAD las siguientes secciones especificas de LinkedIn:\n";
+      liBlock += "1. TITULAR (Headline): linea debajo del nombre. Evalua especificidad, propuesta de valor, keywords, diferenciacion.\n";
+      liBlock += "2. EXTRACTO / ABOUT: presentacion personal. Evalua si comunica quien es, que valor aporta, a quien va dirigido, llamado a la accion.\n";
+      liBlock += "3. EXPERIENCIAS: cada posicion. Evalua si tienen descripcion, verbos de accion, logros cuantificados.\n";
+      liBlock += "4. APTITUDES / HABILIDADES: lista de skills. Evalua relevancia, validaciones, gaps.\n";
+      liBlock += "5. FORMACION: titulos. Evalua si incluye descripcion o actividades relevantes.\n";
+      liBlock += "6. COMPLETITUD: detecta ausencias (foto, banner, URL personalizada, recomendaciones de terceros, certificaciones).\n";
+      liBlock += "7. NARRATIVA: coherencia entre titular, extracto y experiencias.\n";
+      liBlock += "Para atsScore: calidad general del perfil LinkedIn como presencia digital.\n";
+      liBlock += "Para atsDetalle: keywords=palabras clave en titular/aptitudes, verbosAccion=verbos en experiencias, metricas=logros cuantificados, estructura=completitud de secciones, densidadHabilidades=aptitudes declaradas, claridadRoles=claridad del titular.\n";
     } else {
-      liBlock += `
-Analiza el perfil de LinkedIn como documento de empleabilidad digital y su coherencia con el CV.
-Presta especial atencion a: titular, extracto/about, experiencias (si tienen descripcion y logros), aptitudes, y completitud general.
-`;
+      liBlock += "Analiza el perfil LinkedIn como documento de empleabilidad digital y su coherencia con el CV.\n";
+      liBlock += "Presta atencion a: titular, extracto/about, experiencias (descripcion y logros), aptitudes, completitud.\n";
     }
 
     liBlock += liPromptDimensions();
