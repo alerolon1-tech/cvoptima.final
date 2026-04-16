@@ -77,7 +77,9 @@ export async function onRequest(context) {
 
     const MODELS = [
       "llama-3.3-70b-versatile",   // Primario: más preciso
-      "llama-3.1-8b-instant",      // Fallback: mayor límite de tokens
+      "llama-3.1-8b-instant",      // Fallback 1
+      "gemma2-9b-it",              // Fallback 2: límite independiente
+      "mixtral-8x7b-32768",        // Fallback 3: límite independiente
     ];
 
     let groqData = null;
@@ -122,7 +124,7 @@ export async function onRequest(context) {
     }
 
     if (!groqData) {
-      throw new Error("Límite de uso alcanzado en todos los modelos disponibles. Intentá de nuevo en unos minutos.");
+      throw new Error("El servicio de análisis está temporalmente saturado. Intentá de nuevo en unos minutos o más tarde.");
     }
 
     const raw = groqData.choices[0].message.content;
