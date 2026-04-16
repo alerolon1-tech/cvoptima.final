@@ -72,26 +72,59 @@ export async function onRequest(context) {
       });
     }
 
-    // ── Llamada al modelo ────────────────────────────────────────────────────
+    // ── Llamada al modelo con fallback automático por rate limit ─────────────
     const prompt = buildPrompt(cvText, liText, modo, role, sector, seniority);
 
-    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + env.GROQ_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-        max_tokens: 6000,
-      }),
-    });
+    const MODELS = [
+      "llama-3.3-70b-versatile",   // Primario: más preciso
+      "llama-3.1-8b-instant",      // Fallback: mayor límite de tokens
+    ];
 
-    if (!groqRes.ok) throw new Error("Groq error: " + await groqRes.text());
+    let groqData = null;
+    let modelUsed = null;
+    let lastError = null;
 
-    const groqData = await groqRes.json();
+    for (const model of MODELS) {
+      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + env.GROQ_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.3,
+          max_tokens: 6000,
+        }),
+      });
+
+      if (groqRes.ok) {
+        groqData = await groqRes.json();
+        modelUsed = model;
+        break;
+      }
+
+      const errText = await groqRes.text();
+      lastError = errText;
+
+      // Solo hacer fallback en rate limit (429) — otros errores los propagamos
+      let errJson;
+      try { errJson = JSON.parse(errText); } catch { errJson = null; }
+      const isRateLimit = groqRes.status === 429 ||
+        (errJson?.error?.code === "rate_limit_exceeded") ||
+        (errJson?.error?.type === "tokens");
+
+      if (!isRateLimit) {
+        throw new Error("Groq error: " + errText);
+      }
+      // Si es rate limit y hay más modelos, continuamos al siguiente
+    }
+
+    if (!groqData) {
+      throw new Error("Límite de uso alcanzado en todos los modelos disponibles. Intentá de nuevo en unos minutos.");
+    }
+
     const raw = groqData.choices[0].message.content;
 
     let result;
