@@ -78,8 +78,8 @@ export async function onRequest(context) {
     const MODELS = [
       "llama-3.3-70b-versatile",   // Primario: más preciso
       "llama-3.1-8b-instant",      // Fallback 1
-      "gemma2-9b-it",              // Fallback 2: límite independiente
-      "mixtral-8x7b-32768",        // Fallback 3: límite independiente
+      "llama3-70b-8192",           // Fallback 2: límite independiente
+      "llama3-8b-8192",            // Fallback 3: límite independiente
     ];
 
     let groqData = null;
@@ -115,7 +115,8 @@ export async function onRequest(context) {
       try { errJson = JSON.parse(errText); } catch { errJson = null; }
       const isRateLimit = groqRes.status === 429 ||
         (errJson?.error?.code === "rate_limit_exceeded") ||
-        (errJson?.error?.type === "tokens");
+        (errJson?.error?.type === "tokens") ||
+        (errJson?.error?.code === "model_decommissioned");
 
       if (!isRateLimit) {
         throw new Error("Groq error: " + errText);
