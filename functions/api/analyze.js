@@ -97,7 +97,7 @@ export async function onRequest(context) {
           model,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.3,
-          max_tokens: 6000,
+          max_tokens: 4000,
         }),
       });
 
@@ -315,13 +315,13 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
   let cvBlock = "";
   if (cvText && cvText.length >= 30) {
     cvBlock =
-      "\n\nCV:\n\"\"\"\n" + cvText.slice(0, 5000) + "\n\"\"\"\n" +
+      "\n\nCV:\n\"\"\"\n" + cvText.slice(0, 3000) + "\n\"\"\"\n" +
       "Analiza estructura, narrativa, logros cuantificados, verbos de impacto, habilidades, coherencia y compatibilidad ATS.\n";
   }
 
   let liBlock = "";
   if (liText && liText.length >= 30) {
-    liBlock = "\n\nPERFIL LINKEDIN (exportado como PDF desde LinkedIn):\n\"\"\"\n" + liText.slice(0, 5000) + "\n\"\"\"\n";
+    liBlock = "\n\nPERFIL LINKEDIN (exportado como PDF desde LinkedIn):\n\"\"\"\n" + liText.slice(0, 3000) + "\n\"\"\"\n";
 
     if (modo === "li") {
       liBlock += "\nIMPORTANTE: Este texto proviene de un PDF exportado desde LinkedIn. La estructura es diferente a un CV tradicional.\n";
