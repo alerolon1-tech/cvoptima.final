@@ -53,13 +53,15 @@ export async function onRequest(context) {
     const systemPrompt =
       "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n" +
       "REGLAS ABSOLUTAS:\n" +
-      "1. Usa el nombre real de la persona tal como figura en el documento. Si no esta claro, inferilo del encabezado o firma. NUNCA escribas 'No especificado'.\n" +
-      "2. Cada campo de analisis debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha, logro o habilidad especifica.\n" +
-      "3. NUNCA uses frases genericas sin especificar empresa, rol o resultado concreto del documento analizado.\n" +
-      "4. En recomendaciones genera MINIMO 3 de prioridad Alta y 2 de prioridad Media, cada una con detalle especifico al perfil.\n" +
-      "5. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
+      "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
+      "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
+      "3. NUNCA uses frases genericas sin especificar empresa, rol o resultado concreto.\n" +
+      "4. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media.\n" +
+      "5. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
+      "6. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
+      "7. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
 
-    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority);
+    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan);
 
     const MODELS = [
       "llama-3.3-70b-versatile",
@@ -68,10 +70,16 @@ export async function onRequest(context) {
       "llama3-8b-8192",
     ];
 
+    // Starter usa menos tokens para reducir consumo y rate limit
+    const maxTokens = plan === "starter" ? 2500 : 4000;
+
     let groqData = null;
     let lastError = null;
 
-    for (const model of MODELS) {
+    for (let i = 0; i < MODELS.length; i++) {
+      const model = MODELS[i];
+      if (i > 0) await new Promise(r => setTimeout(r, 2000));
+
       const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -85,7 +93,7 @@ export async function onRequest(context) {
             { role: "user",   content: userPrompt   },
           ],
           temperature: 0.2,
-          max_tokens: 4000,
+          max_tokens: maxTokens,
         }),
       });
 
@@ -126,10 +134,23 @@ export async function onRequest(context) {
     if (!result.linkedin_analysis) result.linkedin_analysis = null;
 
     // Normalizar scores: si el modelo los devuelve en escala 0-10, convertir a 0-100
-    const normalizeScore = (v) => (typeof v === 'number' && v <= 10 && v > 0) ? Math.round(v * 10) : (v || 0);
-    result.atsScore           = normalizeScore(result.atsScore);
-    result.scorePotencial     = normalizeScore(result.scorePotencial);
-    result.impactDensityScore = normalizeScore(result.impactDensityScore);
+    const norm = (v) => (typeof v === "number" && v > 0 && v <= 10) ? Math.round(v * 10) : (v || 0);
+    result.atsScore           = norm(result.atsScore);
+    result.scorePotencial     = norm(result.scorePotencial);
+    result.impactDensityScore = norm(result.impactDensityScore);
+
+    if (result.atsDetalle) {
+      for (const k of Object.keys(result.atsDetalle)) {
+        if (typeof result.atsDetalle[k] === "number") result.atsDetalle[k] = norm(result.atsDetalle[k]);
+      }
+    }
+    if (result.perfilEmpleabilidad) {
+      for (const k of ["visibilidad", "coherencia", "movilidad"]) {
+        if (result.perfilEmpleabilidad[k]?.score !== undefined) {
+          result.perfilEmpleabilidad[k].score = norm(result.perfilEmpleabilidad[k].score);
+        }
+      }
+    }
 
     // Fallback: si los scores principales siguen en 0, estimarlos desde perfilEmpleabilidad
     if (result.atsScore === 0 && result.perfilEmpleabilidad) {
@@ -137,22 +158,10 @@ export async function onRequest(context) {
       const vis = pe.visibilidad?.score || 0;
       const coh = pe.coherencia?.score  || 0;
       const mov = pe.movilidad?.score   || 0;
-      result.atsScore       = Math.round((vis + coh + mov) / 3);
-      result.scorePotencial = Math.min(100, result.atsScore + 15);
+      result.atsScore = Math.round((vis + coh + mov) / 3);
     }
-    if (result.impactDensityScore === 0) {
-      result.impactDensityScore = result.atsScore ? Math.round(result.atsScore * 0.85) : 50;
-    }
-    if (result.atsDetalle) {
-      for (const k of Object.keys(result.atsDetalle)) {
-        if (typeof result.atsDetalle[k] === 'number') result.atsDetalle[k] = normalizeScore(result.atsDetalle[k]);
-      }
-    }
-    if (result.perfilEmpleabilidad) {
-      for (const k of ['visibilidad','coherencia','movilidad']) {
-        if (result.perfilEmpleabilidad[k]) result.perfilEmpleabilidad[k].score = normalizeScore(result.perfilEmpleabilidad[k].score);
-      }
-    }
+    if (result.scorePotencial === 0) result.scorePotencial = Math.min(100, result.atsScore + 15);
+    if (result.impactDensityScore === 0) result.impactDensityScore = Math.round(result.atsScore * 0.85);
 
     const response = applyTierVisibility(result, plan, modo);
 
@@ -232,47 +241,70 @@ function applyTierVisibility(data, plan, modo) {
 
 // ─── PROMPT ──────────────────────────────────────────────────────────────────
 
-function buildPrompt(cvText, liText, modo, role, sector, seniority) {
+function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   const ctx = [
     role      && "Rol objetivo: " + role,
     sector    && "Sector: " + sector,
     seniority && "Seniority: " + seniority,
   ].filter(Boolean).join(" | ");
 
-  // El documento va PRIMERO para que el modelo lo procese con maxima atencion
   let docBlock = "";
-
   if (cvText && cvText.length >= 30) {
-    docBlock += "=== DOCUMENTO A ANALIZAR: CV ===\n" + cvText.slice(0, 4500) + "\n=== FIN DEL CV ===\n\n";
+    docBlock += "=== CV A ANALIZAR ===\n" + cvText.slice(0, 4500) + "\n=== FIN CV ===\n\n";
   }
-
   if (liText && liText.length >= 30) {
-    docBlock += "=== DOCUMENTO A ANALIZAR: PERFIL LINKEDIN ===\n" + liText.slice(0, 4500) + "\n=== FIN DEL PERFIL LINKEDIN ===\n\n";
+    docBlock += "=== PERFIL LINKEDIN A ANALIZAR ===\n" + liText.slice(0, 4500) + "\n=== FIN LINKEDIN ===\n\n";
   }
 
   let instrBlock = "";
-
-  if (ctx) instrBlock += "Contexto del analisis: " + ctx + "\n\n";
+  if (ctx) instrBlock += "Contexto: " + ctx + "\n\n";
 
   if (modo === "li") {
-    instrBlock += "MODO: Analiza SOLO el perfil de LinkedIn. Usa su contenido para todos los campos del JSON.\n";
-    instrBlock += "Analiza en profundidad: Titular/Headline, Extracto/About, Experiencias, Aptitudes, Formacion, Completitud, Narrativa entre secciones.\n";
+    instrBlock += "MODO: Analiza SOLO el perfil LinkedIn. Usa su contenido para todos los campos del JSON.\n";
   } else if (modo === "ambos") {
-    instrBlock += "MODO: Analiza el CV (campos principales del JSON) Y el perfil LinkedIn (en linkedin_analysis).\n";
-  } else {
-    instrBlock += "MODO: Analiza el CV.\n";
+    instrBlock += "MODO: Analiza CV (campos principales) Y perfil LinkedIn (en linkedin_analysis).\n";
   }
 
-  instrBlock += "\nANTES de escribir el JSON, calcula mentalmente estos valores para el documento analizado:\n";
-  instrBlock += "- atsScore: puntuacion global del CV como documento (0-100, siendo 100 perfecto para ATS)\n";
-  instrBlock += "- scorePotencial: puntuacion del perfil si implementa las mejoras sugeridas (siempre mayor que atsScore)\n";
-  instrBlock += "- impactDensityScore: porcentaje de experiencias que tienen logros cuantificados (0-100)\n";
-  instrBlock += "Usa esos valores calculados en el JSON. NUNCA dejes estos tres campos en 0.\n\n";
-  instrBlock += "Devuelve SOLO este JSON con los datos reales del documento. Todos los campos son obligatorios:\n\n";
+  instrBlock += "\nCalcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
+  instrBlock += "- atsScore: calidad global del CV como documento ATS\n";
+  instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
+  instrBlock += "- impactDensityScore: porcentaje de experiencias con logros cuantificados\n\n";
+  instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
 
+  // Schema reducido para Starter
+  if (plan === "starter") {
+    return (
+      docBlock + instrBlock +
+      "{\n" +
+      '  "candidateName": "nombre completo del documento",\n' +
+      '  "seniority": "Junior|Semi-Senior|Senior|Lead|Executive",\n' +
+      '  "yearsExperience": "numero",\n' +
+      '  "currentRole": "rol + empresa del documento",\n' +
+      '  "atsScore": 65,\n' +
+      '  "scorePotencial": 80,\n' +
+      '  "impactDensityScore": 55,\n' +
+      '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
+      '  "impactDensityDiagnostico": "diagnostico concreto del documento",\n' +
+      '  "resumenEjecutivo": "Nombre + rol actual + empresa + diagnostico especifico del perfil. 3-4 oraciones.",\n' +
+      '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al documento"}],\n' +
+      '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del documento"}],\n' +
+      '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al documento", "accion": "accion concreta"}],\n' +
+      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "accion especifica para este perfil", "impactoScore": "+N puntos"}],\n' +
+      '  "perfilEmpleabilidad": {\n' +
+      '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
+      '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
+      '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"}\n' +
+      '  },\n' +
+      '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
+      '  "linkedin_analysis": null\n' +
+      "}"
+    );
+  }
+
+  // Schema completo para Diagnóstico / Pro / Professional
   const liDims = liText && liText.length >= 30
     ? '"linkedin_analysis": {\n' +
-      '  "coherencia_score": 0,\n' +
+      '  "coherencia_score": 70,\n' +
       '  "coherencia_nivel": "Alta|Media|Baja",\n' +
       '  "coincidencias": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],\n' +
       '  "brechas": ["oportunidad 1", "oportunidad 2", "oportunidad 3"],\n' +
@@ -281,27 +313,26 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
       '  "titular_actual": "texto exacto del titular actual",\n' +
       '  "titular_sugerido": "propuesta de titular mejorado con rol + propuesta de valor",\n' +
       '  "extracto_diagnostico": "que comunica el extracto, que falta, tono, longitud, llamado a la accion",\n' +
-      '  "completitud_perfil": 0,\n' +
-      '  "dimensiones_li": { "titular": 0, "extracto": 0, "experiencias": 0, "habilidades": 0, "completitud": 0, "narrativa": 0 }\n' +
+      '  "completitud_perfil": 70,\n' +
+      '  "dimensiones_li": {"titular": 65, "extracto": 70, "experiencias": 60, "habilidades": 55, "completitud": 75, "narrativa": 65}\n' +
       '}'
     : '"linkedin_analysis": null';
 
   return (
-    docBlock +
-    instrBlock +
+    docBlock + instrBlock +
     "{\n" +
-    '  "candidateName": "nombre completo extraido del documento",\n' +
+    '  "candidateName": "nombre completo del documento",\n' +
     '  "seniority": "Junior|Semi-Senior|Senior|Lead|Executive",\n' +
-    '  "yearsExperience": "numero entero",\n' +
-    '  "currentRole": "rol mas reciente + empresa si figura",\n' +
+    '  "yearsExperience": "numero",\n' +
+    '  "currentRole": "rol + empresa del documento",\n' +
     '  "atsScore": 65,\n' +
     '  "scorePotencial": 80,\n' +
     '  "impactDensityScore": 55,\n' +
     '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-    '  "impactDensityDiagnostico": "diagnostico concreto con referencia a logros o ausencia de ellos en el documento",\n' +
-    '  "resumenEjecutivo": "Empieza con el nombre real de la persona. Describe su situacion profesional actual con rol y empresa. Luego diagnostico especifico: que funciona, que no, con referencia a elementos concretos del documento. 3-4 oraciones.",\n' +
-    '  "atsDetalle": { "keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65 },\n' +
-    '  "seccionesDetectadas": { "perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false },\n' +
+    '  "impactDensityDiagnostico": "diagnostico concreto del documento",\n' +
+    '  "resumenEjecutivo": "Nombre + rol actual + empresa + diagnostico especifico del perfil. 3-4 oraciones.",\n' +
+    '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
+    '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
     '  "seccionesFaltantes": [],\n' +
     '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al documento"}],\n' +
     '  "analisisLogros": {\n' +
@@ -309,20 +340,19 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
     '    "logrosDebiles": [{"frase": "frase del documento", "motivo": "por que es debil", "sugerencia": "como mejorarlo"}],\n' +
     '    "responsabilidadesSinImpacto": [{"frase": "frase del documento", "oportunidad": "como convertirlo en logro"}]\n' +
     '  },\n' +
-    '  "verbosImpacto": { "detectados": [], "debiles": [{"verbo": "verbo", "contexto": "frase donde aparece", "alternativas": []}] },\n' +
-    '  "narrativaProfesional": { "tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "texto", "progresion": "texto", "oportunidades": [] },\n' +
-    '  "mapaHabilidades": { "declaradas": [], "detectadas": [], "aIncorporar": [] },\n' +
+    '  "verbosImpacto": {"detectados": [], "debiles": [{"verbo": "verbo", "contexto": "frase donde aparece", "alternativas": []}]},\n' +
+    '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "texto", "progresion": "texto", "oportunidades": []},\n' +
+    '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
     '  "areasProfesionales": [],\n' +
     '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 75, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
-    '  "fortalezas": [{"titulo": "titulo concreto referido al perfil", "detalle": "evidencia especifica del documento: seccion, logro, habilidad o empresa concreta"}],\n' +
-    '  "debilidades": [{"titulo": "titulo concreto referido al perfil", "detalle": "que falta o esta mal con referencia especifica al documento", "accion": "accion concreta y realizable para este perfil"}],\n' +
-    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo concreto", "detalle": "accion especifica para este perfil, no generica", "impactoScore": "+N puntos"}],\n' +
+    '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del documento: seccion, logro, habilidad o empresa"}],\n' +
+    '  "debilidades": [{"titulo": "titulo concreto", "detalle": "que falta con referencia al documento", "accion": "accion concreta"}],\n' +
+    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "accion especifica para este perfil", "impactoScore": "+N puntos"}],\n' +
     '  "perfilEmpleabilidad": {\n' +
-    '    "visibilidad": { "score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta sobre que tan legible y encontrable es el perfil" },\n' +
-    '    "coherencia": { "score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta sobre si el relato profesional tiene hilo conductor" },\n' +
-    '    "movilidad": { "score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta sobre si el perfil habilita transiciones o esta encerrado en un solo rol" }\n' +
+    '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
+    '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
+    '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"}\n' +
     '  },\n' +
-    '  IMPORTANTE: todos los campos numericos de score son enteros entre 0 y 100. NO uses escala 0-10.\n' +
     liDims + "\n" +
     "}"
   );
