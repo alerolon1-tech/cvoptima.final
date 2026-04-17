@@ -662,13 +662,13 @@ Si tenés PDF o Word: abrilo → Ctrl+A → Ctrl+C → pegá acá."></textarea>
   <!-- Radar bloqueado (Starter) -->
   <div id="starter-radar-section" style="display:none">
     <div class="pn">
-      <div class="pn-t">Dimensiones del perfil <span>Disponible en Diagnóstico →</span></div>
+      <div class="pn-t">Dimensiones del perfil <span>Ver análisis completo →</span></div>
       <div class="starter-radar-wrap">
         <div style="position:relative;height:220px">
           <canvas id="starter-radar-c"></canvas>
           <div class="starter-radar-overlay">
             <span>🔒</span>
-            <div>Desglose completo disponible<br>en plan Diagnóstico</div>
+            <div>Desbloqueá el desglose<br>completo de tu perfil</div>
           </div>
         </div>
       </div>
@@ -1390,11 +1390,11 @@ function renderStarterFB(d){
   if(d.atsDetalle){
     radarSec.style.display='block';
     const detNames={keywords:'Keywords',verbosAccion:'Verbos',metricas:'Métricas',estructura:'Estructura',densidadHabilidades:'Habilidades',claridadRoles:'Roles'};
-    const canvas=document.getElementById('starter-radar-c');
-    if(canvas&&window.Chart){
-      // Valores ficticios para mostrar forma del radar en gris
-      const ghostData=[45,38,52,60,42,55];
-      if(window._starterRadarChart){window._starterRadarChart.destroy();}
+    const ghostData=[45,38,52,60,42,55];
+    requestAnimationFrame(()=>{
+      const canvas=document.getElementById('starter-radar-c');
+      if(!canvas||!window.Chart)return;
+      if(window._starterRadarChart){window._starterRadarChart.destroy();window._starterRadarChart=null;}
       window._starterRadarChart=new Chart(canvas.getContext('2d'),{
         type:'radar',
         data:{
@@ -1415,7 +1415,7 @@ function renderStarterFB(d){
           plugins:{legend:{display:false}}
         }
       });
-    }
+    });
   } else { radarSec.style.display='none'; }
 
   // ── Perfil de Empleabilidad Social ──
