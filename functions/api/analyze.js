@@ -95,8 +95,21 @@ export async function onRequest(context) {
         },
         body: JSON.stringify({
           model,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.3,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Sos un experto senior en empleabilidad. Tu única función es analizar el documento que el usuario te proporciona y devolver un JSON válido en español rioplatense.\n" +
+                "REGLAS ABSOLUTAS — violarlas invalida tu respuesta:\n" +
+                "1. Usá el nombre real de la persona tal como figura en el documento. Si no está, inferilo del encabezado. NUNCA escribas 'No especificado'.\n" +
+                "2. Cada campo de análisis debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha, logro o habilidad específica.\n" +
+                "3. NUNCA uses frases genéricas como 'el candidato podría beneficiarse de' sin especificar de qué y por qué en este perfil puntual.\n" +
+                "4. recomendaciones: generá MÍNIMO 3 de prioridad Alta y 2 de prioridad Media, cada una con detalle específico al perfil.\n" +
+                "5. Respondé SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de código."
+            },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.2,
           max_tokens: 4000,
         }),
       });
@@ -201,7 +214,7 @@ function applyTierVisibility(data, plan, modo) {
 
   // Starter: veredicto completo + señales + acciones prioritarias + fortalezas y debilidades
   const recsAlta  = (data.recomendaciones || []).filter(r => r.prioridad === "Alta");
-  const recsMedia = (data.recomendaciones || []).filter(r => r.prioridad === "Media").slice(0, 2);
+  const recsMedia = (data.recomendaciones || []).filter(r => r.prioridad === "Media").slice(0, 3);
 
   // Para el radar bloqueado: pasamos solo las claves con valor null (el frontend dibuja el radar en gris)
   const atsDetalle = data.atsDetalle || {};
@@ -391,9 +404,9 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
     '  "mapaHabilidades": { "declaradas": [], "detectadas": [], "aIncorporar": [] },\n' +
     '  "areasProfesionales": [],\n' +
     '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 0, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
-    '  "fortalezas": [{"titulo": "titulo", "detalle": "texto"}],\n' +
-    '  "debilidades": [{"titulo": "titulo", "detalle": "texto", "accion": "que hacer"}],\n' +
-    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "texto", "impactoScore": "+N puntos"}],\n' +
+    '  "fortalezas": [{"titulo": "titulo concreto referido al perfil", "detalle": "evidencia específica del documento"}],\n' +
+    '  "debilidades": [{"titulo": "titulo concreto referido al perfil", "detalle": "qué falta con referencia al documento", "accion": "acción concreta y realizable para este perfil"}],\n' +
+    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo concreto", "detalle": "acción específica para este perfil puntual, no genérica", "impactoScore": "+N puntos"}],\n' +
     '  "perfilEmpleabilidad": {\n' +
     '    "visibilidad": { "score": 0, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta sobre qué tan legible y encontrable es el perfil" },\n' +
     '    "coherencia": { "score": 0, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta sobre si el relato profesional tiene hilo conductor" },\n' +
