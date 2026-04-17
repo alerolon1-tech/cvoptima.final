@@ -202,6 +202,19 @@ function applyTierVisibility(data, plan, modo) {
   // Starter: veredicto completo + señales + acciones prioritarias + fortalezas y debilidades
   const recsAlta  = (data.recomendaciones || []).filter(r => r.prioridad === "Alta");
   const recsMedia = (data.recomendaciones || []).filter(r => r.prioridad === "Media").slice(0, 2);
+
+  // Para el radar bloqueado: pasamos solo las claves con valor null (el frontend dibuja el radar en gris)
+  const atsDetalle = data.atsDetalle || {};
+  const atsDetalle_bloqueado = {
+    keywords:          null,
+    verbosAccion:      null,
+    metricas:          null,
+    estructura:        null,
+    densidadHabilidades: null,
+    claridadRoles:     null,
+    _locked:           true,
+  };
+
   const starter = {
     _plan:               "starter",
     candidateName:       data.candidateName,
@@ -219,6 +232,8 @@ function applyTierVisibility(data, plan, modo) {
     recomendaciones:     [...recsAlta, ...recsMedia],
     fortalezas:          data.fortalezas || [],
     debilidades:         data.debilidades || [],
+    perfilEmpleabilidad: data.perfilEmpleabilidad || null,
+    atsDetalle:          atsDetalle_bloqueado,
     _locked: {
       atsDetalle:           true,
       seccionesDetectadas:  true,
@@ -310,25 +325,18 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
 
   const intro =
     "Sos un experto senior en empleabilidad con enfoque en Empleabilidad en Clave Social.\n" +
-    (ctx ? "Contexto: " + ctx + "\n" : "") +
-    "\nREGLAS DE PERSONALIZACIÓN — obligatorias:\n" +
-    "1. Usá el nombre real de la persona tal como aparece en el documento.\n" +
-    "2. Mencioná su rol actual o más reciente con empresa y fechas exactas del documento.\n" +
-    "3. Citá al menos un logro, proyecto, herramienta o dato concreto que figure textualmente.\n" +
-    "4. Nunca uses frases genéricas sin especificar qué área, empresa o resultado concreto.\n" +
-    "5. resumenEjecutivo: empezá con el nombre + situación profesional actual + diagnóstico específico.\n" +
-    "6. Fortalezas y debilidades: referí a evidencia concreta del documento, no a categorías abstractas.\n";
+    (ctx ? "Contexto: " + ctx + "\n" : "");
 
   let cvBlock = "";
   if (cvText && cvText.length >= 30) {
     cvBlock =
-      "\n\nCV:\n\"\"\"\n" + cvText.slice(0, 4500) + "\n\"\"\"\n" +
+      "\n\nCV:\n\"\"\"\n" + cvText.slice(0, 3000) + "\n\"\"\"\n" +
       "Analiza estructura, narrativa, logros cuantificados, verbos de impacto, habilidades, coherencia y compatibilidad ATS.\n";
   }
 
   let liBlock = "";
   if (liText && liText.length >= 30) {
-    liBlock = "\n\nPERFIL LINKEDIN (exportado como PDF desde LinkedIn):\n\"\"\"\n" + liText.slice(0, 4500) + "\n\"\"\"\n";
+    liBlock = "\n\nPERFIL LINKEDIN (exportado como PDF desde LinkedIn):\n\"\"\"\n" + liText.slice(0, 3000) + "\n\"\"\"\n";
 
     if (modo === "li") {
       liBlock += "\nIMPORTANTE: Este texto proviene de un PDF exportado desde LinkedIn. La estructura es diferente a un CV tradicional.\n";
@@ -343,9 +351,8 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
       liBlock += "Para atsScore: calidad general del perfil LinkedIn como presencia digital.\n";
       liBlock += "Para atsDetalle: keywords=palabras clave en titular/aptitudes, verbosAccion=verbos en experiencias, metricas=logros cuantificados, estructura=completitud de secciones, densidadHabilidades=aptitudes declaradas, claridadRoles=claridad del titular.\n";
     } else {
-      liBlock += "Analiza el perfil LinkedIn como documento de empleabilidad digital y su coherencia con el CV.\n" +
-        "Usá el nombre real de la persona. Referite al titular actual concreto, al contenido específico del extracto y a las experiencias listadas.\n" +
-        "Presta atencion a: titular, extracto/about, experiencias (descripcion y logros), aptitudes, completitud.\n";
+      liBlock += "Analiza el perfil LinkedIn como documento de empleabilidad digital y su coherencia con el CV.\n";
+      liBlock += "Presta atencion a: titular, extracto/about, experiencias (descripcion y logros), aptitudes, completitud.\n";
     }
 
     liBlock += liPromptDimensions();
@@ -360,16 +367,16 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
     intro + modoInstr + cvBlock + liBlock +
     '\nResponde SOLO con JSON valido en espanol rioplatense, sin texto extra, sin markdown:\n\n' +
     '{\n' +
-    '  "candidateName": "nombre completo extraído del documento",\n' +
+    '  "candidateName": "nombre completo",\n' +
     '  "seniority": "Junior|Semi-Senior|Senior|Lead|Executive",\n' +
     '  "yearsExperience": "numero",\n' +
-    '  "currentRole": "rol más reciente + empresa si figura",\n' +
+    '  "currentRole": "rol mas reciente",\n' +
     '  "atsScore": 0,\n' +
     '  "scorePotencial": 0,\n' +
     '  "impactDensityScore": 0,\n' +
     '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-    '  "impactDensityDiagnostico": "diagnóstico concreto con referencia a logros o ausencia de ellos en el documento",\n' +
-    '  "resumenEjecutivo": "Comenzá con el nombre real. Describí su situación profesional actual con rol y empresa. Luego diagnóstico específico: qué funciona, qué no, con referencia a elementos concretos del documento. 3-4 oraciones.",\n' +
+    '  "impactDensityDiagnostico": "frase diagnostica",\n' +
+    '  "resumenEjecutivo": "3-4 oraciones de diagnostico real de la persona",\n' +
     '  "atsDetalle": { "keywords": 0, "verbosAccion": 0, "metricas": 0, "estructura": 0, "densidadHabilidades": 0, "claridadRoles": 0 },\n' +
     '  "seccionesDetectadas": { "perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false },\n' +
     '  "seccionesFaltantes": [],\n' +
@@ -384,9 +391,14 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority) {
     '  "mapaHabilidades": { "declaradas": [], "detectadas": [], "aIncorporar": [] },\n' +
     '  "areasProfesionales": [],\n' +
     '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 0, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
-    '  "fortalezas": [{"titulo": "titulo concreto referido al perfil", "detalle": "explicación con evidencia del documento: qué sección, qué logro, qué habilidad específica lo sostiene"}],\n' +
-    '  "debilidades": [{"titulo": "titulo concreto referido al perfil", "detalle": "qué falta o qué está mal con referencia específica al documento", "accion": "acción concreta y realizable para este perfil puntual"}],\n' +
-    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "acción específica para este perfil, no genérica", "impactoScore": "+N puntos"}],\n' +
+    '  "fortalezas": [{"titulo": "titulo", "detalle": "texto"}],\n' +
+    '  "debilidades": [{"titulo": "titulo", "detalle": "texto", "accion": "que hacer"}],\n' +
+    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "texto", "impactoScore": "+N puntos"}],\n' +
+    '  "perfilEmpleabilidad": {\n' +
+    '    "visibilidad": { "score": 0, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta sobre qué tan legible y encontrable es el perfil" },\n' +
+    '    "coherencia": { "score": 0, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta sobre si el relato profesional tiene hilo conductor" },\n' +
+    '    "movilidad": { "score": 0, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta sobre si el perfil habilita transiciones o está encerrado en un solo rol" }\n' +
+    '  },\n' +
     '  "linkedin_analysis": null\n' +
     '}'
   );
