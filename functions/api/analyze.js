@@ -221,6 +221,22 @@ function applyTierVisibility(data, plan, modo) {
   const recsAlta  = (data.recomendaciones || []).filter(r => r.prioridad === "Alta");
   const recsMedia = (data.recomendaciones || []).filter(r => r.prioridad === "Media").slice(0, 3);
 
+  // En modo ambos, mostrar anticipo de LinkedIn en Starter
+  let liAnticipo = null;
+  if (modo === "ambos" && data.linkedin_analysis) {
+    const la = data.linkedin_analysis;
+    liAnticipo = {
+      _starter_preview: true,
+      coherencia_score:    la.coherencia_score    || null,
+      coherencia_nivel:    la.coherencia_nivel     || null,
+      resumen_coherencia:  la.resumen_coherencia   || null,
+      titular_actual:      la.titular_actual       || null,
+      titular_sugerido:    la.titular_sugerido     || null,
+      coincidencias:       (la.coincidencias || []).slice(0, 2),
+      brechas:             (la.brechas      || []).slice(0, 2),
+    };
+  }
+
   return {
     _plan:               "starter",
     candidateName:       data.candidateName,
@@ -239,6 +255,7 @@ function applyTierVisibility(data, plan, modo) {
     fortalezas:          data.fortalezas || [],
     debilidades:         data.debilidades || [],
     perfilEmpleabilidad: data.perfilEmpleabilidad || null,
+    linkedin_analysis:   liAnticipo,
     atsDetalle: {
       keywords: null, verbosAccion: null, metricas: null,
       estructura: null, densidadHabilidades: null, claridadRoles: null,
