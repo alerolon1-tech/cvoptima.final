@@ -305,8 +305,11 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     return (
       docBlock + instrBlock +
       "MODO: Analiza EXCLUSIVAMENTE el perfil de LinkedIn. Evalua cada seccion especifica de LinkedIn.\n" +
-      "PASO 1 (mental, no lo escribas): identifica el nombre, rol actual, sector, empresas y habilidades declaradas.\n" +
-      "PASO 2: genera el JSON usando SOLO lo que encontraste en el PASO 1. Las brechas y recomendaciones deben referirse a lo que FALTA, nunca a lo que ya esta presente.\n\n" +
+      "PASO 1 (mental, no lo escribas): identifica nombre, rol, sector, empresas, habilidades y certificaciones presentes.\n" +
+      "PASO 2: genera el JSON. Las brechas y recomendaciones deben referirse a lo que FALTA, nunca a lo que ya esta presente.\n" +
+      "PASO 3: para fortalezas genera MINIMO 3 items sobre temas DISTINTOS (no solo logros). Evalua: titular, extracto, experiencias, aptitudes, certificaciones, narrativa, completitud.\n" +
+      "PASO 4: para debilidades genera MINIMO 3 items sobre temas DISTINTOS. Ejemplos validos: falta de extracto/about, URL no personalizada, experiencias sin descripcion, ausencia de recomendaciones de terceros, titular poco especifico, falta de foto o banner.\n" +
+      "PASO 5: para recomendaciones genera MINIMO 3 Alta y 2 Media sobre acciones DISTINTAS y ESPECIFICAS para este perfil.\n\n" +
       "{\n" +
       '  "candidateName": "nombre del perfil",\n' +
       '  "seniority": "Junior|Semi-Senior|Senior|Lead|Executive",\n' +
@@ -319,9 +322,9 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
       '  "resumenEjecutivo": "Nombre + titular actual + diagnostico especifico del perfil LinkedIn como herramienta de empleabilidad. 3-4 oraciones.",\n' +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al perfil"}],\n' +
-      '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia especifica del perfil LinkedIn"}],\n' +
-      '  "debilidades": [{"titulo": "titulo concreto", "detalle": "que falta en el perfil LinkedIn", "accion": "accion concreta"}],\n' +
-      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "accion especifica para mejorar el perfil LinkedIn", "impactoScore": "+N puntos"}],\n' +
+      '  "fortalezas": [{"titulo": "titulo concreto sobre un aspecto especifico del perfil (titular, experiencia, aptitudes, certificaciones, etc)", "detalle": "evidencia especifica del perfil LinkedIn"}],\n' +
+      '  "debilidades": [{"titulo": "aspecto especifico que falta o es debil (extracto, URL, descripciones, recomendaciones, logros, etc)", "detalle": "por que afecta la empleabilidad", "accion": "accion concreta y especifica para mejorar este punto"}],\n' +
+      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Titular|Extracto|Experiencias|Aptitudes|Completitud|Narrativa|Logros", "titulo": "accion especifica", "detalle": "como implementarla en este perfil concreto", "impactoScore": "+N puntos"}],\n' +
       '  "perfilEmpleabilidad": {\n' +
       '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre visibilidad del perfil LinkedIn"},\n' +
       '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre coherencia narrativa entre secciones"},\n' +
