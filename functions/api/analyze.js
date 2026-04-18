@@ -100,6 +100,7 @@ export async function onRequest(context) {
 
       if (groqRes.ok) {
         groqData = await groqRes.json();
+        groqData._modelUsed = model;
         break;
       }
 
@@ -145,6 +146,7 @@ export async function onRequest(context) {
     }
 
     result.has_linkedin = liText.length > 30;
+    result._modelUsed = groqData._modelUsed || 'unknown';
     if (!result.linkedin_analysis) result.linkedin_analysis = null;
 
     // Normalizar scores: si el modelo los devuelve en escala 0-10, convertir a 0-100
