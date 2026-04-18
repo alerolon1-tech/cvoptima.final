@@ -71,7 +71,7 @@ export async function onRequest(context) {
     ];
 
     // Starter usa menos tokens para reducir consumo y rate limit
-    const maxTokens = plan === "starter" ? 2500 : 4000;
+    const maxTokens = plan === "starter" ? 3200 : 4000;
 
     let groqData = null;
     let lastError = null;
@@ -124,8 +124,21 @@ export async function onRequest(context) {
 
     let result;
     try {
-      const m = raw.match(/\{[\s\S]*\}/);
-      result = JSON.parse(m ? m[0] : raw);
+      // Limpiar bloques markdown si el modelo los incluye
+      let clean = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/,'').trim();
+
+      // Si el JSON está truncado, intentar cerrarlo
+      const m = clean.match(/\{[\s\S]*/);
+      if (m) {
+        let jsonStr = m[0];
+        // Contar llaves para detectar truncamiento
+        let open = 0;
+        for (const c of jsonStr) { if(c==='{') open++; else if(c==='}') open--; }
+        if (open > 0) jsonStr += '}'.repeat(open); // cerrar llaves faltantes
+        result = JSON.parse(jsonStr);
+      } else {
+        result = JSON.parse(clean);
+      }
     } catch (e) {
       throw new Error("No se pudo parsear la respuesta del modelo: " + raw.slice(0, 300));
     }
