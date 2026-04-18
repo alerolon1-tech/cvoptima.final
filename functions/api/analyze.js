@@ -55,12 +55,13 @@ export async function onRequest(context) {
       "REGLAS ABSOLUTAS:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
       "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
-      "3. NUNCA inventes datos que no figuren en el documento. Si el perfil no tiene logros cuantificados, dilo: 'No se detectaron logros cuantificados'. Si no hay extracto, dilo: 'Sin extracto'. NUNCA afirmes que algo existe si no lo viste en el texto.\n" +
-      "4. NUNCA uses frases genericas sin especificar empresa, rol o resultado concreto.\n" +
-      "5. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media.\n" +
-      "6. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
-      "7. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
-      "8. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
+      "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
+      "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento. Por ejemplo: si la persona trabaja en impuestos, no recomiendes 'mejorar conocimientos en impuestos'. Si tiene habilidades de comunicacion declaradas, no recomiendes 'mejorar comunicacion'.\n" +
+      "5. Si el documento esta en ingles, analizalo en ingles internamente pero escribe todo el JSON en espanol rioplatense.\n" +
+      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a algo que FALTA o que podria MEJORARSE, nunca a algo que ya esta presente.\n" +
+      "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
+      "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
+      "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
 
     const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan);
 
@@ -303,7 +304,9 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   if (modo === "li") {
     return (
       docBlock + instrBlock +
-      "MODO: Analiza EXCLUSIVAMENTE el perfil de LinkedIn. Evalua cada seccion especifica de LinkedIn.\n\n" +
+      "MODO: Analiza EXCLUSIVAMENTE el perfil de LinkedIn. Evalua cada seccion especifica de LinkedIn.\n" +
+      "PASO 1 (mental, no lo escribas): identifica el nombre, rol actual, sector, empresas y habilidades declaradas.\n" +
+      "PASO 2: genera el JSON usando SOLO lo que encontraste en el PASO 1. Las brechas y recomendaciones deben referirse a lo que FALTA, nunca a lo que ya esta presente.\n\n" +
       "{\n" +
       '  "candidateName": "nombre del perfil",\n' +
       '  "seniority": "Junior|Semi-Senior|Senior|Lead|Executive",\n' +
