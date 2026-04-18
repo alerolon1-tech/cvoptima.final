@@ -177,7 +177,7 @@ export async function onRequest(context) {
       result.atsScore = Math.round((vis + coh + mov) / 3);
     }
     if (result.scorePotencial === 0) result.scorePotencial = Math.min(100, result.atsScore + 15);
-    if (result.impactDensityScore === 0) result.impactDensityScore = Math.round(result.atsScore * 0.85);
+    if (result.impactDensityScore === 0) result.impactDensityScore = 15; // bajo por defecto si no se detectaron logros
 
     const response = applyTierVisibility(result, plan, modo);
 
@@ -295,7 +295,8 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
   instrBlock += "- atsScore: calidad global del documento principal como herramienta de empleabilidad\n";
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
-  instrBlock += "- impactDensityScore: porcentaje de experiencias con logros cuantificados\n\n";
+  instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
+  instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
 
   // ── MODO: Solo LinkedIn ────────────────────────────────────────────────────
@@ -312,7 +313,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "scorePotencial": 80,\n' +
       '  "impactDensityScore": 55,\n' +
       '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-      '  "impactDensityDiagnostico": "si hay logros cuantificados mencionalos textualmente; si NO los hay, escribi exactamente que no se detectaron logros cuantificados",\n' +
+      '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
       '  "resumenEjecutivo": "Nombre + titular actual + diagnostico especifico del perfil LinkedIn como herramienta de empleabilidad. 3-4 oraciones.",\n' +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al perfil"}],\n' +
       '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia especifica del perfil LinkedIn"}],\n' +
@@ -373,7 +374,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
         '  "scorePotencial": 80,\n' +
         '  "impactDensityScore": 55,\n' +
         '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-        '  "impactDensityDiagnostico": "si hay logros cuantificados mencionalos textualmente; si NO los hay, escribi exactamente que no se detectaron logros cuantificados",\n' +
+        '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
         '  "resumenEjecutivo": "Nombre + rol actual + empresa + diagnostico especifico del perfil. 3-4 oraciones.",\n' +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al documento"}],\n' +
         '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del documento"}],\n' +
@@ -401,7 +402,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "scorePotencial": 80,\n' +
       '  "impactDensityScore": 55,\n' +
       '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-      '  "impactDensityDiagnostico": "si hay logros cuantificados mencionalos textualmente; si NO los hay, escribi exactamente que no se detectaron logros cuantificados",\n' +
+      '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
       '  "resumenEjecutivo": "Nombre + rol actual + empresa + diagnostico especifico. 3-4 oraciones.",\n' +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
       '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
@@ -449,7 +450,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '  "scorePotencial": 80,\n' +
     '  "impactDensityScore": 55,\n' +
     '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-    '  "impactDensityDiagnostico": "si hay logros cuantificados mencionalos textualmente; si NO los hay, escribi exactamente que no se detectaron logros cuantificados",\n' +
+    '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
     '  "resumenEjecutivo": "Nombre + rol actual + diagnostico del CV. 3-4 oraciones.",\n' +
     '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
     '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
