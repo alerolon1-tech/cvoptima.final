@@ -58,7 +58,7 @@ export async function onRequest(context) {
       "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
       "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento. Por ejemplo: si la persona trabaja en impuestos, no recomiendes 'mejorar conocimientos en impuestos'. Si tiene habilidades de comunicacion declaradas, no recomiendes 'mejorar comunicacion'.\n" +
       "5. Si el documento esta en ingles, analizalo en ingles internamente pero escribe todo el JSON en espanol rioplatense.\n" +
-      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a algo que FALTA o que podria MEJORARSE, nunca a algo que ya esta presente.\n" +
+      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento (CV o perfil LinkedIn): redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector, aplicar a empresas o tomar decisiones de carrera — eso no es parte del analisis del documento.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
       "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
@@ -324,7 +324,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al perfil"}],\n' +
       '  "fortalezas": [{"titulo": "titulo concreto sobre un aspecto especifico del perfil (titular, experiencia, aptitudes, certificaciones, etc)", "detalle": "evidencia especifica del perfil LinkedIn"}],\n' +
       '  "debilidades": [{"titulo": "aspecto especifico que falta o es debil (extracto, URL, descripciones, recomendaciones, logros, etc)", "detalle": "por que afecta la empleabilidad", "accion": "accion concreta y especifica para mejorar este punto"}],\n' +
-      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Titular|Extracto|Experiencias|Aptitudes|Completitud|Narrativa|Logros", "titulo": "accion especifica", "detalle": "como implementarla en este perfil concreto", "impactoScore": "+N puntos"}],\n' +
+      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Titular|Extracto|Experiencias|Aptitudes|Completitud|Narrativa|Logros", "titulo": "mejora concreta del perfil LinkedIn", "detalle": "como aplicar esta mejora en este perfil concreto — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N puntos"}],\n' +
       '  "perfilEmpleabilidad": {\n' +
       '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre visibilidad del perfil LinkedIn"},\n' +
       '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre coherencia narrativa entre secciones"},\n' +
@@ -385,7 +385,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al documento"}],\n' +
         '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del documento"}],\n' +
         '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al documento", "accion": "accion concreta"}],\n' +
-        '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "accion especifica para este perfil", "impactoScore": "+N puntos"}],\n' +
+        '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N puntos"}],\n' +
         '  "perfilEmpleabilidad": {\n' +
         '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
         '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
@@ -426,7 +426,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 75, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
       '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del CV"}],\n' +
       '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al CV", "accion": "accion concreta"}],\n' +
-      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "accion especifica", "impactoScore": "+N puntos"}],\n' +
+      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N puntos"}],\n' +
       '  "perfilEmpleabilidad": {\n' +
       '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
       '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
@@ -474,7 +474,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 75, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
     '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del CV"}],\n' +
     '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al CV", "accion": "accion concreta"}],\n' +
-    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "categoria", "titulo": "titulo", "detalle": "accion especifica", "impactoScore": "+N puntos"}],\n' +
+    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N puntos"}],\n' +
     '  "perfilEmpleabilidad": {\n' +
     '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre el CV"},\n' +
     '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre el CV"},\n' +
