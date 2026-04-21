@@ -410,6 +410,13 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
         '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"}\n' +
         '  },\n' +
         '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
+        '  "analisisLogros": {\n' +
+        '    "logrosFuertes": [{"frase": "frase textual del documento que represente un logro concreto", "motivo": "por que es un logro"}],\n' +
+        '    "logrosDebiles": [],\n' +
+        '    "responsabilidadesSinImpacto": []\n' +
+        '  },\n' +
+        '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "1 oracion sobre el hilo conductor del perfil", "progresion": "", "oportunidades": []},\n' +
+        '  "mapaHabilidades": {"declaradas": ["habilidad1", "habilidad2"], "detectadas": [], "aIncorporar": []},\n' +
         '  "linkedin_analysis": null\n' +
         "}"
       );
