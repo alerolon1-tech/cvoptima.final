@@ -180,6 +180,11 @@ export async function onRequest(context) {
     if (result.scorePotencial === 0) result.scorePotencial = Math.min(100, result.atsScore + 15);
     if (result.impactDensityScore === 0) result.impactDensityScore = 15; // bajo por defecto si no se detectaron logros
 
+    // Registrar email aunque sea Starter (para llevar registro de usuarios)
+    if (userEmail && env.SUPABASE_URL && env.SUPABASE_KEY) {
+      await registrarEmail(env, userEmail, plan);
+    }
+
     const response = applyTierVisibility(result, plan, modo);
 
     if (userId && env.SUPABASE_URL && env.SUPABASE_KEY) {
@@ -510,6 +515,22 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
 
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
+async function registrarEmail(env, email, plan) {
+  try {
+    // Upsert — si ya existe el email, no lo duplica
+    await fetch(env.SUPABASE_URL + "/rest/v1/usuarios", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": env.SUPABASE_KEY,
+        "Authorization": "Bearer " + env.SUPABASE_KEY,
+        "Prefer": "resolution=ignore-duplicates,return=minimal",
+      },
+      body: JSON.stringify({ email, plan: plan === "starter" ? "starter" : plan }),
+    });
+  } catch { /* silencioso */ }
+}
+
 async function resolveUserPlan(env, token) {
   try {
     // token es el email del usuario
@@ -550,3 +571,4 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
+
