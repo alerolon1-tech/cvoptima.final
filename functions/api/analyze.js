@@ -154,7 +154,7 @@ export async function onRequest(context) {
     const norm = (v) => (typeof v === "number" && v > 0 && v <= 10) ? Math.round(v * 10) : (v || 0);
     result.atsScore           = norm(result.atsScore);
     result.scorePotencial     = norm(result.scorePotencial);
-    result.impactDensityScore = norm(result.impactDensityScore);
+    result.impactDensityScore = Math.min(85, norm(result.impactDensityScore));
 
     // Calcular label desde el score, ignorar lo que diga el modelo
     if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
