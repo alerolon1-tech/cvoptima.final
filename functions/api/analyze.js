@@ -30,10 +30,10 @@ export async function onRequest(context) {
 
     let plan = fd.get("plan") || "starter";
 
-    const authHeader = request.headers.get("Authorization") || "";
-    if (authHeader.startsWith("Bearer ") && env.SUPABASE_URL && env.SUPABASE_KEY) {
-      const token = authHeader.slice(7);
-      const userPlan = await resolveUserPlan(env, token);
+    // Verificar email del usuario para asignar plan
+    const userEmail = request.headers.get("X-User-Email") || "";
+    if (userEmail && env.SUPABASE_URL && env.SUPABASE_KEY) {
+      const userPlan = await resolveUserPlan(env, userEmail);
       if (userPlan) plan = userPlan;
     }
 
@@ -512,20 +512,19 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
 
 async function resolveUserPlan(env, token) {
   try {
-    const authRes = await fetch(env.SUPABASE_URL + "/auth/v1/user", {
-      headers: { "apikey": env.SUPABASE_KEY, "Authorization": "Bearer " + token },
-    });
-    if (!authRes.ok) return null;
-    const authData = await authRes.json();
-    if (!authData.id) return null;
-
-    const planRes = await fetch(
-      env.SUPABASE_URL + "/rest/v1/usuarios?id=eq." + authData.id + "&select=plan",
-      { headers: { "apikey": env.SUPABASE_KEY, "Authorization": "Bearer " + env.SUPABASE_KEY } }
+    // token es el email del usuario
+    const res = await fetch(
+      env.SUPABASE_URL + "/rest/v1/usuarios?email=eq." + encodeURIComponent(token) + "&select=plan",
+      {
+        headers: {
+          "apikey": env.SUPABASE_KEY,
+          "Authorization": "Bearer " + env.SUPABASE_KEY,
+        }
+      }
     );
-    if (!planRes.ok) return null;
-    const planData = await planRes.json();
-    return planData?.[0]?.plan || "starter";
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.[0]?.plan || null;
   } catch {
     return null;
   }
