@@ -156,6 +156,11 @@ export async function onRequest(context) {
     result.scorePotencial     = norm(result.scorePotencial);
     result.impactDensityScore = norm(result.impactDensityScore);
 
+    // Calcular label desde el score, ignorar lo que diga el modelo
+    if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
+    else if (result.impactDensityScore >= 35) result.impactDensityLabel = "Medio";
+    else result.impactDensityLabel = "Bajo";
+
     if (result.atsDetalle) {
       for (const k of Object.keys(result.atsDetalle)) {
         if (typeof result.atsDetalle[k] === "number") result.atsDetalle[k] = norm(result.atsDetalle[k]);
@@ -265,6 +270,14 @@ function applyTierVisibility(data, plan, modo) {
     debilidades:         data.debilidades || [],
     perfilEmpleabilidad: data.perfilEmpleabilidad || null,
     linkedin_analysis:   liAnticipo,
+    // Preview de campos bloqueados — primera frase sin profundidad
+    _preview: {
+      narrativaTipo:       data.narrativaProfesional?.tipo || null,
+      narrativaDescripcion: data.narrativaProfesional?.descripcion
+        ? data.narrativaProfesional.descripcion.split('.')[0] + '.' : null,
+      logrosFuertes:       (data.analisisLogros?.logrosFuertes || []).slice(0, 1),
+      habilidadesDeclaradas: (data.mapaHabilidades?.declaradas || []).slice(0, 4),
+    },
     atsDetalle: {
       keywords: null, verbosAccion: null, metricas: null,
       estructura: null, densidadHabilidades: null, claridadRoles: null,
@@ -571,4 +584,3 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
-
