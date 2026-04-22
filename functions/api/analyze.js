@@ -235,6 +235,20 @@ function applyTierVisibility(data, plan, modo) {
   const recsAlta  = (data.recomendaciones || []).filter(r => r.prioridad === "Alta");
   const recsMedia = (data.recomendaciones || []).filter(r => r.prioridad === "Media").slice(0, 3);
 
+  // Descripción textual del radar desde valores reales de atsDetalle
+  const atsD = data.atsDetalle || {};
+  const detLabels = {keywords:'Keywords',verbosAccion:'Verbos de acción',metricas:'Métricas',estructura:'Estructura',densidadHabilidades:'Densidad de habilidades',claridadRoles:'Claridad de roles'};
+  const detEntries = Object.entries(detLabels)
+    .map(([k,n]) => ({k, n, v: typeof atsD[k]==='number' ? atsD[k] : null}))
+    .filter(e => e.v !== null)
+    .sort((a,b) => b.v - a.v);
+  let radarDescripcion = null;
+  if(detEntries.length >= 2){
+    const fuertes = detEntries.slice(0,2).map(e=>e.n);
+    const debiles = detEntries.slice(-2).map(e=>e.n);
+    radarDescripcion = 'Tu perfil muestra mayor solidez en ' + fuertes.join(' y ') + '. Las dimensiones con más oportunidad de mejora son ' + debiles.join(' y ') + '.';
+  }
+
   // En modo ambos, mostrar anticipo de LinkedIn en Starter
   let liAnticipo = null;
   if (modo === "ambos" && data.linkedin_analysis) {
@@ -270,8 +284,8 @@ function applyTierVisibility(data, plan, modo) {
     debilidades:         data.debilidades || [],
     perfilEmpleabilidad: data.perfilEmpleabilidad || null,
     linkedin_analysis:   liAnticipo,
-    // Preview de campos bloqueados — primera frase sin profundidad
     _preview: {
+      radarDescripcion,
       narrativaTipo:       data.narrativaProfesional?.tipo || null,
       narrativaDescripcion: data.narrativaProfesional?.descripcion
         ? data.narrativaProfesional.descripcion.split('.')[0] + '.' : null,
