@@ -56,12 +56,13 @@ export async function onRequest(context) {
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
       "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
       "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
-      "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento. Por ejemplo: si la persona trabaja en impuestos, no recomiendes 'mejorar conocimientos en impuestos'. Si tiene habilidades de comunicacion declaradas, no recomiendes 'mejorar comunicacion'.\n" +
+      "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento.\n" +
       "5. Si el documento esta en ingles, analizalo en ingles internamente pero escribe todo el JSON en espanol rioplatense.\n" +
-      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento (CV o perfil LinkedIn): redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector, aplicar a empresas o tomar decisiones de carrera — eso no es parte del analisis del documento.\n" +
+      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
-      "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
+      "9. PERSONA NARRATIVA — OBLIGATORIO: todos los campos de texto del JSON deben estar escritos en SEGUNDA PERSONA, dirigidos directamente a quien hizo el analisis. Usa 'tu perfil', 'tu CV', 'tus experiencias', 'tus logros', 'tu narrativa'. NUNCA uses tercera persona ('el candidato', 'la persona', 'ella tiene', 'su perfil'). El resumenEjecutivo puede comenzar con el nombre de la persona pero inmediatamente pasar a segunda persona: 'Lucía, tu perfil muestra...' o directamente 'Tu perfil muestra...'\n" +
+      "10. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
 
     const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan);
 
