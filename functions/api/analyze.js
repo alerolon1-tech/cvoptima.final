@@ -52,7 +52,15 @@ export async function onRequest(context) {
 
     const systemPrompt =
       "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n" +
-      "REGLAS ABSOLUTAS:\n" +
+      "\n" +
+      "REGLA PRINCIPAL — LEE ESTO PRIMERO:\n" +
+      "TODO el texto del JSON debe estar en SEGUNDA PERSONA. Hablale directamente a quien hizo el analisis.\n" +
+      "CORRECTO: 'Tu perfil muestra...', 'Tus logros indican...', 'Tu narrativa es...'\n" +
+      "INCORRECTO: 'El candidato muestra...', 'Sus logros indican...', 'La persona tiene...'\n" +
+      "El resumenEjecutivo puede empezar con el nombre: 'Maria, tu perfil muestra...' — pero SIEMPRE en segunda persona despues.\n" +
+      "Esta regla aplica a TODOS los campos de texto sin excepcion.\n" +
+      "\n" +
+      "REGLAS ADICIONALES:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
       "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
       "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
@@ -61,8 +69,7 @@ export async function onRequest(context) {
       "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
-      "9. PERSONA NARRATIVA — OBLIGATORIO: todos los campos de texto del JSON deben estar escritos en SEGUNDA PERSONA, dirigidos directamente a quien hizo el analisis. Usa 'tu perfil', 'tu CV', 'tus experiencias', 'tus logros', 'tu narrativa'. NUNCA uses tercera persona ('el candidato', 'la persona', 'ella tiene', 'su perfil'). El resumenEjecutivo puede comenzar con el nombre de la persona pero inmediatamente pasar a segunda persona: 'Lucía, tu perfil muestra...' o directamente 'Tu perfil muestra...'\n" +
-      "10. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
+      "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
 
     const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan);
 
@@ -331,6 +338,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
   instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
+  instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
 
   // ── MODO: Solo LinkedIn ────────────────────────────────────────────────────
