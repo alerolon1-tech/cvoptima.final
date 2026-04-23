@@ -37,7 +37,7 @@ export async function onRequest(context) {
       if (userPlan) plan = userPlan;
     }
 
-    if (modo !== "li" && cvText.length < 30) {
+    if (modo !== "li" && modo !== "comparativa" && cvText.length < 30) {
       return new Response(JSON.stringify({ error: "No se recibio texto del CV" }), {
         status: 400,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
@@ -45,6 +45,12 @@ export async function onRequest(context) {
     }
     if ((modo === "li" || modo === "ambos") && liText.length < 30) {
       return new Response(JSON.stringify({ error: "No se recibio texto del perfil de LinkedIn" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+    if (modo === "comparativa" && (cvText.length < 30 || liText.length < 30)) {
+      return new Response(JSON.stringify({ error: "Se necesitan las dos versiones del CV para comparar" }), {
         status: 400,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
       });
@@ -219,6 +225,7 @@ export async function onRequest(context) {
 // ─── TIERS ───────────────────────────────────────────────────────────────────
 
 function applyTierVisibility(data, plan, modo) {
+  if (modo === "comparativa") return { ...data, _plan: "comparativa" };
   if (plan === "professional" || plan === "pro") {
     return { ...data, _plan: plan };
   }
@@ -340,6 +347,38 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
   instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
+
+  // ── MODO: Comparativa entre dos versiones de CV ───────────────────────────
+  if (modo === "comparativa") {
+    const cv1Block = "=== CV VERSIÓN 1 (original) ===\n" + cvText.slice(0, 4000) + "\n=== FIN VERSIÓN 1 ===\n\n";
+    const cv2Block = "=== CV VERSIÓN 2 (nueva) ===\n" + liText.slice(0, 4000) + "\n=== FIN VERSIÓN 2 ===\n\n";
+    return (
+      cv1Block + cv2Block +
+      (ctx ? "Contexto: " + ctx + "\n\n" : "") +
+      "MODO: Comparativa entre dos versiones del mismo CV. Analiza ambas versiones y devuelve un informe comparativo en segunda persona.\n\n" +
+      "Devuelve SOLO este JSON:\n\n" +
+      "{\n" +
+      '  "candidateName": "nombre del CV",\n' +
+      '  "atsScore": 0,\n' +
+      '  "atsScoreV1": 0,\n' +
+      '  "atsScoreV2": 0,\n' +
+      '  "scorePotencial": 0,\n' +
+      '  "mejora_global": "Alta|Media|Baja|Sin cambio",\n' +
+      '  "resumenComparativo": "Comparativa global: que mejoro, que empeoro, que quedo igual. En segunda persona. 3-4 oraciones.",\n' +
+      '  "mejoras": [\n' +
+      '    {"aspecto": "que aspecto mejoro", "v1": "como estaba en v1", "v2": "como quedo en v2", "impacto": "Alto|Medio|Bajo"}\n' +
+      '  ],\n' +
+      '  "retrocesos": [\n' +
+      '    {"aspecto": "que aspecto empeoro o desaparecio", "v1": "como estaba en v1", "v2": "como quedo en v2", "recomendacion": "que hacer"}\n' +
+      '  ],\n' +
+      '  "sin_cambios": ["aspecto que quedó igual 1", "aspecto que quedó igual 2"],\n' +
+      '  "recomendaciones_pendientes": [\n' +
+      '    {"prioridad": "Alta|Media|Baja", "titulo": "titulo", "detalle": "que todavia falta mejorar en la version 2"}\n' +
+      '  ],\n' +
+      '  "veredicto": "Una oración final de veredicto: vale la pena la version 2 o necesita mas trabajo?"\n' +
+      "}"
+    );
+  }
 
   // ── MODO: Solo LinkedIn ────────────────────────────────────────────────────
   if (modo === "li") {
@@ -614,3 +653,4 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
+
