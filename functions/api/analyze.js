@@ -72,7 +72,7 @@ export async function onRequest(context) {
       "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
       "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento.\n" +
       "5. Si el documento esta en ingles, analizalo en ingles internamente pero escribe todo el JSON en espanol rioplatense.\n" +
-      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas.\n" +
+      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas. Si el CV no tiene titular, perfil profesional o logros cuantificados, esas DEBEN ser recomendaciones de prioridad Alta.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
       "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
@@ -169,6 +169,12 @@ export async function onRequest(context) {
     result.atsScore           = norm(result.atsScore);
     result.scorePotencial     = norm(result.scorePotencial);
     result.impactDensityScore = Math.min(85, norm(result.impactDensityScore));
+
+    // Si el diagnóstico menciona ausencia de logros, forzar score bajo
+    const diagLower = (result.impactDensityDiagnostico || '').toLowerCase();
+    if (diagLower.includes('no se detect') || diagLower.includes('sin logros') || diagLower.includes('no hay logros') || diagLower.includes('no presenta logros')) {
+      result.impactDensityScore = Math.min(result.impactDensityScore, 20);
+    }
 
     // Calcular label desde el score, ignorar lo que diga el modelo
     if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
@@ -341,7 +347,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   if (ctx) instrBlock += "Contexto: " + ctx + "\n\n";
 
   instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
-  instrBlock += "- atsScore: calidad global del documento principal como herramienta de empleabilidad\n";
+  instrBlock += "- atsScore: calidad global del documento. Un CV sin titular, sin perfil profesional y sin logros NO puede superar 50. Sé honesto.\n";
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
   instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
@@ -653,4 +659,3 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
-
