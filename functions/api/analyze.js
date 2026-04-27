@@ -210,6 +210,31 @@ export async function onRequest(context) {
       await registrarEmail(env, userEmail, plan);
     }
 
+    // Detectar secciones faltantes críticas y agregar recomendaciones automáticas
+    const secciones = result.seccionesDetectadas || {};
+    const recsAuto = [];
+    if (!secciones.perfilProfesional) {
+      recsAuto.push({
+        prioridad: "Alta",
+        categoria: "Estructura",
+        titulo: "Agregar titular y perfil profesional",
+        detalle: "Tu CV no tiene titular ni perfil profesional. Son las primeras secciones que lee un reclutador — sin ellas, tu perfil no comunica quién sos ni qué buscás. Agregá 2-3 líneas que resuman tu rol, experiencia y propuesta de valor.",
+        impactoScore: "+12 puntos"
+      });
+    }
+    if (!secciones.logros && result.impactDensityScore < 30) {
+      recsAuto.push({
+        prioridad: "Alta",
+        categoria: "Logros",
+        titulo: "Incorporar logros cuantificados en tus experiencias",
+        detalle: "Tus experiencias describen responsabilidades pero no muestran resultados. Transformá al menos una tarea por puesto en un logro con número: cantidad de clientes atendidos, porcentaje de mejora, volumen gestionado.",
+        impactoScore: "+15 puntos"
+      });
+    }
+    if (recsAuto.length > 0) {
+      result.recomendaciones = [...recsAuto, ...(result.recomendaciones || [])];
+    }
+
     const response = applyTierVisibility(result, plan, modo);
 
     if (userId && env.SUPABASE_URL && env.SUPABASE_KEY) {
@@ -351,6 +376,9 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
   instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
+  instrBlock += "ESTRUCTURA DE CV ÓPTIMO — usá esto como referencia para evaluar el documento:\n";
+  instrBlock += "Un CV óptimo tiene: (1) Titular específico con rol y propuesta de valor, (2) Perfil profesional de 3-4 líneas con años de experiencia, especialidad y valor diferencial, (3) Experiencias con empresa, rol, fechas y al menos 2 logros cuantificados por puesto usando verbos de acción, (4) Educación con institución, título y año de graduación, (5) Habilidades técnicas y blandas relevantes al sector, (6) Datos de contacto completos: email, teléfono, LinkedIn, ciudad.\n";
+  instrBlock += "PENALIZACIÓN DE SCORE: si falta el titular → atsScore máximo 55. Si falta el perfil profesional → atsScore máximo 60. Si ninguna experiencia tiene logros cuantificados → atsScore máximo 50. Si faltan dos o más secciones obligatorias → atsScore máximo 45.\n\n";
   instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
 
