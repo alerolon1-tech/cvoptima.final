@@ -72,7 +72,7 @@ export async function onRequest(context) {
       "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
       "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento.\n" +
       "5. Si el documento esta en ingles, analizalo en ingles internamente pero escribe todo el JSON en espanol rioplatense.\n" +
-      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas. Si el CV no tiene titular, perfil profesional o logros cuantificados, esas DEBEN ser recomendaciones de prioridad Alta.\n" +
+      "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas. Si el CV no tiene titular, perfil profesional o logros cuantificados, esas DEBEN ser recomendaciones de prioridad Alta. IMPORTANTE: cada recomendacion debe ser sobre un tema DISTINTO — no repitas el mismo tema con diferente título. NUNCA uses frases genéricas como 'mejorar la redacción' o 'mejorar el formato' sin especificar exactamente qué mejorar y cómo.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
       "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
@@ -141,21 +141,26 @@ export async function onRequest(context) {
 
     let result;
     try {
-      // Limpiar bloques markdown si el modelo los incluye
-      let clean = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/,'').trim();
+      // Limpiar bloques markdown — al principio Y en cualquier lugar
+      let clean = raw
+        .replace(/```(?:json)?\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
 
-      // Si el JSON está truncado, intentar cerrarlo
+      // Extraer desde la primera llave
       const m = clean.match(/\{[\s\S]*/);
-      if (m) {
-        let jsonStr = m[0];
-        // Contar llaves para detectar truncamiento
-        let open = 0;
-        for (const c of jsonStr) { if(c==='{') open++; else if(c==='}') open--; }
-        if (open > 0) jsonStr += '}'.repeat(open); // cerrar llaves faltantes
-        result = JSON.parse(jsonStr);
-      } else {
-        result = JSON.parse(clean);
+      if (!m) throw new Error('no-json');
+      let jsonStr = m[0];
+
+      // Cerrar llaves faltantes si el JSON está truncado
+      let open = 0;
+      for (const c of jsonStr) {
+        if (c === '{') open++;
+        else if (c === '}') open--;
       }
+      if (open > 0) jsonStr += '}'.repeat(open);
+
+      result = JSON.parse(jsonStr);
     } catch (e) {
       throw new Error("No se pudo parsear la respuesta del modelo: " + raw.slice(0, 300));
     }
