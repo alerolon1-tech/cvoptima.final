@@ -79,6 +79,9 @@ export async function onRequest(context) {
 
     const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan);
 
+    // Pre-calcular valores del radar desde el texto (no depender del modelo)
+    const atsDetalleCalculado = modo !== 'li' ? calcularAtsDetalle(cvText) : calcularAtsDetalle(liText);
+
     const MODELS = [
       "llama-3.3-70b-versatile",
       "llama-3.1-8b-instant",
@@ -167,6 +170,8 @@ export async function onRequest(context) {
 
     result.has_linkedin = liText.length > 30;
     result._modelUsed = groqData._modelUsed || 'unknown';
+    result._modelUsed = groqData._modelUsed || 'unknown';
+    result.atsDetalle = atsDetalleCalculado;
     if (!result.linkedin_analysis) result.linkedin_analysis = null;
 
     // Normalizar scores: si el modelo los devuelve en escala 0-10, convertir a 0-100
@@ -357,6 +362,43 @@ function applyTierVisibility(data, plan, modo) {
 }
 
 // ─── PROMPT ──────────────────────────────────────────────────────────────────
+
+function calcularAtsDetalle(texto) {
+  const t = texto.toLowerCase();
+
+  // Métricas — números, porcentajes, cifras monetarias
+  const metricasMatches = texto.match(/\d+\s*%|\$\s*\d+|\d+\s*(clientes|usuarios|proyectos|personas|ventas|productos|millones|mil)/gi) || [];
+  const metricas = Math.min(90, metricasMatches.length === 0 ? 5 : Math.min(30 + metricasMatches.length * 15, 85));
+
+  // Verbos de acción — verbos de impacto en primera persona
+  const verbosAccion_list = ['gestion', 'coordin', 'implement', 'desarroll', 'lider', 'supervis', 'optimiz', 'increment', 'reduj', 'mejor', 'cre', 'diseñ', 'lanz', 'negoci', 'ejecut', 'planific', 'anali', 'elabor', 'organiz', 'direct'];
+  const verbosCount = verbosAccion_list.filter(v => t.includes(v)).length;
+  const verbosAccion = Math.min(90, verbosCount === 0 ? 10 : Math.min(20 + verbosCount * 8, 85));
+
+  // Keywords — palabras clave profesionales relevantes
+  const keywords_list = ['linkedin', 'excel', 'office', 'inglés', 'ingles', 'python', 'sql', 'crm', 'erp', 'agile', 'scrum', 'marketing', 'ventas', 'finanzas', 'rrhh', 'logística', 'operaciones', 'atención al cliente', 'gestión de proyectos'];
+  const keywordsCount = keywords_list.filter(k => t.includes(k)).length;
+  const keywords = Math.min(90, keywordsCount === 0 ? 15 : Math.min(25 + keywordsCount * 10, 85));
+
+  // Estructura — secciones presentes
+  const tieneTitular = /título|titular|objetivo|headline/i.test(texto) || texto.split('\n').slice(0,5).some(l => l.trim().length > 5 && l.trim().length < 80 && !l.includes('@'));
+  const tienePerfilProfesional = /perfil|resumen|summary|sobre mí|acerca de/i.test(texto);
+  const tieneExperiencia = /experiencia|trabajo|empleo|puesto|cargo/i.test(texto);
+  const tieneEducacion = /educación|formación|universidad|instituto|licenciatura|técnico/i.test(texto);
+  const tieneHabilidades = /habilidades|skills|competencias|conocimientos/i.test(texto);
+  const seccionesPresentes = [tieneTitular, tienePerfilProfesional, tieneExperiencia, tieneEducacion, tieneHabilidades].filter(Boolean).length;
+  const estructura = Math.min(90, Math.round(seccionesPresentes / 5 * 85));
+
+  // Densidad de habilidades — cantidad de habilidades listadas
+  const habilidadesMatch = texto.match(/·|•|\|/g) || [];
+  const densidadHabilidades = Math.min(90, habilidadesMatch.length === 0 ? 10 : Math.min(20 + habilidadesMatch.length * 5, 80));
+
+  // Claridad de roles — si cada experiencia tiene empresa, rol y fechas
+  const tieneEmpresas = (texto.match(/\d{4}/g) || []).length >= 2; // al menos 2 años mencionados
+  const claridadRoles = Math.min(90, tieneEmpresas ? Math.min(50 + verbosCount * 5, 80) : 25);
+
+  return { keywords, verbosAccion, metricas, estructura, densidadHabilidades, claridadRoles };
+}
 
 function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   const ctx = [
