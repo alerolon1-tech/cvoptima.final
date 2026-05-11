@@ -241,14 +241,19 @@ export async function onRequest(context) {
 
     // Filtrar logrosCualitativos que son en realidad responsabilidades
     if (result.analisisLogros?.logrosCualitativos) {
-      const verbosConjugados = ['é', 'í', 'ó', 'ré', 'cé', 'gué', 'cé', 'zé', 'organicé', 'lideré', 'implementé', 'desarrollé', 'mejoré', 'diseñé', 'creé', 'gestioné', 'coordiné', 'dirigí', 'etablecí', 'reduje', 'aumenté', 'capacité', 'formé', 'negocié'];
+      // Palabras que indican responsabilidad, no logro
+      const iniciosResponsabilidad = ['coordinación', 'gestión', 'atención', 'manejo', 'control', 'soporte', 'apoyo', 'asistencia', 'administración', 'elaboración', 'ejecución', 'seguimiento', 'monitoreo', 'realización', 'preparación', 'supervisión', 'revisión'];
+      const verbosConjugados = ['é', 'ré', 'lideré', 'implementé', 'desarrollé', 'mejoré', 'diseñé', 'creé', 'gestioné', 'coordiné', 'dirigí', 'establecí', 'reduje', 'aumenté', 'capacité', 'formé', 'negocié', 'optimicé', 'automaticé', 'reorganicé'];
+
       result.analisisLogros.logrosCualitativos = result.analisisLogros.logrosCualitativos.filter(l => {
-        const frase = (l.frase || '').toLowerCase();
-        // Rechazar frases muy cortas (menos de 6 palabras)
+        const frase = (l.frase || '').toLowerCase().trim();
+        // Rechazar frases muy cortas
         if (frase.split(' ').length < 6) return false;
+        // Rechazar frases que empiezan con sustantivo de responsabilidad
+        if (iniciosResponsabilidad.some(p => frase.startsWith(p))) return false;
         // Rechazar frases sin verbo conjugado en primera persona
         const tieneVerbo = verbosConjugados.some(v => frase.includes(v)) ||
-          /[aeiou]é\b|[aeiou]í\b/.test(frase);
+          /\b\w+[aeiou]é\b|\b\w+[aeiou]í\b/.test(frase);
         return tieneVerbo;
       });
     }
