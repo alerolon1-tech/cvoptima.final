@@ -278,12 +278,16 @@ export async function onRequest(context) {
             impactoScore: recsLogros[0]?.impactoScore || '+8 puntos'
           };
         } else if (!tieneLogrosCuantitativos) {
+          const resps = (result.analisisLogros?.responsabilidadesSinImpacto || []).slice(0, 2);
+          let ejemplos = resps.length > 0
+            ? ' Por ejemplo, a partir de lo que figura en tu CV: ' + resps.map(r => '"' + (r.frase||'') + '" → sumale una cifra concreta o un verbo de impacto con resultado').join('; ')
+            : ' Ejemplo: "Atendí 50 clientes por día" (cuantitativo) o "Mejoré la experiencia de atención implementando un nuevo proceso" (cualitativo).';
           recLogro = {
             prioridad: 'Alta',
             categoria: 'Logros',
-            titulo: 'Incorporá resultados concretos en tus experiencias',
-            detalle: 'Ninguna de tus experiencias muestra resultados medibles. Para cada puesto, agregá al menos un logro con número, porcentaje o cifra: "reducí el tiempo de entrega un 20%", "gestioné un equipo de 5 personas", "procesé 200 solicitudes por mes".',
-            impactoScore: recsLogros[0].impactoScore || '+15 puntos'
+            titulo: 'Incorporá logros en tus experiencias — cuantitativos o cualitativos',
+            detalle: 'Tus experiencias describen tareas pero no muestran resultados. Podés agregar logros cuantitativos (con número, porcentaje o cifra) o cualitativos (con verbo de acción y resultado concreto).' + ejemplos,
+            impactoScore: (recsLogros[0] && recsLogros[0].impactoScore) || '+15 puntos'
           };
         } else {
           recLogro = recsLogros[0]; // Ya tiene logros cuantitativos, usar la primera recomendación
