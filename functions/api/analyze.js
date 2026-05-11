@@ -226,6 +226,41 @@ export async function onRequest(context) {
       await registrarEmail(env, userEmail, plan);
     }
 
+    // ── Filtro anti-duplicados en recomendaciones ──────────────────────────
+    // Agrupa por palabras clave del título y elimina duplicados por tema
+    if (result.recomendaciones?.length) {
+      const temasVistos = new Set();
+      const palabrasLogros = ['logro', 'cuantif', 'número', 'métric', 'resultado', 'impacto'];
+      let temaLogrosContado = 0;
+
+      // Si hay logros cualitativos, ajustar recomendaciones de logros
+      const tieneLogrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length > 0;
+      const tieneLogrosCuantitativos = (result.analisisLogros?.logrosFuertes || []).length > 0;
+
+      result.recomendaciones = result.recomendaciones.filter(r => {
+        const titulo = (r.titulo || '').toLowerCase();
+        const esLogro = palabrasLogros.some(p => titulo.includes(p));
+
+        if (esLogro) {
+          if (temaLogrosContado >= 1) return false; // Solo una recomendación de logros
+          temaLogrosContado++;
+          // Si hay logros cualitativos, ajustar el título y detalle
+          if (tieneLogrosCualitativos && !tieneLogrosCuantitativos) {
+            r.titulo = 'Cuantificá los logros cualitativos que ya tenés';
+            r.detalle = 'Tu CV muestra logros cualitativos valiosos — acciones concretas con verbos de impacto. El siguiente paso es agregarles un número, porcentaje o cifra que los refuerce: cantidad de personas, tiempo reducido, volumen gestionado.';
+          }
+          return true;
+        }
+
+        // Para otros temas, verificar duplicados por palabras clave
+        const palabrasClave = titulo.split(' ').filter(w => w.length > 4);
+        const temaClave = palabrasClave.slice(0, 2).join('-');
+        if (temasVistos.has(temaClave)) return false;
+        temasVistos.add(temaClave);
+        return true;
+      });
+    }
+
     // Detectar secciones faltantes críticas y agregar recomendaciones automáticas
     const secciones = result.seccionesDetectadas || {};
     const recsAuto = [];
