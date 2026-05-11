@@ -66,11 +66,11 @@ export async function onRequest(context) {
       "El resumenEjecutivo puede empezar con el nombre: 'Maria, tu perfil muestra...' — pero SIEMPRE en segunda persona despues.\n" +
       "Esta regla aplica a TODOS los campos de texto sin excepcion.\n" +
       "\n" +
-      "LOGROS CUANTITATIVOS vs CUALITATIVOS — distincion obligatoria:\n" +
+      "LOGROS CUANTITATIVOS vs CUALITATIVOS vs RESPONSABILIDADES — distincion obligatoria:\n" +
       "- Logro cuantitativo: tiene número, porcentaje o cifra medible. Ejemplo: 'reduje el tiempo de entrega un 30%'\n" +
-      "- Logro cualitativo: tiene verbo de acción y resultado concreto SIN número. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo' o 'lideré la implementación de un nuevo sistema de seguimiento'\n" +
-      "- Responsabilidad sin impacto: describe una tarea sin resultado. Ejemplo: 'me encargué de la gestión de agenda'\n" +
-      "Distinguí siempre estas tres categorías. Los logros cualitativos tienen peso específico en el CV aunque no tengan número.\n" +
+      "- Logro cualitativo: tiene verbo de acción EN PRIMERA PERSONA que describe un CAMBIO o RESULTADO concreto. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo', 'lideré la implementación de un nuevo sistema de seguimiento', 'desarrollé un protocolo que mejoró la coordinación entre áreas'\n" +
+      "- Responsabilidad sin impacto: describe una tarea o función, NO un resultado. Ejemplo: 'atención al cliente', 'gestión de agenda', 'coordinación de reuniones', 'manejo de caja', 'reposición de mercadería'. ESTAS NO SON LOGROS CUALITATIVOS.\n" +
+      "REGLA: para ser logro cualitativo debe responder a la pregunta '¿qué cambió o mejoró gracias a esta persona?'. Si no responde esa pregunta, es una responsabilidad.\n" +
       "\n" +
       "REGLAS ADICIONALES:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
