@@ -186,13 +186,26 @@ export async function onRequest(context) {
     result.scorePotencial     = norm(result.scorePotencial);
     result.impactDensityScore = Math.min(85, norm(result.impactDensityScore));
 
-    // Si el diagnóstico menciona ausencia de logros, forzar score bajo
+    // Ajustar impactDensityScore según logros cualitativos y cuantitativos reales
+    const logrosFuertes    = (result.analisisLogros?.logrosFuertes || []).length;
+    const logrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length;
     const diagLower = (result.impactDensityDiagnostico || '').toLowerCase();
-    if (diagLower.includes('no se detect') || diagLower.includes('sin logros') || diagLower.includes('no hay logros') || diagLower.includes('no presenta logros')) {
+
+    if (logrosFuertes === 0 && logrosCualitativos === 0) {
+      // Sin ningún logro — score muy bajo
       result.impactDensityScore = Math.min(result.impactDensityScore, 20);
+      result.impactDensityDiagnostico = 'No se detectaron logros cuantitativos ni cualitativos en el documento. Las experiencias describen tareas pero no muestran resultados ni impacto.';
+    } else if (logrosFuertes === 0 && logrosCualitativos > 0) {
+      // Solo logros cualitativos — score medio, no penalizar como si no hubiera nada
+      result.impactDensityScore = Math.max(result.impactDensityScore, 35);
+      result.impactDensityScore = Math.min(result.impactDensityScore, 60);
+      result.impactDensityDiagnostico = `Tu CV muestra ${logrosCualitativos} logro${logrosCualitativos > 1 ? 's' : ''} cualitativo${logrosCualitativos > 1 ? 's' : ''} — acciones concretas con verbos de impacto que comunican valor real. Para aumentar el score, podés sumar cifras a esos logros cuando sea posible.`;
+    } else if (logrosFuertes > 0 && logrosCualitativos > 0) {
+      // Tiene ambos tipos — score alto
+      result.impactDensityScore = Math.max(result.impactDensityScore, 55);
     }
 
-    // Calcular label desde el score, ignorar lo que diga el modelo
+    // Calcular label desde el score
     if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
     else if (result.impactDensityScore >= 35) result.impactDensityLabel = "Medio";
     else result.impactDensityLabel = "Bajo";
@@ -227,38 +240,58 @@ export async function onRequest(context) {
     }
 
     // ── Filtro anti-duplicados en recomendaciones ──────────────────────────
-    // Agrupa por palabras clave del título y elimina duplicados por tema
     if (result.recomendaciones?.length) {
-      const temasVistos = new Set();
-      const palabrasLogros = ['logro', 'cuantif', 'número', 'métric', 'resultado', 'impacto'];
-      let temaLogrosContado = 0;
-
-      // Si hay logros cualitativos, ajustar recomendaciones de logros
       const tieneLogrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length > 0;
       const tieneLogrosCuantitativos = (result.analisisLogros?.logrosFuertes || []).length > 0;
 
-      result.recomendaciones = result.recomendaciones.filter(r => {
-        const titulo = (r.titulo || '').toLowerCase();
-        const esLogro = palabrasLogros.some(p => titulo.includes(p));
+      // Palabras que identifican recomendaciones sobre logros
+      const palabrasLogros = ['logro', 'cuantif', 'métric', 'resultado', 'impacto', 'incorporar', 'agreg', 'número'];
 
-        if (esLogro) {
-          if (temaLogrosContado >= 1) return false; // Solo una recomendación de logros
-          temaLogrosContado++;
-          // Si hay logros cualitativos, ajustar el título y detalle
-          if (tieneLogrosCualitativos && !tieneLogrosCuantitativos) {
-            r.titulo = 'Cuantificá los logros cualitativos que ya tenés';
-            r.detalle = 'Tu CV muestra logros cualitativos valiosos — acciones concretas con verbos de impacto. El siguiente paso es agregarles un número, porcentaje o cifra que los refuerce: cantidad de personas, tiempo reducido, volumen gestionado.';
-          }
-          return true;
+      // Separar recomendaciones de logros de las demás
+      const recsLogros = result.recomendaciones.filter(r =>
+        palabrasLogros.some(p => (r.titulo || '').toLowerCase().includes(p) || (r.detalle || '').toLowerCase().includes(p))
+      );
+      const recsOtras = result.recomendaciones.filter(r =>
+        !palabrasLogros.some(p => (r.titulo || '').toLowerCase().includes(p) || (r.detalle || '').toLowerCase().includes(p))
+      );
+
+      // Construir UNA SOLA recomendación de logros
+      let recLogro = null;
+      if (recsLogros.length > 0) {
+        if (tieneLogrosCualitativos && !tieneLogrosCuantitativos) {
+          recLogro = {
+            prioridad: 'Alta',
+            categoria: 'Logros',
+            titulo: 'Tus logros cualitativos comunican impacto — potenciá algunos con cifras',
+            detalle: 'Tu CV ya muestra acciones concretas con verbos de impacto. Eso tiene valor real. Si podés recordar alguna cifra — cantidad de personas, tiempo, volumen, proyectos — sumársela a uno o dos logros va a reforzar aún más lo que ya comunicás. No es obligatorio, pero suma.',
+            impactoScore: recsLogros[0]?.impactoScore || '+8 puntos'
+          };
+        } else if (!tieneLogrosCuantitativos) {
+          recLogro = {
+            prioridad: 'Alta',
+            categoria: 'Logros',
+            titulo: 'Incorporá resultados concretos en tus experiencias',
+            detalle: 'Ninguna de tus experiencias muestra resultados medibles. Para cada puesto, agregá al menos un logro con número, porcentaje o cifra: "reducí el tiempo de entrega un 20%", "gestioné un equipo de 5 personas", "procesé 200 solicitudes por mes".',
+            impactoScore: recsLogros[0].impactoScore || '+15 puntos'
+          };
+        } else {
+          recLogro = recsLogros[0]; // Ya tiene logros cuantitativos, usar la primera recomendación
         }
+      }
 
-        // Para otros temas, verificar duplicados por palabras clave
-        const palabrasClave = titulo.split(' ').filter(w => w.length > 4);
-        const temaClave = palabrasClave.slice(0, 2).join('-');
-        if (temasVistos.has(temaClave)) return false;
-        temasVistos.add(temaClave);
+      // Eliminar duplicados en las demás recomendaciones por palabras clave del título
+      const temasVistos = new Set();
+      const recsOtrasFiltradas = recsOtras.filter(r => {
+        const palabrasClave = (r.titulo || '').toLowerCase().split(' ').filter(w => w.length > 4).slice(0, 3).join('-');
+        if (temasVistos.has(palabrasClave)) return false;
+        temasVistos.add(palabrasClave);
         return true;
       });
+
+      // Reconstruir recomendaciones: logro primero (si hay), resto después
+      result.recomendaciones = recLogro
+        ? [recLogro, ...recsOtrasFiltradas]
+        : recsOtrasFiltradas;
     }
 
     // Detectar secciones faltantes críticas y agregar recomendaciones automáticas
