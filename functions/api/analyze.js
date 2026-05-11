@@ -66,6 +66,12 @@ export async function onRequest(context) {
       "El resumenEjecutivo puede empezar con el nombre: 'Maria, tu perfil muestra...' — pero SIEMPRE en segunda persona despues.\n" +
       "Esta regla aplica a TODOS los campos de texto sin excepcion.\n" +
       "\n" +
+      "LOGROS CUANTITATIVOS vs CUALITATIVOS — distincion obligatoria:\n" +
+      "- Logro cuantitativo: tiene número, porcentaje o cifra medible. Ejemplo: 'reduje el tiempo de entrega un 30%'\n" +
+      "- Logro cualitativo: tiene verbo de acción y resultado concreto SIN número. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo' o 'lideré la implementación de un nuevo sistema de seguimiento'\n" +
+      "- Responsabilidad sin impacto: describe una tarea sin resultado. Ejemplo: 'me encargué de la gestión de agenda'\n" +
+      "Distinguí siempre estas tres categorías. Los logros cualitativos tienen peso específico en el CV aunque no tengan número.\n" +
+      "\n" +
       "REGLAS ADICIONALES:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
       "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
@@ -346,6 +352,7 @@ function applyTierVisibility(data, plan, modo) {
       narrativaDescripcion: data.narrativaProfesional?.descripcion
         ? data.narrativaProfesional.descripcion.split('.')[0] + '.' : null,
       logrosFuertes:       (data.analisisLogros?.logrosFuertes || []).slice(0, 1),
+      logrosCualitativos:  (data.analisisLogros?.logrosCualitativos || []).slice(0, 1),
       habilidadesDeclaradas: (data.mapaHabilidades?.declaradas || []).slice(0, 4),
     },
     atsDetalle: {
@@ -554,7 +561,8 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
         '  },\n' +
         '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
         '  "analisisLogros": {\n' +
-        '    "logrosFuertes": [{"frase": "frase textual del documento que represente un logro concreto", "motivo": "por que es un logro"}],\n' +
+        '    "logrosFuertes": [{"frase": "frase textual del documento que represente un logro cuantitativo concreto con número, porcentaje o cifra", "motivo": "por que es un logro"}],\n' +
+        '    "logrosCualitativos": [{"frase": "frase textual que muestre un resultado o cambio concreto sin número — usando verbos de acción como reorganizó, lideró, implementó, mejoró", "motivo": "qué impacto relacional o de proceso refleja"}],\n' +
         '    "logrosDebiles": [],\n' +
         '    "responsabilidadesSinImpacto": []\n' +
         '  },\n' +
@@ -584,6 +592,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico"}],\n' +
       '  "analisisLogros": {\n' +
       '    "logrosFuertes": [{"frase": "frase exacta del CV", "motivo": "por que es fuerte"}],\n' +
+      '    "logrosCualitativos": [{"frase": "frase exacta del CV que muestre un resultado o cambio concreto sin número usando verbos de acción", "motivo": "qué impacto relacional o de proceso refleja"}],\n' +
       '    "logrosDebiles": [{"frase": "frase del CV", "motivo": "por que es debil", "sugerencia": "como mejorarlo"}],\n' +
       '    "responsabilidadesSinImpacto": [{"frase": "frase del CV", "oportunidad": "como convertirlo en logro"}]\n' +
       '  },\n' +
@@ -632,6 +641,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico"}],\n' +
     '  "analisisLogros": {\n' +
     '    "logrosFuertes": [{"frase": "frase exacta del CV", "motivo": "por que es fuerte"}],\n' +
+    '    "logrosCualitativos": [{"frase": "frase exacta del CV que muestre un resultado o cambio concreto sin número usando verbos de acción", "motivo": "qué impacto relacional o de proceso refleja"}],\n' +
     '    "logrosDebiles": [{"frase": "frase del CV", "motivo": "debil", "sugerencia": "mejora"}],\n' +
     '    "responsabilidadesSinImpacto": [{"frase": "frase del CV", "oportunidad": "como mejorar"}]\n' +
     '  },\n' +
