@@ -68,9 +68,9 @@ export async function onRequest(context) {
       "\n" +
       "LOGROS CUANTITATIVOS vs CUALITATIVOS vs RESPONSABILIDADES — distincion obligatoria:\n" +
       "- Logro cuantitativo: tiene número, porcentaje o cifra medible. Ejemplo: 'reduje el tiempo de entrega un 30%'\n" +
-      "- Logro cualitativo: tiene verbo de acción EN PRIMERA PERSONA que describe un CAMBIO o RESULTADO concreto. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo', 'lideré la implementación de un nuevo sistema de seguimiento', 'desarrollé un protocolo que mejoró la coordinación entre áreas'\n" +
-      "- Responsabilidad sin impacto: describe una tarea o función, NO un resultado. Ejemplo: 'atención al cliente', 'gestión de agenda', 'coordinación de reuniones', 'manejo de caja', 'reposición de mercadería'. ESTAS NO SON LOGROS CUALITATIVOS.\n" +
-      "REGLA: para ser logro cualitativo debe responder a la pregunta '¿qué cambió o mejoró gracias a esta persona?'. Si no responde esa pregunta, es una responsabilidad.\n" +
+      "- Logro cualitativo: tiene verbo conjugado EN PRIMERA PERSONA que describe un CAMBIO o RESULTADO concreto. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo', 'lideré la implementación de un nuevo sistema de seguimiento', 'implementé un protocolo que mejoró la coordinación'\n" +
+      "- Responsabilidad sin impacto: describe una tarea o función, NO un resultado. NUNCA son logros cualitativos: 'atención al cliente', 'atención a empleados', 'atención a proveedores', 'gestión de agenda', 'coordinación de reuniones', 'manejo de caja', 'reposición de mercadería', 'control de stock', 'facturación', 'archivo', 'soporte', cualquier frase sin verbo conjugado en primera persona.\n" +
+      "REGLA ESTRICTA: un logro cualitativo SIEMPRE tiene un verbo conjugado (reorganicé, lideré, implementé, desarrollé, mejoré, diseñé, creé) seguido de un resultado o cambio concreto. Si la frase NO tiene verbo conjugado en primera persona, es una RESPONSABILIDAD, no un logro.\n" +
       "\n" +
       "REGLAS ADICIONALES:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
@@ -237,6 +237,20 @@ export async function onRequest(context) {
     // Registrar email aunque sea Starter (para llevar registro de usuarios)
     if (userEmail && env.SUPABASE_URL && env.SUPABASE_KEY) {
       await registrarEmail(env, userEmail, plan);
+    }
+
+    // Filtrar logrosCualitativos que son en realidad responsabilidades
+    if (result.analisisLogros?.logrosCualitativos) {
+      const verbosConjugados = ['é', 'í', 'ó', 'ré', 'cé', 'gué', 'cé', 'zé', 'organicé', 'lideré', 'implementé', 'desarrollé', 'mejoré', 'diseñé', 'creé', 'gestioné', 'coordiné', 'dirigí', 'etablecí', 'reduje', 'aumenté', 'capacité', 'formé', 'negocié'];
+      result.analisisLogros.logrosCualitativos = result.analisisLogros.logrosCualitativos.filter(l => {
+        const frase = (l.frase || '').toLowerCase();
+        // Rechazar frases muy cortas (menos de 6 palabras)
+        if (frase.split(' ').length < 6) return false;
+        // Rechazar frases sin verbo conjugado en primera persona
+        const tieneVerbo = verbosConjugados.some(v => frase.includes(v)) ||
+          /[aeiou]é\b|[aeiou]í\b/.test(frase);
+        return tieneVerbo;
+      });
     }
 
     // ── Filtro anti-duplicados en recomendaciones ──────────────────────────
