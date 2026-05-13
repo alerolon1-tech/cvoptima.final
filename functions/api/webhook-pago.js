@@ -1,5 +1,3 @@
-import { createHash, randomBytes } from "crypto";
-
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -51,9 +49,7 @@ export async function onRequest(context) {
 
 function generateToken() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let token = "";
-  for (let i = 0; i < 32; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return token;
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array).map(b => chars[b % chars.length]).join('');
 }
