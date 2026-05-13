@@ -29,6 +29,13 @@ export async function onRequest(context) {
     const userId    = fd.get("userId")    || null;
 
     let plan = fd.get("plan") || "starter";
+    const pagoToken = fd.get("pagoToken") || "";
+
+    // Verificar token de pago (post-pago inmediato)
+    if (pagoToken && env.SUPABASE_URL && env.SUPABASE_KEY) {
+      const tokenPlan = await verificarTokenPago(env, pagoToken);
+      if (tokenPlan) plan = tokenPlan;
+    }
 
     // Verificar email del usuario para asignar plan
     const userEmail = request.headers.get("X-User-Email") || "";
@@ -774,6 +781,42 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
 }
 
 // ─── SUPABASE ─────────────────────────────────────────────────────────────────
+
+async function verificarTokenPago(env, token) {
+  try {
+    const res = await fetch(
+      env.SUPABASE_URL + "/rest/v1/tokens_diagnostico?token=eq." + encodeURIComponent(token) + "&usado=eq.false&select=token,email",
+      {
+        headers: {
+          "apikey": env.SUPABASE_KEY,
+          "Authorization": "Bearer " + env.SUPABASE_KEY,
+        }
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data?.[0]) return null;
+
+    // Marcar token como usado
+    await fetch(
+      env.SUPABASE_URL + "/rest/v1/tokens_diagnostico?token=eq." + encodeURIComponent(token),
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": env.SUPABASE_KEY,
+          "Authorization": "Bearer " + env.SUPABASE_KEY,
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify({ usado: true }),
+      }
+    );
+
+    return "diagnostico";
+  } catch {
+    return null;
+  }
+}
 
 async function registrarEmail(env, email, plan) {
   try {
