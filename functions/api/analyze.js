@@ -70,7 +70,8 @@ export async function onRequest(context) {
       "- Logro cuantitativo: tiene número, porcentaje o cifra medible. Ejemplo: 'reduje el tiempo de entrega un 30%'\n" +
       "- Logro cualitativo: tiene verbo conjugado EN PRIMERA PERSONA que describe un CAMBIO o RESULTADO concreto. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo', 'lideré la implementación de un nuevo sistema de seguimiento', 'implementé un protocolo que mejoró la coordinación'\n" +
       "- Responsabilidad sin impacto: describe una tarea o función, NO un resultado. NUNCA son logros cualitativos: 'atención al cliente', 'atención a empleados', 'atención a proveedores', 'gestión de agenda', 'coordinación de reuniones', 'manejo de caja', 'reposición de mercadería', 'control de stock', 'facturación', 'archivo', 'soporte', cualquier frase sin verbo conjugado en primera persona.\n" +
-      "REGLA ESTRICTA: un logro cualitativo SIEMPRE tiene un verbo conjugado (reorganicé, lideré, implementé, desarrollé, mejoré, diseñé, creé) seguido de un resultado o cambio concreto. Si la frase NO tiene verbo conjugado en primera persona, es una RESPONSABILIDAD, no un logro.\n" +
+      "- Atributo de personalidad: describe cómo es la persona, NO qué logró. NUNCA son logros cualitativos: 'persona responsable', 'soy proactivo', 'tengo ganas de crecer', 'comprometida con el trabajo', 'con muchas ganas de aprender', 'buen manejo del equipo', cualquier descripción de valores, actitudes o rasgos personales. Estos van a responsabilidadesSinImpacto o se ignoran.\n" +
+      "REGLA ESTRICTA: un logro cualitativo SIEMPRE tiene un verbo conjugado (reorganicé, lideré, implementé, desarrollé, mejoré, diseñé, creé) seguido de un resultado o cambio concreto. Si la frase NO tiene verbo conjugado en primera persona, es una RESPONSABILIDAD o ATRIBUTO, no un logro.\n" +
       "\n" +
       "REGLAS ADICIONALES:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
@@ -239,13 +240,15 @@ export async function onRequest(context) {
       await registrarEmail(env, userEmail, plan);
     }
 
-    // Filtrar logrosCualitativos que son en realidad responsabilidades
+    // Filtrar logrosCualitativos que son en realidad responsabilidades o atributos
     if (result.analisisLogros?.logrosCualitativos) {
       const iniciosResponsabilidad = ['coordinación', 'gestión', 'atención', 'manejo', 'control', 'soporte', 'apoyo', 'asistencia', 'administración', 'elaboración', 'ejecución', 'seguimiento', 'monitoreo', 'realización', 'preparación', 'supervisión', 'revisión'];
+      const atributosPersonalidad = ['responsable', 'proactiv', 'comprometid', 'dedicad', 'apasionad', 'motivad', 'entusiasta', 'puntual', 'ordenad', 'organizado', 'creativ', 'innovador', 'flexibl', 'adaptabl', 'comunicativ', 'trabajo en equipo', 'ganas de crecer', 'ganas de aprender', 'con muchas ganas', 'deseos de', 'buen manejo', 'buena predisposición'];
       result.analisisLogros.logrosCualitativos = result.analisisLogros.logrosCualitativos.filter(l => {
         const frase = (l.frase || '').toLowerCase().trim();
         if (frase.split(' ').length < 5) return false;
         if (iniciosResponsabilidad.some(p => frase.startsWith(p))) return false;
+        if (atributosPersonalidad.some(p => frase.includes(p))) return false;
         return true;
       });
     }
