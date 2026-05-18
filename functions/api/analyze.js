@@ -367,7 +367,16 @@ export async function onRequest(context) {
 function applyTierVisibility(data, plan, modo) {
   if (modo === "comparativa") return { ...data, _plan: "comparativa" };
   if (plan === "professional" || plan === "pro") {
-    return { ...data, _plan: plan };
+    return {
+      ...data,
+      _plan: plan,
+      capitalRelacional: data.capitalRelacional || null,
+      diagnosticoTrayectoria: data.diagnosticoTrayectoria || null,
+      posicionamiento: data.posicionamiento || null,
+      recomendacionesNarrativa: data.recomendacionesNarrativa || [],
+      moduloEmpleabilidadClaveSocial: data.moduloEmpleabilidadClaveSocial || null,
+      versionIngles: data.versionIngles || null,
+    };
   }
 
   if (plan === "diagnostico") {
@@ -529,6 +538,42 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n";
   instrBlock += "RECORDATORIO RECOMENDACIONES: cada tema solo aparece UNA VEZ en el plan de acción. El tema 'logros' solo puede tener una recomendacion. Si el CV tiene logros cualitativos, la recomendacion de logros debe ser 'cuantificá tus logros existentes' — no 'incorporá logros'.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
+
+  // ── Schema adicional para plan PRO ────────────────────────────────────────
+  const proSchema = plan === "pro" || plan === "professional" ? (
+    '  "capitalRelacional": {\n' +
+    '    "score": 60,\n' +
+    '    "diagnostico": "descripcion de como se visibiliza el trabajo con otros en el perfil",\n' +
+    '    "verbosRelacionales": ["coordiné", "lideré", "trabajé junto a"],\n' +
+    '    "organizacionesVinculadas": ["nombre de org o stakeholder mencionado en el CV"],\n' +
+    '    "recomendaciones": ["como mejorar la visibilidad relacional del perfil"]\n' +
+    '  },\n' +
+    '  "diagnosticoTrayectoria": {\n' +
+    '    "tipo": "Consistente|En crecimiento|En transicion|Dispersa",\n' +
+    '    "descripcion": "que comunica esta trayectoria al mercado hoy",\n' +
+    '    "patrones": ["patron detectado 1", "patron detectado 2"],\n' +
+    '    "oportunidades": ["como reposicionar esta trayectoria"],\n' +
+    '    "riesgos": ["que puede estar limitando la empleabilidad desde la trayectoria"]\n' +
+    '  },\n' +
+    '  "posicionamiento": {\n' +
+    '    "movilidadVertical": {"posible": true, "diagnostico": "texto", "acciones": []},\n' +
+    '    "movilidadLateral": {"posible": true, "diagnostico": "texto", "acciones": []},\n' +
+    '    "transicionSector": {"posible": false, "diagnostico": "texto", "acciones": []}\n' +
+    '  },\n' +
+    '  "recomendacionesNarrativa": [\n' +
+    '    {"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual o ausente", "sugerido": "texto reescrito", "justificacion": "por que este cambio mejora el posicionamiento"}\n' +
+    '  ],\n' +
+    '  "moduloEmpleabilidadClaveSocial": {\n' +
+    '    "lectura": "texto de 3-4 oraciones que interpreta el perfil desde el enfoque de empleabilidad como practica relacional y colectiva — no individual. Menciona cómo la trayectoria, los vinculos y el momento del mercado se intersectan en este perfil especifico.",\n' +
+    '    "posicionamientoMercado": "como se posiciona este perfil frente al mercado laboral actual",\n' +
+    '    "tensiones": ["tension entre lo que el perfil comunica y lo que el mercado demanda"]\n' +
+    '  },\n' +
+    '  "versionIngles": {\n' +
+    '    "titular": "Professional Title optimized in English",\n' +
+    '    "perfilProfesional": "Professional summary rewritten in English following Anglo-Saxon CV conventions",\n' +
+    '    "logrosDestacados": ["Top achievement 1 in English", "Top achievement 2 in English"]\n' +
+    '  }\n'
+  ) : '';
 
   // ── MODO: Comparativa entre dos versiones de CV ───────────────────────────
   if (modo === "comparativa") {
@@ -704,6 +749,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"}\n' +
       '  },\n' +
       '  "linkedin_analysis": null\n' +
+      (proSchema ? proSchema : '') +
       "}"
     );
   }
@@ -776,6 +822,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '      "narrativa": 65\n' +
     '    }\n' +
     '  }\n' +
+    (proSchema ? proSchema : '') +
     "}"
   );
 }
