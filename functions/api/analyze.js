@@ -536,7 +536,8 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Un CV óptimo tiene: (1) Titular específico con rol y propuesta de valor, (2) Perfil profesional de 3-4 líneas con años de experiencia, especialidad y valor diferencial, (3) Experiencias con empresa, rol, fechas y al menos 2 logros cuantificados por puesto usando verbos de acción, (4) Educación con institución, título y año de graduación, (5) Habilidades técnicas y blandas relevantes al sector, (6) Datos de contacto completos: email, teléfono, LinkedIn, ciudad.\n";
   instrBlock += "PENALIZACIÓN DE SCORE: si falta el titular → atsScore máximo 55. Si falta el perfil profesional → atsScore máximo 60. Si ninguna experiencia tiene logros cuantificados → atsScore máximo 50. Si faltan dos o más secciones obligatorias → atsScore máximo 45.\n\n";
   instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n";
-  instrBlock += "RECORDATORIO RECOMENDACIONES: cada tema solo aparece UNA VEZ en el plan de acción. El tema 'logros' solo puede tener una recomendacion. Si el CV tiene logros cualitativos, la recomendacion de logros debe ser 'cuantificá tus logros existentes' — no 'incorporá logros'.\n\n";
+  instrBlock += "ROLES OBJETIVO: identificá mínimo 4 roles para el perfil. Incluí el rol actual/obvio PERO TAMBIÉN roles similares, adyacentes y en sectores compatibles. Por ejemplo si alguien es recepcionista: sugerí también asistente virtual, coordinadora administrativa, atención al cliente corporativo, asistente de RRHH. Si trabajó en educación: sugerí también capacitación corporativa, diseño instruccional, contenidos. Pensá en transferibilidad de skills, no solo en el rol exacto.\n\n";
+  instrBlock += "FORTALEZAS Y OPORTUNIDADES: generá mínimo 4 fortalezas y 4 oportunidades de mejora. Cada una debe ser específica al documento analizado — mencioná empresas, roles, habilidades o experiencias reales. Evitá generalidades. Las oportunidades deben incluir una acción concreta de mejora, no solo el diagnóstico del problema.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
 
   // ── Schema adicional para plan PRO ────────────────────────────────────────
@@ -561,17 +562,25 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '    "transicionSector": {"posible": false, "diagnostico": "texto", "acciones": []}\n' +
     '  },\n' +
     '  "recomendacionesNarrativa": [\n' +
-    '    {"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual o ausente", "sugerido": "texto reescrito", "justificacion": "por que este cambio mejora el posicionamiento"}\n' +
+    '    {"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual exacto o ausente", "sugerido": "texto concreto listo para copiar y pegar — no una descripcion de que hacer sino el texto reescrito", "justificacion": "por que este cambio mejora el posicionamiento estrategico del perfil", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}\n' +
     '  ],\n' +
     '  "moduloEmpleabilidadClaveSocial": {\n' +
-    '    "lectura": "texto de 3-4 oraciones que interpreta el perfil desde el enfoque de empleabilidad como practica relacional y colectiva — no individual. Menciona cómo la trayectoria, los vinculos y el momento del mercado se intersectan en este perfil especifico.",\n' +
+    '    "lectura": "texto de 4-5 oraciones que interpreta el perfil desde el enfoque de empleabilidad como practica relacional y colectiva — no individual. Menciona cómo la trayectoria, los vinculos y el momento del mercado se intersectan en este perfil especifico.",\n' +
+    '    "dimensionEstructural": "como los cambios del mercado laboral, la tecnologia y las formas de organizacion del trabajo impactan en este perfil — oportunidades y riesgos estructurales concretos",\n' +
+    '    "dimensionRelacional": "analisis de redes, vinculos y reconocimiento social visible en el perfil — que capital relacional tiene y que le falta para aprovechar oportunidades laborales",\n' +
+    '    "dimensionSubjetiva": "lectura de la identidad laboral, sentido y capacidad de agencia que se infiere del perfil — si hay coherencia entre lo que hace y lo que comunica que quiere hacer",\n' +
+    '    "dimensionColectiva": "como este perfil puede construir su futuro laboral en articulacion con organizaciones, redes e instituciones — no como destino individual sino como construccion social",\n' +
     '    "posicionamientoMercado": "como se posiciona este perfil frente al mercado laboral actual",\n' +
     '    "tensiones": ["tension entre lo que el perfil comunica y lo que el mercado demanda"]\n' +
     '  },\n' +
     '  "versionIngles": {\n' +
-    '    "titular": "Professional Title optimized in English",\n' +
-    '    "perfilProfesional": "Professional summary rewritten in English following Anglo-Saxon CV conventions",\n' +
-    '    "logrosDestacados": ["Top achievement 1 in English", "Top achievement 2 in English"]\n' +
+    '    "nota": "This is a rewrite, not a translation. Anglo-Saxon CV conventions apply: action verbs, quantified achievements, no personal pronouns.",\n' +
+    '    "titular": "Professional Title | Area of Expertise — concise and keyword-rich",\n' +
+    '    "perfilProfesional": "3-4 sentence professional summary in English: role + years of experience + key skills + value proposition. No I/my. Start with a strong noun or verb.",\n' +
+    '    "experiencias": [{"empresa": "Company name", "rol": "Job Title in English", "logros": ["Achievement rewritten in English with action verb + result", "Second achievement"]}],\n' +
+    '    "habilidades": {"tecnicas": ["technical skill in English"], "blandas": ["soft skill in English"]},\n' +
+    '    "logrosDestacados": ["Top achievement 1 with quantified result in English", "Top achievement 2", "Top achievement 3"],\n' +
+    '    "sugerenciasAdaptacion": ["tip to adapt this CV for the Anglo-Saxon market"]\n' +
     '  }\n'
   ) : '';
 
@@ -739,7 +748,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
       '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "texto", "progresion": "texto", "oportunidades": []},\n' +
       '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
       '  "areasProfesionales": [],\n' +
-      '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 75, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
+      '  "rolesObjetivo": [{"titulo": "rol exacto y roles similares o adyacentes al perfil detectado", "matchPct": 75, "seniority": "nivel", "sector": "sector compatible además del sector actual", "justificacion": "por qué este rol y sector son compatibles con la trayectoria", "skills": ["skill que ya tiene", "skill a desarrollar"]}],\n' +
       '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del CV"}],\n' +
       '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al CV", "accion": "accion concreta"}],\n' +
       '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N puntos"}],\n' +
@@ -789,7 +798,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "texto", "progresion": "texto", "oportunidades": []},\n' +
     '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
     '  "areasProfesionales": [],\n' +
-    '  "rolesObjetivo": [{"titulo": "rol", "matchPct": 75, "seniority": "nivel", "justificacion": "texto", "skills": []}],\n' +
+    '  "rolesObjetivo": [{"titulo": "rol exacto y roles similares o adyacentes al perfil detectado", "matchPct": 75, "seniority": "nivel", "sector": "sector compatible además del sector actual", "justificacion": "por qué este rol y sector son compatibles con la trayectoria", "skills": ["skill que ya tiene", "skill a desarrollar"]}],\n' +
     '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del CV"}],\n' +
     '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al CV", "accion": "accion concreta"}],\n' +
     '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N puntos"}],\n' +
