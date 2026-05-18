@@ -538,6 +538,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n";
   instrBlock += "ROLES OBJETIVO: identificá mínimo 4 roles para el perfil. Incluí el rol actual/obvio PERO TAMBIÉN roles similares, adyacentes y en sectores compatibles. Por ejemplo si alguien es recepcionista: sugerí también asistente virtual, coordinadora administrativa, atención al cliente corporativo, asistente de RRHH. Si trabajó en educación: sugerí también capacitación corporativa, diseño instruccional, contenidos. Pensá en transferibilidad de skills, no solo en el rol exacto.\n\n";
   instrBlock += "FORTALEZAS Y OPORTUNIDADES: generá mínimo 4 fortalezas y 4 oportunidades de mejora. Cada una debe ser específica al documento analizado — mencioná empresas, roles, habilidades o experiencias reales. Evitá generalidades. Las oportunidades deben incluir una acción concreta de mejora, no solo el diagnóstico del problema.\n\n";
+  instrBlock += "PROHIBICIÓN ABSOLUTA — LIDERAZGO: NO recomendés 'desarrollar capacidad de liderazgo' ni ninguna variante de esa recomendación SALVO que el CV muestre evidencia concreta de liderazgo de personas (equipo a cargo, coordinación de equipos, gestión de personas). Si no hay evidencia, no lo menciones. El liderazgo no es una habilidad universal deseable — es específica a ciertos roles y perfiles.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
 
   // ── Schema adicional para plan PRO ────────────────────────────────────────
@@ -565,11 +566,11 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
     '    {"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual exacto o ausente", "sugerido": "texto concreto listo para copiar y pegar — no una descripcion de que hacer sino el texto reescrito", "justificacion": "por que este cambio mejora el posicionamiento estrategico del perfil", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}\n' +
     '  ],\n' +
     '  "moduloEmpleabilidadClaveSocial": {\n' +
-    '    "lectura": "texto de 4-5 oraciones que interpreta el perfil desde el enfoque de empleabilidad como practica relacional y colectiva — no individual. Menciona cómo la trayectoria, los vinculos y el momento del mercado se intersectan en este perfil especifico.",\n' +
-    '    "dimensionEstructural": "como los cambios del mercado laboral, la tecnologia y las formas de organizacion del trabajo impactan en este perfil — oportunidades y riesgos estructurales concretos",\n' +
-    '    "dimensionRelacional": "analisis de redes, vinculos y reconocimiento social visible en el perfil — que capital relacional tiene y que le falta para aprovechar oportunidades laborales",\n' +
-    '    "dimensionSubjetiva": "lectura de la identidad laboral, sentido y capacidad de agencia que se infiere del perfil — si hay coherencia entre lo que hace y lo que comunica que quiere hacer",\n' +
-    '    "dimensionColectiva": "como este perfil puede construir su futuro laboral en articulacion con organizaciones, redes e instituciones — no como destino individual sino como construccion social",\n' +
+    '    "lectura": "texto de 4-5 oraciones en lenguaje simple y directo sobre este perfil específico — sin términos abstractos ni académicos. Describí concretamente qué tiene este perfil, en qué contexto laboral está parado y qué posibilidades reales tiene desde lo relacional y lo estructural. Hablale directamente a la persona.",\n' +
+    '    "dimensionEstructural": "qué está pasando en el mercado laboral en el sector y rol de esta persona — cambios concretos, demanda real, impacto de la tecnología. Sin abstracciones. Ejemplo: si trabaja en atención al cliente, mencioná la automatización y qué skills la protegen",\n' +
+    '    "dimensionRelacional": "con quiénes trabaja o trabajó esta persona y cómo eso genera o no oportunidades — redes visibles, vínculos con organizaciones, reconocimiento social que se infiere del perfil. Concreto y específico al CV",\n' +
+    '    "dimensionSubjetiva": "qué comunica este perfil sobre la identidad laboral de la persona — si hay coherencia entre lo que hizo y lo que quiere hacer, si la trayectoria tiene sentido propio, qué capacidad de agencia se infiere. En lenguaje simple",\n' +
+    '    "dimensionColectiva": "qué organizaciones, redes o contextos pueden ser aliados para el desarrollo laboral de esta persona — no genérico sino específico al sector, rol y trayectoria detectados",\n' +
     '    "posicionamientoMercado": "como se posiciona este perfil frente al mercado laboral actual",\n' +
     '    "tensiones": ["tension entre lo que el perfil comunica y lo que el mercado demanda"]\n' +
     '  },\n' +
