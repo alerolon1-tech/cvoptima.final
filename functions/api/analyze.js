@@ -29,6 +29,7 @@ export async function onRequest(context) {
     const userId    = fd.get("userId")    || null;
 
     let plan = fd.get("plan") || "starter";
+    const idioma = fd.get("idioma") || "es";
     const pagoToken = fd.get("pagoToken") || "";
 
     // Verificar token de pago (post-pago inmediato)
@@ -91,7 +92,7 @@ export async function onRequest(context) {
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
       "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
 
-    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan);
+    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma);
 
     // Pre-calcular valores del radar desde el texto (no depender del modelo)
     const atsDetalleCalculado = modo !== 'li' ? calcularAtsDetalle(cvText) : calcularAtsDetalle(liText);
@@ -509,11 +510,12 @@ function calcularAtsDetalle(texto) {
   return { keywords, verbosAccion, metricas, estructura, densidadHabilidades, claridadRoles };
 }
 
-function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
+function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma = 'es') {
+  const isEnglish = idioma === 'en';
   const ctx = [
-    role      && "Rol objetivo: " + role,
-    sector    && "Sector: " + sector,
-    seniority && "Seniority: " + seniority,
+    role      && (isEnglish ? "Target role: " : "Rol objetivo: ") + role,
+    sector    && (isEnglish ? "Sector: " : "Sector: ") + sector,
+    seniority && (isEnglish ? "Seniority: " : "Seniority: ") + seniority,
   ].filter(Boolean).join(" | ");
 
   let docBlock = "";
@@ -536,6 +538,9 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Un CV óptimo tiene: (1) Titular específico con rol y propuesta de valor, (2) Perfil profesional de 3-4 líneas con años de experiencia, especialidad y valor diferencial, (3) Experiencias con empresa, rol, fechas y al menos 2 logros cuantificados por puesto usando verbos de acción, (4) Educación con institución, título y año de graduación, (5) Habilidades técnicas y blandas relevantes al sector, (6) Datos de contacto completos: email, teléfono, LinkedIn, ciudad.\n";
   instrBlock += "PENALIZACIÓN DE SCORE: si falta el titular → atsScore máximo 55. Si falta el perfil profesional → atsScore máximo 60. Si ninguna experiencia tiene logros cuantificados → atsScore máximo 50. Si faltan dos o más secciones obligatorias → atsScore máximo 45.\n\n";
   instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n";
+  instrBlock += isEnglish
+    ? "LANGUAGE: ALL text fields must be in English. Professional, clear, second person ('your profile', 'your experience').\n\n"
+    : "IDIOMA: todos los campos de texto en español rioplatense. Segunda persona ('tu perfil', 'tu experiencia').\n\n";
   instrBlock += "ROLES OBJETIVO: identificá mínimo 4 roles para el perfil. Incluí el rol actual/obvio PERO TAMBIÉN roles similares, adyacentes y en sectores compatibles. Por ejemplo si alguien es recepcionista: sugerí también asistente virtual, coordinadora administrativa, atención al cliente corporativo, asistente de RRHH. Si trabajó en educación: sugerí también capacitación corporativa, diseño instruccional, contenidos. Pensá en transferibilidad de skills, no solo en el rol exacto.\n\n";
   instrBlock += "FORTALEZAS Y OPORTUNIDADES: generá mínimo 4 fortalezas y 4 oportunidades de mejora. Cada una debe ser específica al documento analizado — mencioná empresas, roles, habilidades o experiencias reales. Evitá generalidades. Las oportunidades deben incluir una acción concreta de mejora, no solo el diagnóstico del problema.\n\n";
   instrBlock += "PROHIBICIÓN ABSOLUTA — LIDERAZGO: NO recomendés 'desarrollar capacidad de liderazgo' ni ninguna variante de esa recomendación SALVO que el CV muestre evidencia concreta de liderazgo de personas (equipo a cargo, coordinación de equipos, gestión de personas). Si no hay evidencia, no lo menciones. El liderazgo no es una habilidad universal deseable — es específica a ciertos roles y perfiles.\n\n";
