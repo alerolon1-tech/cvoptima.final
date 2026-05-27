@@ -65,8 +65,9 @@ export async function onRequest(context) {
     }
 
     const systemPrompt =
-      "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n" +
-      "\n" +
+      (isEnglish
+        ? "You are a senior employability expert. Your ONLY function is to analyze the document provided and return a valid JSON in ENGLISH. ALL text fields must be in English. Second person: 'your profile', 'your experience', 'your skills'. Never use Spanish.\n\n"
+        : "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n\n") +
       "REGLA PRINCIPAL — LEE ESTO PRIMERO:\n" +
       "TODO el texto del JSON debe estar en SEGUNDA PERSONA. Hablale directamente a quien hizo el analisis.\n" +
       "CORRECTO: 'Tu perfil muestra...', 'Tus logros indican...', 'Tu narrativa es...'\n" +
@@ -526,7 +527,9 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
     docBlock += "=== PERFIL LINKEDIN A ANALIZAR ===\n" + liText.slice(0, 4500) + "\n=== FIN LINKEDIN ===\n\n";
   }
 
-  let instrBlock = "";
+  let instrBlock = isEnglish
+    ? "CRITICAL: Generate ALL text fields in English. Second person throughout ('your profile', 'your achievements', 'your experience'). Professional English for international job markets.\n\n"
+    : "";
   if (ctx) instrBlock += "Contexto: " + ctx + "\n\n";
 
   instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
