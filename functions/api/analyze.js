@@ -65,24 +65,40 @@ export async function onRequest(context) {
       });
     }
 
-    const systemPrompt =
-      (isEnglish
-        ? "You are a senior employability expert. Your ONLY function is to analyze the document provided and return a valid JSON in ENGLISH. ALL text fields must be in English. Second person: 'your profile', 'your experience', 'your skills'. Never use Spanish.\n\n"
-        : "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n\n") +
+    const systemPrompt = isEnglish ? (
+      "You are a senior employability expert. Your ONLY function is to analyze the document provided and return a valid JSON. ALL text fields MUST be in English. Never use Spanish.\n\n" +
+      "MAIN RULE — READ THIS FIRST:\n" +
+      "ALL text in the JSON must be in SECOND PERSON. Address the person directly.\n" +
+      "CORRECT: 'Your profile shows...', 'Your achievements indicate...', 'Your narrative is...'\n" +
+      "INCORRECT: 'The candidate shows...', 'Their achievements indicate...'\n\n" +
+      "QUANTITATIVE vs QUALITATIVE ACHIEVEMENTS vs RESPONSIBILITIES:\n" +
+      "- Quantitative achievement: has a number, percentage or measurable figure. Example: 'reduced delivery time by 30%'\n" +
+      "- Qualitative achievement: has a conjugated verb describing a CONCRETE CHANGE or RESULT. Example: 'reorganized the customer service process improving team experience', 'led the implementation of a new tracking system'\n" +
+      "- Responsibility without impact: describes a task, NOT a result. NEVER qualitative achievements: 'customer service', 'agenda management', 'cashier', 'stock control'. Any phrase without a conjugated verb in first person.\n" +
+      "- Personality attribute: describes how the person IS, NOT what they achieved. NEVER qualitative achievements: 'responsible person', 'proactive', 'eager to grow'. These go to responsabilitiesWithoutImpact or are ignored.\n\n" +
+      "ADDITIONAL RULES:\n" +
+      "1. Use the person's real name as it appears in the document.\n" +
+      "2. Every field must mention concrete data from the document: company, role, tool, date or specific achievement.\n" +
+      "3. NEVER invent data not in the document. If something does not exist write 'Not detected in document'.\n" +
+      "4. Generate MINIMUM 3 High priority and 2 Medium priority recommendations. Each must refer to concrete document improvements.\n" +
+      "5. All scores are integers between 0 and 100. NEVER use 0-10 scale.\n" +
+      "6. NEVER set atsScore, scorePotencial or impactDensityScore to 0.\n" +
+      "7. NO LEADERSHIP recommendations unless the CV shows concrete evidence of managing people.\n" +
+      "8. Respond ONLY with the JSON. No extra text, no markdown."
+    ) : (
+      "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n\n" +
       "REGLA PRINCIPAL — LEE ESTO PRIMERO:\n" +
       "TODO el texto del JSON debe estar en SEGUNDA PERSONA. Hablale directamente a quien hizo el analisis.\n" +
       "CORRECTO: 'Tu perfil muestra...', 'Tus logros indican...', 'Tu narrativa es...'\n" +
       "INCORRECTO: 'El candidato muestra...', 'Sus logros indican...', 'La persona tiene...'\n" +
       "El resumenEjecutivo puede empezar con el nombre: 'Maria, tu perfil muestra...' — pero SIEMPRE en segunda persona despues.\n" +
-      "Esta regla aplica a TODOS los campos de texto sin excepcion.\n" +
-      "\n" +
+      "Esta regla aplica a TODOS los campos de texto sin excepcion.\n\n" +
       "LOGROS CUANTITATIVOS vs CUALITATIVOS vs RESPONSABILIDADES — distincion obligatoria:\n" +
       "- Logro cuantitativo: tiene número, porcentaje o cifra medible. Ejemplo: 'reduje el tiempo de entrega un 30%'\n" +
       "- Logro cualitativo: tiene verbo conjugado EN PRIMERA PERSONA que describe un CAMBIO o RESULTADO concreto. Ejemplo: 'reorganicé el proceso de atención mejorando la experiencia del equipo', 'lideré la implementación de un nuevo sistema de seguimiento', 'implementé un protocolo que mejoró la coordinación'\n" +
       "- Responsabilidad sin impacto: describe una tarea o función, NO un resultado. NUNCA son logros cualitativos: 'atención al cliente', 'atención a empleados', 'atención a proveedores', 'gestión de agenda', 'coordinación de reuniones', 'manejo de caja', 'reposición de mercadería', 'control de stock', 'facturación', 'archivo', 'soporte', cualquier frase sin verbo conjugado en primera persona.\n" +
       "- Atributo de personalidad: describe cómo es la persona, NO qué logró. NUNCA son logros cualitativos: 'persona responsable', 'soy proactivo', 'tengo ganas de crecer', 'comprometida con el trabajo', 'con muchas ganas de aprender', 'buen manejo del equipo', cualquier descripción de valores, actitudes o rasgos personales. Estos van a responsabilidadesSinImpacto o se ignoran.\n" +
-      "REGLA ESTRICTA: un logro cualitativo SIEMPRE tiene un verbo conjugado (reorganicé, lideré, implementé, desarrollé, mejoré, diseñé, creé) seguido de un resultado o cambio concreto. Si la frase NO tiene verbo conjugado en primera persona, es una RESPONSABILIDAD o ATRIBUTO, no un logro.\n" +
-      "\n" +
+      "REGLA ESTRICTA: un logro cualitativo SIEMPRE tiene un verbo conjugado (reorganicé, lideré, implementé, desarrollé, mejoré, diseñé, creé) seguido de un resultado o cambio concreto. Si la frase NO tiene verbo conjugado en primera persona, es una RESPONSABILIDAD o ATRIBUTO, no un logro.\n\n" +
       "REGLAS ADICIONALES:\n" +
       "1. Usa el nombre real de la persona tal como figura en el documento. NUNCA escribas 'No especificado'.\n" +
       "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
@@ -92,7 +108,9 @@ export async function onRequest(context) {
       "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas. Si el CV no tiene titular, perfil profesional o logros cuantificados, esas DEBEN ser recomendaciones de prioridad Alta. REGLAS ESTRICTAS DE RECOMENDACIONES: (a) cada recomendacion debe ser sobre un tema DISTINTO — no repitas el mismo tema con diferente título ni diferente redacción; (b) el tema 'logros' solo puede aparecer UNA SOLA VEZ en todo el plan de acción — si el CV tiene logros cualitativos, reconocelos y recomendá cuantificarlos en lugar de decir que no hay logros; (c) NUNCA uses frases genéricas como 'mejorar la redacción' o 'mejorar el formato' sin especificar exactamente qué mejorar y cómo; (d) antes de escribir cada recomendacion verificá que no haya otra sobre el mismo tema.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
-      "9. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo.";
+      "9. PROHIBICION ABSOLUTA — LIDERAZGO: NO recomiendes 'desarrollar capacidad de liderazgo' salvo que el CV muestre evidencia concreta de gestión de personas.\n" +
+      "10. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo."
+    );
 
     const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma);
 
