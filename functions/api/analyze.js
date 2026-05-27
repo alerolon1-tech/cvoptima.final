@@ -30,6 +30,7 @@ export async function onRequest(context) {
 
     let plan = fd.get("plan") || "starter";
     const idioma = fd.get("idioma") || "es";
+    const isEnglish = idioma === 'en';
     const pagoToken = fd.get("pagoToken") || "";
 
     // Verificar token de pago (post-pago inmediato)
