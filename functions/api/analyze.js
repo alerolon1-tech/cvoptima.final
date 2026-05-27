@@ -549,24 +549,39 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
   let instrBlock = isEnglish
     ? "CRITICAL: Generate ALL text fields in English. Second person throughout ('your profile', 'your achievements', 'your experience'). Professional English for international job markets.\n\n"
     : "";
-  if (ctx) instrBlock += "Contexto: " + ctx + "\n\n";
+  if (ctx) instrBlock += (isEnglish ? "Context: " : "Contexto: ") + ctx + "\n\n";
 
-  instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
-  instrBlock += "- atsScore: calidad global del documento. Un CV sin titular, sin perfil profesional y sin logros NO puede superar 50. Sé honesto.\n";
-  instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
-  instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
-  instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
-  instrBlock += "ESTRUCTURA DE CV ÓPTIMO — usá esto como referencia para evaluar el documento:\n";
-  instrBlock += "Un CV óptimo tiene: (1) Titular específico con rol y propuesta de valor, (2) Perfil profesional de 3-4 líneas con años de experiencia, especialidad y valor diferencial, (3) Experiencias con empresa, rol, fechas y al menos 2 logros cuantificados por puesto usando verbos de acción, (4) Educación con institución, título y año de graduación, (5) Habilidades técnicas y blandas relevantes al sector, (6) Datos de contacto completos: email, teléfono, LinkedIn, ciudad.\n";
-  instrBlock += "PENALIZACIÓN DE SCORE: si falta el titular → atsScore máximo 55. Si falta el perfil profesional → atsScore máximo 60. Si ninguna experiencia tiene logros cuantificados → atsScore máximo 50. Si faltan dos o más secciones obligatorias → atsScore máximo 45.\n\n";
-  instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n";
-  instrBlock += isEnglish
-    ? "LANGUAGE: ALL text fields must be in English. Professional, clear, second person ('your profile', 'your experience').\n\n"
-    : "IDIOMA: todos los campos de texto en español rioplatense. Segunda persona ('tu perfil', 'tu experiencia').\n\n";
-  instrBlock += "ROLES OBJETIVO: identificá mínimo 4 roles para el perfil. Incluí el rol actual/obvio PERO TAMBIÉN roles similares, adyacentes y en sectores compatibles. Por ejemplo si alguien es recepcionista: sugerí también asistente virtual, coordinadora administrativa, atención al cliente corporativo, asistente de RRHH. Si trabajó en educación: sugerí también capacitación corporativa, diseño instruccional, contenidos. Pensá en transferibilidad de skills, no solo en el rol exacto.\n\n";
-  instrBlock += "FORTALEZAS Y OPORTUNIDADES: generá mínimo 4 fortalezas y 4 oportunidades de mejora. Cada una debe ser específica al documento analizado — mencioná empresas, roles, habilidades o experiencias reales. Evitá generalidades. Las oportunidades deben incluir una acción concreta de mejora, no solo el diagnóstico del problema.\n\n";
-  instrBlock += "PROHIBICIÓN ABSOLUTA — LIDERAZGO: NO recomendés 'desarrollar capacidad de liderazgo' ni ninguna variante de esa recomendación SALVO que el CV muestre evidencia concreta de liderazgo de personas (equipo a cargo, coordinación de equipos, gestión de personas). Si no hay evidencia, no lo menciones. El liderazgo no es una habilidad universal deseable — es específica a ciertos roles y perfiles.\n\n";
-  instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
+  if (isEnglish) {
+    instrBlock += "Calculate these scores before writing the JSON (scale 0-100, NEVER leave at 0):\n";
+    instrBlock += "- atsScore: overall document quality. A resume without headline, professional profile and achievements CANNOT exceed 50. Be honest.\n";
+    instrBlock += "- scorePotencial: possible score if improvements are implemented (always higher than atsScore)\n";
+    instrBlock += "- impactDensityScore: count how many experiences have numbers, percentages or measurable results. If none have them, score is below 20.\n\n";
+    instrBlock += "CRITICAL: before writing any diagnostic field, look for evidence in the document text. If you don't find it, write 'Not detected in document' instead of inventing.\n\n";
+    instrBlock += "OPTIMAL RESUME STRUCTURE — use this as reference to evaluate the document:\n";
+    instrBlock += "An optimal resume has: (1) Specific headline with role and value proposition, (2) Professional profile of 3-4 lines with years of experience, specialty and differential value, (3) Experience with company, role, dates and at least 2 quantified achievements per position using action verbs, (4) Education with institution, degree and graduation year, (5) Relevant technical and soft skills for the sector, (6) Complete contact info: email, phone, LinkedIn, city.\n";
+    instrBlock += "SCORE PENALTY: if headline is missing → max atsScore 55. If professional profile missing → max atsScore 60. If no experience has quantified achievements → max atsScore 50. If two or more required sections missing → max atsScore 45.\n\n";
+    instrBlock += "FINAL REMINDER: all JSON text in SECOND PERSON ('your profile', 'your achievements', 'your narrative'). NEVER third person.\n";
+    instrBlock += "LANGUAGE: ALL text fields must be in English. Professional, clear, second person.\n\n";
+    instrBlock += "TARGET ROLES: identify minimum 4 roles for the profile. Include the current/obvious role BUT ALSO similar, adjacent roles and in compatible sectors. Think about skill transferability, not just the exact role.\n\n";
+    instrBlock += "STRENGTHS AND OPPORTUNITIES: generate minimum 4 strengths and 4 improvement opportunities. Each must be specific to the analyzed document — mention real companies, roles, skills or experiences. Avoid generalities. Opportunities must include a concrete improvement action.\n\n";
+    instrBlock += "ABSOLUTE PROHIBITION — LEADERSHIP: DO NOT recommend 'developing leadership skills' unless the resume shows concrete evidence of people management. If there is no evidence, do not mention it.\n\n";
+    instrBlock += "Return ONLY the following JSON with real data from the document:\n\n";
+  } else {
+    instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
+    instrBlock += "- atsScore: calidad global del documento. Un CV sin titular, sin perfil profesional y sin logros NO puede superar 50. Sé honesto.\n";
+    instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
+    instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
+    instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto del documento. Si no la encontras, escribi 'No detectado en el documento' en lugar de inventar.\n\n";
+    instrBlock += "ESTRUCTURA DE CV ÓPTIMO — usá esto como referencia para evaluar el documento:\n";
+    instrBlock += "Un CV óptimo tiene: (1) Titular específico con rol y propuesta de valor, (2) Perfil profesional de 3-4 líneas con años de experiencia, especialidad y valor diferencial, (3) Experiencias con empresa, rol, fechas y al menos 2 logros cuantificados por puesto usando verbos de acción, (4) Educación con institución, título y año de graduación, (5) Habilidades técnicas y blandas relevantes al sector, (6) Datos de contacto completos: email, teléfono, LinkedIn, ciudad.\n";
+    instrBlock += "PENALIZACIÓN DE SCORE: si falta el titular → atsScore máximo 55. Si falta el perfil profesional → atsScore máximo 60. Si ninguna experiencia tiene logros cuantificados → atsScore máximo 50. Si faltan dos o más secciones obligatorias → atsScore máximo 45.\n\n";
+    instrBlock += "RECORDATORIO FINAL: todo el texto del JSON en SEGUNDA PERSONA ('tu perfil', 'tus logros', 'tu narrativa'). NUNCA tercera persona.\n";
+    instrBlock += "IDIOMA: todos los campos de texto en español rioplatense. Segunda persona ('tu perfil', 'tu experiencia').\n\n";
+    instrBlock += "ROLES OBJETIVO: identificá mínimo 4 roles para el perfil. Incluí el rol actual/obvio PERO TAMBIÉN roles similares, adyacentes y en sectores compatibles. Por ejemplo si alguien es recepcionista: sugerí también asistente virtual, coordinadora administrativa, atención al cliente corporativo, asistente de RRHH. Si trabajó en educación: sugerí también capacitación corporativa, diseño instruccional, contenidos. Pensá en transferibilidad de skills, no solo en el rol exacto.\n\n";
+    instrBlock += "FORTALEZAS Y OPORTUNIDADES: generá mínimo 4 fortalezas y 4 oportunidades de mejora. Cada una debe ser específica al documento analizado — mencioná empresas, roles, habilidades o experiencias reales. Evitá generalidades. Las oportunidades deben incluir una acción concreta de mejora, no solo el diagnóstico del problema.\n\n";
+    instrBlock += "PROHIBICIÓN ABSOLUTA — LIDERAZGO: NO recomendés 'desarrollar capacidad de liderazgo' ni ninguna variante de esa recomendación SALVO que el CV muestre evidencia concreta de liderazgo de personas (equipo a cargo, coordinación de equipos, gestión de personas). Si no hay evidencia, no lo menciones. El liderazgo no es una habilidad universal deseable — es específica a ciertos roles y perfiles.\n\n";
+    instrBlock += "Devuelve SOLO el siguiente JSON con datos reales del documento:\n\n";
+  }
 
   // ── Schema adicional para plan PRO ────────────────────────────────────────
   const proSchema = plan === "pro" || plan === "professional" ? (
