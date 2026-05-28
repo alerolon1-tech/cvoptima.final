@@ -565,6 +565,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
     instrBlock += "TARGET ROLES: identify minimum 4 roles for the profile. Include the current/obvious role BUT ALSO similar, adjacent roles and in compatible sectors. Think about skill transferability, not just the exact role.\n\n";
     instrBlock += "STRENGTHS AND OPPORTUNITIES: generate minimum 4 strengths and 4 improvement opportunities. Each must be specific to the analyzed document — mention real companies, roles, skills or experiences. Avoid generalities. Opportunities must include a concrete improvement action.\n\n";
     instrBlock += "ABSOLUTE PROHIBITION — LEADERSHIP: DO NOT recommend 'developing leadership skills' unless the resume shows concrete evidence of people management. If there is no evidence, do not mention it.\n\n";
+    instrBlock += "IMPORTANT: The 'prioridad' field values MUST always be exactly 'Alta', 'Media', or 'Baja' (these are internal data codes, not display text). ALL other text fields must be in English.\n\n";
     instrBlock += "Return ONLY the following JSON with real data from the document:\n\n";
   } else {
     instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
