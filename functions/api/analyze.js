@@ -317,7 +317,7 @@ export async function onRequest(context) {
             prioridad: 'Alta',
             categoria: 'Logros',
             titulo: 'Incorporá logros en tus experiencias — cuantitativos o cualitativos',
-            detalle: 'Tus experiencias describen tareas pero no muestran resultados. Podés agregar logros cuantitativos (con número, porcentaje o cifra) o cualitativos (con verbo de acción y resultado concreto).' + ejemplos,
+            detalle: (isEnglish ? 'Your experience sections describe tasks but do not show results. You can add quantitative achievements (with number, percentage or figure) or qualitative ones (with action verb and concrete result).' : 'Tus experiencias describen tareas pero no muestran resultados. Podés agregar logros cuantitativos (con número, porcentaje o cifra) o cualitativos (con verbo de acción y resultado concreto).') + ejemplos,
             impactoScore: (recsLogros[0] && recsLogros[0].impactoScore) || '+15 puntos'
           };
         } else {
@@ -344,7 +344,13 @@ export async function onRequest(context) {
     const secciones = result.seccionesDetectadas || {};
     const recsAuto = [];
     if (!secciones.perfilProfesional) {
-      recsAuto.push({
+      recsAuto.push(isEnglish ? {
+        prioridad: "Alta",
+        categoria: "Headline",
+        titulo: "Add a headline and professional summary",
+        detalle: "Your resume does not have a headline or professional summary. These are the first sections a recruiter reads — without them, your profile does not communicate who you are or what you are looking for. Add 2-3 lines summarizing your role, experience and value proposition.",
+        impactoScore: "+12"
+      } : {
         prioridad: "Alta",
         categoria: "Estructura",
         titulo: "Agregar titular y perfil profesional",
@@ -353,7 +359,13 @@ export async function onRequest(context) {
       });
     }
     if (!secciones.logros && result.impactDensityScore < 30) {
-      recsAuto.push({
+      recsAuto.push(isEnglish ? {
+        prioridad: "Alta",
+        categoria: "Achievements",
+        titulo: "Add quantified achievements to your experience",
+        detalle: "Your experience sections describe responsibilities but do not show results. Transform at least one task per position into an achievement with a number: number of clients served, percentage of improvement, volume managed.",
+        impactoScore: "+15"
+      } : {
         prioridad: "Alta",
         categoria: "Logros",
         titulo: "Incorporar logros cuantificados en tus experiencias",
