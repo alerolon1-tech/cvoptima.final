@@ -679,12 +679,12 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
       '  "scorePotencial": 80,\n' +
       '  "impactDensityScore": 55,\n' +
       '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-      '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
-      '  "resumenEjecutivo": "Nombre + titular actual + diagnostico especifico del perfil LinkedIn como herramienta de empleabilidad. 3-4 oraciones.",\n' +
-      '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al perfil"}],\n' +
+      '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score. If no quantified achievements write: No quantified achievements detected",\n' +
+      '  "resumenEjecutivo": "Name + current headline + LinkedIn profile diagnosis as employability tool. 3-4 sentences.",\n' +
+      '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the profile"}],\n' +
       '  "fortalezas": [{"titulo": "titulo concreto sobre un aspecto especifico del perfil (titular, experiencia, aptitudes, certificaciones, etc)", "detalle": "evidencia especifica del perfil LinkedIn"}],\n' +
       '  "debilidades": [{"titulo": "aspecto especifico que falta o es debil (extracto, URL, descripciones, recomendaciones, logros, etc)", "detalle": "por que afecta la empleabilidad", "accion": "accion concreta y especifica para mejorar este punto"}],\n' +
-      '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Titular|Extracto|Experiencias|Aptitudes|Completitud|Narrativa|Logros", "titulo": "mejora concreta del perfil LinkedIn", "detalle": "como aplicar esta mejora en este perfil concreto — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N"}],\n' +
+      (isEnglish ? '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Headline|Summary|Experience|Skills|Completeness|Narrative|Achievements", "titulo": "specific LinkedIn improvement in English", "detalle": "how to apply this to this specific profile", "impactoScore": "+N"}],\n' : '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Titular|Extracto|Experiencias|Aptitudes|Completitud|Narrativa|Logros", "titulo": "mejora concreta del perfil LinkedIn", "detalle": "como aplicar esta mejora en este perfil concreto — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N"}],\n') +
       '  "perfilEmpleabilidad": {\n' +
       '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre visibilidad del perfil LinkedIn"},\n' +
       '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre coherencia narrativa entre secciones"},\n' +
@@ -740,16 +740,16 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
         '  "scorePotencial": 80,\n' +
         '  "impactDensityScore": 55,\n' +
         '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-        '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
-        '  "resumenEjecutivo": "Nombre + rol actual + empresa + diagnostico especifico del perfil. 3-4 oraciones.",\n' +
-        '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico al documento"}],\n' +
+        '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score. If no quantified achievements write: No quantified achievements detected",\n' +
+        '  "resumenEjecutivo": "Name + current role + company + specific profile diagnosis. 3-4 sentences.",\n' +
+        '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the document"}],\n' +
         '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del documento"}],\n' +
         '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al documento", "accion": "accion concreta"}],\n' +
         (isEnglish ? '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Headline|Structure|Achievements|Keywords|Sections|Verbs|Format", "titulo": "specific improvement title in English", "detalle": "how to apply this improvement to this specific document — NEVER suggest job hunting or sector change", "impactoScore": "+N"}],\n' : '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N"}],\n') +
         '  "perfilEmpleabilidad": {\n' +
-        '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
-        '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
-        '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"}\n' +
+        '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 concrete sentence"},\n' +
+        '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 concrete sentence"},\n' +
+        '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 concrete sentence"}\n' +
         '  },\n' +
         '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
         '  "analisisLogros": {\n' +
@@ -758,7 +758,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
         '    "logrosDebiles": [],\n' +
         '    "responsabilidadesSinImpacto": []\n' +
         '  },\n' +
-        '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "1 oracion sobre el hilo conductor del perfil", "progresion": "", "oportunidades": []},\n' +
+        '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "profile thread — 1 sentence", "progresion": "", "oportunidades": []},\n' +
         '  "mapaHabilidades": {"declaradas": ["habilidad1", "habilidad2"], "detectadas": [], "aIncorporar": []},\n' +
         '  "linkedin_analysis": null\n' +
         "}"
@@ -776,30 +776,30 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
       '  "scorePotencial": 80,\n' +
       '  "impactDensityScore": 55,\n' +
       '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-      '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
-      '  "resumenEjecutivo": "Nombre + rol actual + empresa + diagnostico especifico. 3-4 oraciones.",\n' +
+      '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score. If no quantified achievements write: No quantified achievements detected",\n' +
+      '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences.",\n' +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
       '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
       '  "seccionesFaltantes": [],\n' +
-      (isEnglish ? '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text in English"}],\n' : '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico"}],\n') +
+      (isEnglish ? '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text in English"}],\n' : '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text"}],\n') +
       '  "analisisLogros": {\n' +
       '    "logrosFuertes": [{"frase": "frase exacta del CV", "motivo": "por que es fuerte"}],\n' +
       '    "logrosCualitativos": [{"frase": "frase exacta del CV que muestre un resultado o cambio concreto sin número usando verbos de acción", "motivo": "qué impacto relacional o de proceso refleja"}],\n' +
       '    "logrosDebiles": [{"frase": "frase del CV", "motivo": "por que es debil", "sugerencia": "como mejorarlo"}],\n' +
       '    "responsabilidadesSinImpacto": [{"frase": "frase del CV", "oportunidad": "como convertirlo en logro"}]\n' +
       '  },\n' +
-      '  "verbosImpacto": {"detectados": [], "debiles": [{"verbo": "verbo", "contexto": "frase", "alternativas": []}]},\n' +
-      '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "texto", "progresion": "texto", "oportunidades": []},\n' +
+      '  "verbosImpacto": {"detectados": [], "debiles": [{"verbo": "verb", "contexto": "phrase", "alternativas": []}]},\n' +
+      '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "text", "progresion": "text", "oportunidades": []},\n' +
       '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
       '  "areasProfesionales": [],\n' +
-      '  "rolesObjetivo": [{"titulo": "rol exacto y roles similares o adyacentes al perfil detectado", "matchPct": 75, "seniority": "nivel", "sector": "sector compatible además del sector actual", "justificacion": "por qué este rol y sector son compatibles con la trayectoria", "skills": ["skill que ya tiene", "skill a desarrollar"]}],\n' +
+      '  "rolesObjetivo": [{"titulo": "exact role and similar/adjacent roles for the profile", "matchPct": 75, "seniority": "nivel", "sector": "compatible sector beyond the current one", "justificacion": "why this role and sector fit the trajectory", "skills": ["existing skill", "skill to develop"]}],\n' +
       '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del CV"}],\n' +
       '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al CV", "accion": "accion concreta"}],\n' +
       '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N"}],\n' +
       '  "perfilEmpleabilidad": {\n' +
-      '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
-      '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"},\n' +
-      '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion concreta"}\n' +
+      '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 concrete sentence"},\n' +
+      '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 concrete sentence"},\n' +
+      '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 concrete sentence"}\n' +
       '  },\n' +
       '  "linkedin_analysis": null\n' +
       (proSchema ? proSchema : '') +
@@ -826,46 +826,46 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
     '  "scorePotencial": 80,\n' +
     '  "impactDensityScore": 55,\n' +
     '  "impactDensityLabel": "Alto|Medio|Bajo",\n' +
-    '  "impactDensityDiagnostico": "cita textualmente 1-2 frases del documento que justifiquen el score. Si no hay logros cuantificados escribe: Sin logros cuantificados detectados",\n' +
-    (isEnglish ? '  "resumenEjecutivo": "Name + current role + CV diagnosis. 3-4 sentences in English.",\n' : '  "resumenEjecutivo": "Nombre + rol actual + diagnostico del CV. 3-4 oraciones.",\n') +
+    '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score. If no quantified achievements write: No quantified achievements detected",\n' +
+    (isEnglish ? '  "resumenEjecutivo": "Name + current role + CV diagnosis. 3-4 sentences in English.",\n' : '  "resumenEjecutivo": "Name + current role + resume diagnosis. 3-4 sentences.",\n') +
     '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
     '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
     '  "seccionesFaltantes": [],\n' +
-    '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto especifico"}],\n' +
+    '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text"}],\n' +
     '  "analisisLogros": {\n' +
     '    "logrosFuertes": [{"frase": "frase exacta del CV", "motivo": "por que es fuerte"}],\n' +
     '    "logrosCualitativos": [{"frase": "frase exacta del CV que muestre un resultado o cambio concreto sin número usando verbos de acción", "motivo": "qué impacto relacional o de proceso refleja"}],\n' +
     '    "logrosDebiles": [{"frase": "frase del CV", "motivo": "debil", "sugerencia": "mejora"}],\n' +
     '    "responsabilidadesSinImpacto": [{"frase": "frase del CV", "oportunidad": "como mejorar"}]\n' +
     '  },\n' +
-    '  "verbosImpacto": {"detectados": [], "debiles": [{"verbo": "verbo", "contexto": "frase", "alternativas": []}]},\n' +
-    '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "texto", "progresion": "texto", "oportunidades": []},\n' +
+    '  "verbosImpacto": {"detectados": [], "debiles": [{"verbo": "verb", "contexto": "phrase", "alternativas": []}]},\n' +
+    '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "text", "progresion": "text", "oportunidades": []},\n' +
     '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
     '  "areasProfesionales": [],\n' +
-    '  "rolesObjetivo": [{"titulo": "rol exacto y roles similares o adyacentes al perfil detectado", "matchPct": 75, "seniority": "nivel", "sector": "sector compatible además del sector actual", "justificacion": "por qué este rol y sector son compatibles con la trayectoria", "skills": ["skill que ya tiene", "skill a desarrollar"]}],\n' +
+    '  "rolesObjetivo": [{"titulo": "exact role and similar/adjacent roles for the profile", "matchPct": 75, "seniority": "nivel", "sector": "compatible sector beyond the current one", "justificacion": "why this role and sector fit the trajectory", "skills": ["existing skill", "skill to develop"]}],\n' +
     (isEnglish ? '  "fortalezas": [{"titulo": "specific strength title", "detalle": "evidence from the resume"}],\n' : '  "fortalezas": [{"titulo": "titulo concreto", "detalle": "evidencia del CV"}],\n') +
     (isEnglish ? '  "debilidades": [{"titulo": "specific weakness title", "detalle": "reference to the resume", "accion": "concrete action to improve"}],\n' : '  "debilidades": [{"titulo": "titulo concreto", "detalle": "referencia al CV", "accion": "accion concreta"}],\n') +
-    '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N"}],\n' +
+    (isEnglish ? '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Headline|Structure|Achievements|Keywords|Sections|Verbs|Format", "titulo": "specific improvement in English", "detalle": "how to apply this to this specific document", "impactoScore": "+N"}],\n' : '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del documento", "detalle": "como aplicar esta mejora en este documento especifico — NUNCA sugerir buscar empleo o cambiar sector", "impactoScore": "+N"}],\n') +
     '  "perfilEmpleabilidad": {\n' +
-    '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre el CV"},\n' +
-    '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre el CV"},\n' +
-    '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oracion sobre el CV"}\n' +
+    '    "visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 sentence about the resume"},\n' +
+    '    "coherencia":  {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 sentence about the resume"},\n' +
+    '    "movilidad":   {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 sentence about the resume"}\n' +
     '  },\n' +
     '  "linkedin_analysis": {\n' +
     '    "coherencia_score": 70,\n' +
     '    "coherencia_nivel": "Alta|Media|Baja",\n' +
     '    "completitud_perfil": 70,\n' +
-    '    "titular_actual": "texto exacto del titular de LinkedIn",\n' +
-    '    "titular_sugerido": "propuesta mejorada alineada con el CV: rol + propuesta de valor + keywords",\n' +
-    '    "extracto_diagnostico": "el extracto refleja la narrativa del CV? que falta? tono, longitud, llamado a la accion",\n' +
-    '    "experiencias_diagnostico": "las experiencias en LinkedIn coinciden con el CV? hay gaps, cargos distintos o fechas inconsistentes?",\n' +
-    '    "aptitudes_diagnostico": "las aptitudes de LinkedIn complementan las habilidades del CV? que falta validar?",\n' +
-    '    "completitud_diagnostico": "que secciones faltan: foto, banner, URL personalizada, recomendaciones de terceros, certificaciones",\n' +
-    '    "narrativa_diagnostico": "el titular, extracto y experiencias de LinkedIn cuentan la misma historia que el CV?",\n' +
-    '    "coincidencias": ["punto de alineacion real entre CV y LinkedIn 1", "punto 2", "punto 3"],\n' +
-    '    "brechas": ["contradiccion o brecha real entre CV y LinkedIn 1", "brecha 2", "brecha 3"],\n' +
-    '    "recomendaciones_linkedin": ["accion concreta para alinear LinkedIn con el CV 1", "accion 2", "accion 3", "accion 4"],\n' +
-    '    "resumen_coherencia": "diagnostico de coherencia entre CV y LinkedIn: que coincide, que contradice, que impacto tiene en la empleabilidad. 3-4 oraciones.",\n' +
+    '    "titular_actual": "exact LinkedIn headline text",\n' +
+    '    "titular_sugerido": "improved proposal: role + value proposition + keywords",\n' +
+    '    "extracto_diagnostico": "does the summary reflect the resume? tone, length, call to action",\n' +
+    '    "experiencias_diagnostico": "do LinkedIn experiences match the resume? gaps, different titles, inconsistent dates?",\n' +
+    '    "aptitudes_diagnostico": "do LinkedIn skills complement the resume? what needs validation?",\n' +
+    '    "completitud_diagnostico": "missing sections: photo, banner, custom URL, recommendations, certifications",\n' +
+    '    "narrativa_diagnostico": "do the headline, summary and experience tell the same story as the resume?",\n' +
+    '    "coincidencias": ["real alignment point 1", "point 2", "point 3"],\n' +
+    '    "brechas": ["real gap or contradiction 1", "gap 2", "gap 3"],\n' +
+    '    "recomendaciones_linkedin": ["concrete action to align LinkedIn with resume 1", "action 2", "action 3", "action 4"],\n' +
+    '    "resumen_coherencia": "coherence diagnosis: what matches, what contradicts, impact on employability. 3-4 sentences.",\n' +
     '    "dimensiones_li": {\n' +
     '      "titular": 65,\n' +
     '      "extracto": 70,\n' +
@@ -974,4 +974,3 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
-
