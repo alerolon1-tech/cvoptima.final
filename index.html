@@ -695,11 +695,11 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 <!-- ══ LOADING ════════════════════════════════════════════════════════════════ -->
 <div id="pg-load" class="page" style="display:none">
 <div class="load">
-  <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="justify-content:center;margin-bottom:20px"><span data-i18n="back-fix"><span data-i18n="back-fix">← Volver y corregir</span></span></button>
+  <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="justify-content:center;margin-bottom:20px"><span data-i18n="back-fix"><span data-i18n="back-fix"><span data-i18n="back-fix">← Volver y corregir</span></span></span></button>
   <div class="spin"></div>
-  <h2 data-i18n="loading-title"><span data-i18n="loading-title">Analizando tu perfil</span></h2>
-  <p data-i18n="loading-subtitle">Procesando con criterios de empleabilidad reales...</p>
-  <p data-i18n="loading-time" style="font-size:12px;color:var(--tx3);margin-top:-8px;margin-bottom:4px"><span data-i18n="loading-time">El análisis tarda entre 15 y 30 segundos</span></p>
+  <h2 data-i18n="loading-title"><span data-i18n="loading-title"><span data-i18n="loading-title">Analizando tu perfil</span></span></h2>
+  <p data-i18n="loading-subtitle"><span data-i18n="loading-subtitle">Procesando con criterios de empleabilidad reales...</span></p>
+  <p data-i18n="loading-time" style="font-size:12px;color:var(--tx3);margin-top:-8px;margin-bottom:4px"><span data-i18n="loading-time"><span data-i18n="loading-time">El análisis tarda entre 15 y 30 segundos</span></span></p>
   <ul class="steps">
     <li class="step" id="s1"><span class="sdot"></span><span data-i18n="step1">Leyendo estructura y secciones</li>
     <li class="step" id="s2"><span class="sdot"></span><span data-i18n="step2">Detectando logros vs responsabilidades</li>
@@ -724,7 +724,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
   <!-- ── Dash header ── -->
   <div class="dh fu">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
-      <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="margin-bottom:0"><span data-i18n="back-new">← Nuevo análisis</span></button>
+      <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="margin-bottom:0"><span data-i18n="back-new"><span data-i18n="back-new">← Nuevo análisis</span></span></button>
     </div>
     <div>
       <div class="dh-name" id="d-name">Diagnóstico</div>
@@ -759,12 +759,12 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
     <div class="veredicto-grid">
       <div class="veredicto-score-wrap">
         <div class="veredicto-score" id="v-score">—</div>
-        <div class="veredicto-score-lbl" id="v-score-lbl">Score de Empleabilidad</div>
+        <div class="veredicto-score-lbl" id="v-score-lbl"><span data-i18n="score-emp-lbl">Score de Empleabilidad</span></div>
         <div class="veredicto-score-of">/ 100</div>
       </div>
       <div class="veredicto-content">
         <div class="veredicto-lectura" id="v-lectura"></div>
-        <div data-i18n="sig-title" class="senales-titulo">Las 3 señales más importantes</div>
+        <div data-i18n="sig-title" class="senales-titulo"><span data-i18n="sig-title">Las 3 señales más importantes</span></div>
         <div class="senales-list" id="v-senales"></div>
       </div>
     </div>
@@ -772,7 +772,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       <div class="vmeta-card">
         <div data-i18n="score-potencial" class="vmeta-lbl">Score potencial</div>
         <div class="vmeta-val" id="v-pot">—</div>
-        <div data-i18n="score-alcanzable" class="vmeta-sub">alcanzable con mejoras</div>
+        <div data-i18n="score-alcanzable" class="vmeta-sub"><span data-i18n="score-alcanzable">alcanzable con mejoras</span></div>
       </div>
       <div class="vmeta-card">
         <div data-i18n="score-impact" class="vmeta-lbl">Impact Density</div>
@@ -820,7 +820,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
   <!-- Preview campos bloqueados (Starter) -->
   <div id="starter-preview-section" style="display:none">
     <div class="pn">
-      <div class="pn-t"><span data-i18n="vista-previa-label">Vista previa del análisis</span> <span style="cursor:pointer;font-size:10px" data-i18n="ver-analisis" onclick="scrollToPlanes()">Ver análisis completo →</span></div>
+      <div class="pn-t"><span data-i18n="vista-previa-label">Vista previa del análisis</span> <span style="cursor:pointer;font-size:10px" data-i18n="ver-analisis" onclick="scrollToPlanes()"><span data-i18n="ver-analisis">Ver análisis completo →</span></span></div>
       <div id="starter-preview-body"></div>
     </div>
   </div>
@@ -834,12 +834,12 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
           <canvas id="starter-radar-c"></canvas>
           <div class="starter-radar-overlay">
             <span>🔒</span>
-            <div data-i18n="ver-desglose">Ver desglose completo</div>
+            <div data-i18n="ver-desglose"><span data-i18n="ver-desglose">Ver desglose completo</span></div>
           </div>
         </div>
       </div>
       <div class="radar-how">
-        <div data-i18n="radar-guide-title" class="radar-how-t">Cómo leer este gráfico</div>
+        <div data-i18n="radar-guide-title" class="radar-how-t"><span data-i18n="radar-guide-title">Cómo leer este gráfico</span></div>
         <div data-i18n="radar-guide-text" class="radar-how-d">Cada eje representa una dimensión de tu perfil. Cuanto más grande es el área coloreada, más sólido es tu CV en esa dimensión. Una forma equilibrada y amplia indica un perfil bien desarrollado.</div>
       </div>
       <div id="starter-radar-legend" class="radar-legend"></div>
@@ -858,12 +858,12 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
           <div class="lock-title">Análisis completo de coherencia disponible en plan Diagnóstico</div>
           <div class="lock-sub">Incluye diagnóstico por sección, radar comparativo CV↔LinkedIn y plan de alineación.</div>
         </div>
-        <button class="lock-btn" onclick="scrollToPlanes()"><span data-i18n="ver-planes">Ver planes →</span></button>
+        <button class="lock-btn" onclick="scrollToPlanes()"><span data-i18n="ver-planes"><span data-i18n="ver-planes">Ver planes →</span></span></button>
       </div>
     </div>
   </div>
     <div class="pn">
-      <div class="empl-social-title">Perfil de empleabilidad social</div>
+      <div class="empl-social-title"><span data-i18n="empl-social-title">Perfil de empleabilidad social</span></div>
       <div id="starter-empl-bars"></div>
     </div>
   </div>
@@ -908,15 +908,15 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
           <!-- Guía de lectura de dimensiones -->
           <div style="margin-bottom:16px;background:var(--bg3);border-radius:var(--r);padding:16px 18px">
-            <div style="font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal2);margin-bottom:12px">Qué mide cada dimensión</div>
-            <div style="font-size:11px;color:var(--tx2);line-height:1.6;margin-bottom:12px">Cuando enviás tu CV a una empresa, en muchos casos lo lee primero un sistema automático — no una persona. Ese sistema busca palabras, estructura y patrones específicos. Si tu CV no los tiene, puede quedarse fuera antes de que alguien lo vea. Estas dimensiones miden exactamente eso.</div>
+            <div style="font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal2);margin-bottom:12px"><span data-i18n="dims-subtitle">Qué mide cada dimensión</span></div>
+            <div style="font-size:11px;color:var(--tx2);line-height:1.6;margin-bottom:12px"><span data-i18n="dims-intro">Cuando enviás tu CV a una empresa, en muchos casos lo lee primero un sistema automático — no una persona. Ese sistema busca palabras, estructura y patrones específicos. Si tu CV no los tiene, puede quedarse fuera antes de que alguien lo vea. Estas dimensiones miden exactamente eso.</span></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Keywords</span>¿Tu CV usa las palabras que los reclutadores y sistemas buscan? Cada sector y rol tiene términos específicos — si no aparecen, el perfil pierde visibilidad.</div>
-              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Verbos de acción</span>¿Tus experiencias muestran lo que hiciste o solo describen tu función? Verbos como "lideré", "implementé" o "reduje" comunican resultados concretos, no solo tareas.</div>
-              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Métricas</span>¿Hay números en tu CV? Cifras, porcentajes o cantidades concretas hacen que tus logros sean más creíbles y medibles. No siempre es posible, pero cuando están marcan la diferencia.</div>
-              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Estructura</span>¿Tu CV tiene las secciones que se esperan? Titular, perfil profesional, experiencia, educación y habilidades son las secciones que los sistemas y reclutadores buscan primero.</div>
-              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Densidad de habilidades</span>¿Listás tus habilidades de forma explícita? Un CV que no nombra sus competencias clave puede ser invisible para los sistemas de búsqueda, aunque la persona las tenga.</div>
-              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Claridad de roles</span>¿Se entiende bien cada posición que tuviste? Empresa, cargo, período y responsabilidades tienen que leerse sin esfuerzo — tanto para los sistemas como para quien te lee.</div>
+              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Keywords</span><span data-i18n="dims-kw-desc">¿Tu CV usa las palabras que los reclutadores y sistemas buscan? Cada sector y rol tiene términos específicos — si no aparecen, el perfil pierde visibilidad.</span></div>
+              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Verbos de acción</span><span data-i18n="dims-verbs-desc">¿Tus experiencias muestran lo que hiciste o solo describen tu función? Verbos como "lideré", "implementé" o "reduje" comunican resultados concretos, no solo tareas.</span></div>
+              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px"><span data-i18n="dims-met-title">Métricas</span></span><span data-i18n="dims-met-desc">¿Hay números en tu CV? Cifras, porcentajes o cantidades concretas hacen que tus logros sean más creíbles y medibles. No siempre es posible, pero cuando están marcan la diferencia.</span></div>
+              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px">Estructura</span><span data-i18n="dims-est-desc">¿Tu CV tiene las secciones que se esperan? Titular, perfil profesional, experiencia, educación y habilidades son las secciones que los sistemas y reclutadores buscan primero.</span></div>
+              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px"><span data-i18n="dims-hab-title">Densidad de habilidades</span></span><span data-i18n="dims-hab-desc">¿Listás tus habilidades de forma explícita? Un CV que no nombra sus competencias clave puede ser invisible para los sistemas de búsqueda, aunque la persona las tenga.</span></div>
+              <div style="font-size:11px;color:var(--tx2);line-height:1.55;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:2px solid var(--teal)"><span style="color:var(--teal2);font-weight:600;display:block;margin-bottom:2px"><span data-i18n="dims-roles-title">Claridad de roles</span></span><span data-i18n="dims-roles-desc">¿Se entiende bien cada posición que tuviste? Empresa, cargo, período y responsabilidades tienen que leerse sin esfuerzo — tanto para los sistemas como para quien te lee.</span></div>
             </div>
             <div style="font-size:11px;color:var(--tx3);padding-top:10px;border-top:1px solid var(--b1)">📊 <strong style="color:var(--tx2)">Cómo leer el radar:</strong> cada eje representa una dimensión. Cuanto más cerca del borde exterior, mejor posicionado está tu perfil en esa área. Un polígono con lados parejos indica un CV equilibrado; uno irregular muestra dónde están las oportunidades de mejora.</div>
           </div>
@@ -948,7 +948,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
               <div id="d-faltantes" style="margin-top:12px"></div>
             </div>
             <div>
-              <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px"><span data-i18n="sec-alertas">Alertas</span></div>
+              <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px"><span data-i18n="sec-alertas"><span data-i18n="sec-alertas">Alertas</span></span></div>
               <div id="d-alertas"></div>
             </div>
           </div>
@@ -1179,12 +1179,12 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
   ════════════════════════════════════════════ -->
   <div id="acciones-wrap" style="display:none">
     <div class="acciones-panel">
-      <div data-i18n="label-plan-accion" class="acciones-title" data-i18n="label-plan-accion">Plan de acción · ordenado por prioridad e impacto</div>
+      <div data-i18n="label-plan-accion" class="acciones-title" data-i18n="label-plan-accion"><span data-i18n="label-plan-accion">Plan de acción · ordenado por prioridad e impacto</span></div>
       <div class="horizonte-tabs">
-        <button class="ht active" onclick="filterAcciones('todas', this)"><span data-i18n="filter-todas">Todas las acciones</span></button>
-        <button data-i18n="label-prioridad-alta" class="ht" onclick="filterAcciones('Alta', this)"><span data-i18n="label-prioridad-alta">Prioridad alta</button>
-        <button data-i18n="label-prioridad-media" class="ht" onclick="filterAcciones('Media', this)">Prioridad media</button>
-        <button class="ht" onclick="filterAcciones('Baja', this)">Prioridad baja</button>
+        <button class="ht active" onclick="filterAcciones('todas', this)"><span data-i18n="filter-todas"><span data-i18n="filter-todas">Todas las acciones</span></span></button>
+        <button data-i18n="label-prioridad-alta" class="ht" onclick="filterAcciones('Alta', this)"><span data-i18n="label-prioridad-alta"><span data-i18n="label-prioridad-alta">Prioridad alta</span></button>
+        <button data-i18n="label-prioridad-media" class="ht" onclick="filterAcciones('Media', this)"><span data-i18n="label-prioridad-media">Prioridad media</span></button>
+        <button class="ht" onclick="filterAcciones('Baja', this)"><span data-i18n="label-prioridad-baja">Prioridad baja</span></button>
       </div>
       <div id="d-acciones"></div>
     </div>
@@ -1192,7 +1192,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
   <!-- Disclaimer -->
   <div class="fu" style="margin-top:32px;padding:16px 20px;border-top:1px solid var(--b2);border-radius:8px;background:var(--bg2)">
-    <p style="font-size:11px;color:var(--tx3);line-height:1.7;text-align:center;max-width:680px;margin:0 auto"><strong data-i18n="disclaimer-title" style="color:var(--tx2)">Aviso importante:</strong> <span data-i18n="disclaimer-text">Este análisis es una primera aproximación generada por inteligencia artificial. Puede contener errores o interpretaciones que no reflejen el contexto específico de tu búsqueda, sector o puesto. Los resultados son orientativos y deben leerse de manera crítica. Te recomendamos complementar este diagnóstico con tu propio criterio y, cuando sea posible, con la mirada de un profesional de empleabilidad.</span></p>
+    <p style="font-size:11px;color:var(--tx3);line-height:1.7;text-align:center;max-width:680px;margin:0 auto"><strong data-i18n="disclaimer-title" style="color:var(--tx2)"><span data-i18n="disclaimer-title">Aviso importante:</span></strong> <span data-i18n="disclaimer-text">Este análisis es una primera aproximación generada por inteligencia artificial. Puede contener errores o interpretaciones que no reflejen el contexto específico de tu búsqueda, sector o puesto. Los resultados son orientativos y deben leerse de manera crítica. Te recomendamos complementar este diagnóstico con tu propio criterio y, cuando sea posible, con la mirada de un profesional de empleabilidad.</span></p>
   </div>
 
   <!-- Botón nuevo diagnóstico -->
@@ -1216,7 +1216,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
         <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0">Guardá el análisis actual para compararlo con una versión mejorada del CV. Podés guardar hasta 3 versiones durante la sesión.</div>
         <div id="comp-versions-list" style="margin-bottom:14px"></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button onclick="guardarVersion()" id="comp-save-btn" style="padding:9px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer"><span data-i18n="guardar-version">💾 Guardar versión actual</span></button>
+          <button onclick="guardarVersion()" id="comp-save-btn" style="padding:9px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer"><span data-i18n="guardar-version"><span data-i18n="guardar-version">💾 Guardar versión actual</span></span></button>
           <button onclick="compararVersiones()" id="comp-compare-btn" style="display:none;padding:9px 18px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer">📊 Ver comparativa</button>
         </div>
         <div id="comp-resultado" style="margin-top:16px"></div>
@@ -1299,15 +1299,15 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-rol-lbl">Rol buscado *</span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-rol-lbl"><span data-i18n="merc-rol-lbl">Rol buscado *</span></span></label>
             <input id="merc-rol" type="text" placeholder="Ej: Analista de RRHH" data-i18n-placeholder="merc-rol-ph" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-sector-lbl">Sector *</span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-sector-lbl"><span data-i18n="merc-sector-lbl">Sector *</span></span></label>
             <input id="merc-sector" type="text" placeholder="Ej: Tecnología, Salud, Educación" data-i18n-placeholder="merc-sector-ph" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-seniority-lbl">Seniority</span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-seniority-lbl"><span data-i18n="merc-seniority-lbl">Seniority</span></span></label>
             <select id="merc-seniority" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
               <option value="" data-i18n-opt="merc-no-esp">No especificado</option>
               <option value="Junior">Junior</option>
@@ -1317,11 +1317,11 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
             </select>
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-ubicacion-lbl">Ubicación</span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-ubicacion-lbl"><span data-i18n="merc-ubicacion-lbl">Ubicación</span></span></label>
             <input id="merc-ubicacion" type="text" placeholder="Ej: Buenos Aires, Argentina" data-i18n-placeholder="merc-ubicacion-ph" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-empresa-lbl">Tipo de empresa</span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-empresa-lbl"><span data-i18n="merc-empresa-lbl">Tipo de empresa</span></span></label>
             <select id="merc-empresa" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
               <option value="" data-i18n-opt="merc-no-pref">Sin preferencia</option>
               <option value="Startup">Startup</option>
@@ -1332,7 +1332,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
             </select>
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-modalidad-lbl">Modalidad</span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-modalidad-lbl"><span data-i18n="merc-modalidad-lbl">Modalidad</span></span></label>
             <select id="merc-modalidad" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
               <option value="" data-i18n-opt="merc-no-pref">Sin preferencia</option>
               <option value="Presencial">Presencial</option>
@@ -1345,7 +1345,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
         <div id="merc-error" style="display:none;font-size:11px;color:var(--rd);margin-bottom:8px"></div>
         <button onclick="analizarMercado()" id="merc-btn" style="padding:11px 24px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer">
-          <span id="merc-label" data-i18n="analizar-mercado">Analizar mercado →</span>
+          <span id="merc-label" data-i18n="analizar-mercado"><span data-i18n="analizar-mercado">Analizar mercado →</span></span>
         </button>
 
         <div id="merc-loading" style="display:none;margin-top:16px;font-size:12px;color:var(--tx3)"><span data-i18n="merc-loading-text">Buscando datos del mercado en tiempo real... esto puede tardar unos segundos.</span></div>
@@ -1363,7 +1363,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
         <div style="height:16px"></div>
         <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px;padding:10px 14px;background:var(--bg3);border-left:3px solid #0891B2;border-radius:0 var(--r) var(--r) 0">Genera un CV profesional completo en inglés siguiendo las convenciones del mercado anglosajón — no es una traducción sino una reescritura optimizada para ATS y reclutadores de habla inglesa.</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-          <button onclick="generarCVIngles()" id="cv-ing-btn" style="padding:10px 20px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span id="cv-ing-label" data-i18n="generar-ingles">Generar CV en inglés →</span></button>
+          <button onclick="generarCVIngles()" id="cv-ing-btn" style="padding:10px 20px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span id="cv-ing-label" data-i18n="generar-ingles"><span data-i18n="generar-ingles">Generar CV en inglés →</span></span></button>
           <button onclick="dlCVIngles()" id="cv-ing-dl" style="display:none;padding:10px 20px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer">⬇ Descargar PDF</button>
         </div>
         <div id="cv-ing-loading" style="display:none;font-size:12px;color:var(--tx3);margin-bottom:12px">Generando la versión optimizada en inglés... esto puede tardar 20-30 segundos.</div>
@@ -1505,22 +1505,22 @@ var LANG = 'es';
 
 var I18N = {
   es: {
-    'score-potencial': 'Score potencial',
+    'score-potencial': LANG==='en'?'Potential Score':'Score potencial',
     'score-impact': 'Impact Density',
     'vista-previa-label': 'Vista previa del análisis',
     'anticipo-li': 'Anticipo · Coherencia CV ↔ LinkedIn',
     'tab-coherencia': '🔗 Coherencia CV ↔ LinkedIn',
-    'logros-fuertes-lbl': LANG==='en'?'Quantitative achievements ✓':'Logros cuantitativos ✓',
-    'logros-cuali-lbl': LANG==='en'?'Qualitative achievements ◈':'Logros cualitativos ◈',
-    'logros-debiles-lbl': LANG==='en'?'Weak achievements ◆':'Logros débiles ◆',
-    'responsabilidades-lbl': LANG==='en'?'Responsibilities without impact':'Responsabilidades sin impacto',
+    'logros-fuertes-lbl': LANG==='en'?'Quantitative achievements ✓':LANG==='en'?'Quantitative achievements ✓':'Logros cuantitativos ✓',
+    'logros-cuali-lbl': LANG==='en'?'Qualitative achievements ◈':LANG==='en'?'Qualitative achievements ◈':'Logros cualitativos ◈',
+    'logros-debiles-lbl': LANG==='en'?'Weak achievements ◆':LANG==='en'?'Weak achievements ◆':'Logros débiles ◆',
+    'responsabilidades-lbl': LANG==='en'?'Responsibilities without impact':LANG==='en'?'Responsibilities without impact':'Responsabilidades sin impacto',
     'verbos-lbl': 'Verbos de impacto detectados',
-    'narrativa-lbl': LANG==='en'?'Professional narrative':LANG==='en'?'Professional narrative':'Narrativa profesional',
+    'narrativa-lbl': LANG==='en'?'Professional narrative':LANG==='en'?'Professional narrative':LANG==='en'?'Professional narrative':'Narrativa profesional',
     'coherencia-lbl': 'Coherencia CV ↔ LinkedIn',
     'secciones-lbl': 'Secciones detectadas',
-    'habilidades-dec-lbl': LANG==='en'?'Declared skills':'Habilidades declaradas',
-    'habilidades-det-lbl': LANG==='en'?'Detected in text':'Detectadas en el texto',
-    'habilidades-inc-lbl': LANG==='en'?'To incorporate':'A incorporar',
+    'habilidades-dec-lbl': LANG==='en'?'Declared skills':LANG==='en'?'Declared skills':'Habilidades declaradas',
+    'habilidades-det-lbl': LANG==='en'?'Detected in text':LANG==='en'?'Detected in text':'Detectadas en el texto',
+    'habilidades-inc-lbl': LANG==='en'?'To incorporate':LANG==='en'?'To incorporate':'A incorporar',
     'no-detectado': 'No detectado',
     'no-disponible': 'No disponible.',
     'ver-plan-completo': 'Ver plan completo →',
@@ -1545,7 +1545,7 @@ var I18N = {
     'radar-guide-text': 'Cada eje representa una dimensión de tu perfil. Cuanto más grande es el área coloreada, más sólido es tu CV en esa dimensión. Una forma equilibrada y amplia indica un perfil bien desarrollado.',
     'ver-desglose': 'Ver desglose completo',
     'label-dims-perfil': 'Dimensiones del perfil',
-    'score-emp-lbl': 'Score de Empleabilidad',
+    'score-emp-lbl': LANG==='en'?'Employability Score':'Score de Empleabilidad',
     'score-alcanzable': 'alcanzable con mejoras',
     'home-badge': 'Diagnóstico profesional · Empleabilidad en Clave Social',
     'home-title': 'Conocé el impacto real de tu perfil',
@@ -1630,8 +1630,8 @@ var I18N = {
     'ing-loading': 'Generando la versión optimizada en inglés... esto puede tardar 20-30 segundos.',
     'lock-title': 'Análisis completo en plan Diagnóstico',
     'lock-cta': 'Ver plan completo →',
-    'label-fortalezas': LANG==='en'?'Strengths':'Fortalezas',
-    'label-oportunidades': LANG==='en'?'Areas for improvement':'Oportunidades de mejora',
+    'label-fortalezas': LANG==='en'?'Strengths':LANG==='en'?'Strengths':'Fortalezas',
+    'label-oportunidades': LANG==='en'?'Areas for improvement':LANG==='en'?'Areas for improvement':'Oportunidades de mejora',
     'label-fortalezas-li': '✓ Fortalezas',
     'label-oportunidades-li': '◆ Oportunidades de mejora',
     'label-plan-accion': 'Plan de acción · ordenado por prioridad e impacto',
@@ -1645,14 +1645,124 @@ var I18N = {
     'label-starter-desc': 'El análisis completo incluye desglose de dimensiones, análisis de logros, mapa de habilidades, narrativa profesional, LinkedIn y plan de acción priorizado.',
   },
   en: {
-    'logros-cuali-lbl': 'Qualitative achievements ◈',
+    'score-potencial': 'Potential Score',
+    'score-impact': 'Impact Density',
+    'vista-previa-label': 'Analysis preview',
+    'anticipo-li': 'Preview · Resume ↔ LinkedIn Coherence',
+    'tab-coherencia': '🔗 Resume ↔ LinkedIn Coherence',
     'logros-fuertes-lbl': 'Quantitative achievements ✓',
+    'logros-cuali-lbl': 'Qualitative achievements ◈',
     'logros-debiles-lbl': 'Weak achievements ◆',
     'responsabilidades-lbl': 'Responsibilities without impact',
-    'empl-social-title': 'Employability profile',
+    'verbos-lbl': 'Impact verbs detected',
+    'narrativa-lbl': 'Professional narrative',
+    'coherencia-lbl': 'Resume ↔ LinkedIn Coherence',
+    'secciones-lbl': 'Detected sections',
+    'habilidades-dec-lbl': 'Declared skills',
+    'habilidades-det-lbl': 'Detected in text',
+    'habilidades-inc-lbl': 'To incorporate',
+    'no-detectado': 'Not detected',
+    'no-disponible': 'Not available.',
+    'ver-plan-completo': 'View full plan →',
+    'starter-vista-previa': 'Analysis preview',
+    'dl-pdf-btn': '⬇ Download PDF report',
+    'sec-logros-short': 'Achievement analysis',
+    'lock-full': 'Full analysis available in Diagnóstico plan',
+    'logro-cuanti': 'Quantitative achievement',
+    'logro-cuali': 'Qualitative achievement',
+    'logro-fuerte': 'Strong achievement',
+    'logro-debil': 'Weak achievement',
+    'sig-title': 'The 3 most important signals',
+    'como-leer': 'How to read this diagnosis?',
+    'habilidades-det-preview': 'Detected skills',
+    'lock-analisis': '🔒 Full analysis in Diagnóstico plan',
+    'lock-desglose': '🔒 Full breakdown in Diagnóstico plan',
+    'lock-mapa': '🔒 Full skills map in Diagnóstico plan',
+    'radar-guide-title': 'How to read this chart',
+    'radar-guide-text': 'Each axis represents a dimension of your profile. The larger the colored area, the stronger your resume. A balanced shape indicates a well-developed profile.',
+    'ver-desglose': 'View full breakdown',
+    'label-dims-perfil': 'Profile dimensions',
+    'score-emp-lbl': 'Employability Score',
+    'score-alcanzable': 'achievable with improvements',
+    'logo-sub': 'Employability in Social Key',
+    'home-badge': 'Professional diagnosis · Employability in Social Key',
+    'home-title': 'Discover the real impact of your profile',
+    'home-desc': 'A resume is not just a document. It shows how your career becomes visible in a changing labor market. The same applies to your LinkedIn profile.',
+    'home-btn-cv': 'Analyze Resume',
+    'home-btn-cv-sub': 'Full diagnosis of your resume',
+    'home-btn-li': 'Analyze LinkedIn profile',
+    'home-btn-li-sub': 'Diagnosis of your digital presence',
+    'home-btn-ambos': 'Analyze Resume + LinkedIn',
+    'feat-cv-t': 'Resume Structure',
+    'feat-cv-d': 'How information is organized and how clear your resume reads.',
+    'feat-li-t': 'LinkedIn Profile',
+    'feat-li-d': 'Completeness, narrative and coherence of your digital presence.',
+    'feat-coh-t': 'Resume ↔ LinkedIn Coherence',
+    'feat-coh-d': 'Alignment between both documents and gaps to resolve.',
+    'home-about-label': 'About CVOptima',
+    'home-about-text': 'CVOptima analyzes how your resume communicates your professional trajectory. Both documents build employability in a relational and social way.',
+    'home-credit': 'By Alejandra Rolón — Professional Development and Employability',
+    'back-home': '← Back',
+    'up-title': 'Upload your Resume',
+    'up-title-li': 'Upload your LinkedIn profile',
+    'up-title-ambos': 'Upload your Resume and LinkedIn',
+    'up-sub': 'PDF or text. Full diagnosis takes about 20 seconds.',
+    'up-sub-li': 'PDF downloaded from LinkedIn · Profile > More > Save to PDF.',
+    'up-sub-ambos': 'Load both documents for the diagnosis and coherence comparison.',
+    'tab-text': '✏ Paste text',
+    'tab-pdf': '📄 Upload PDF',
+    'drop-text': 'Drag your PDF or click to select',
+    'drop-hint': 'PDF only · Max 10 MB',
+    'ta-placeholder': 'Paste your full resume text here...',
+    'cv-sec-lbl': 'Your Resume',
+    'li-sec-lbl': 'LinkedIn Profile',
+    'li-how-title': 'How do I download my LinkedIn PDF?',
+    'flbl-role': 'Target role',
+    'flbl-sector': 'Sector',
+    'flbl-seniority': 'Target seniority',
+    'disclaim': 'Your information is processed in real time and not stored.',
+    'go-label': 'Analyze my Resume',
+    'go-label-li': 'Analyze my LinkedIn',
+    'go-label-ambos': 'Analyze Resume + LinkedIn',
+    'li-drop-text': 'Drag your LinkedIn PDF or click',
+    'back-new': '← New analysis',
+    'sec-dims': '📊 Profile dimensions',
+    'ats-badge': 'includes ATS ⓘ',
+    'dims-title': 'What is an ATS?',
+    'dims-subtitle': 'WHAT EACH DIMENSION MEASURES',
+    'dims-intro': 'When you submit your resume to a company, an automated system often reads it first — not a person. That system looks for keywords, structure and specific patterns. If your resume lacks them, it may be filtered out before anyone sees it. These dimensions measure exactly that.',
+    'dims-kw-title': 'Keywords',
+    'dims-kw-desc': 'Do you use the keywords that recruiters and systems search for? Every sector and role has specific terms — if they are not present, the profile loses visibility.',
+    'dims-verbs-title': 'Action verbs',
+    'dims-verbs-desc': 'Do your experiences show what you did or just describe your function? Verbs like "led", "implemented" or "reduced" communicate concrete results, not just tasks.',
+    'dims-met-title': 'Metrics',
+    'dims-met-desc': 'Are there numbers in your resume? Figures, percentages or concrete amounts make your achievements more credible. Not always possible, but when present they make a difference.',
+    'dims-est-title': 'Structure',
+    'dims-est-desc': 'Does your resume have the expected sections? Headline, professional profile, experience, education and skills are what systems and recruiters look for first.',
+    'dims-hab-title': 'Skills density',
+    'dims-hab-desc': 'Do you explicitly list your skills? A resume that does not name key competencies can be invisible to search systems, even if you have them.',
+    'dims-roles-title': 'Role clarity',
+    'dims-roles-desc': 'Is each position you held easy to understand? Company, role, period and responsibilities should be readable without effort — for both systems and people.',
+    'sec-alertas': 'Alerts',
+    'sec-logros': '🎯 Achievement, task and responsibility analysis',
+    'sec-verbos': '✍️ Impact verbs and professional narrative',
+    'sec-habilidades': '🧠 Skills map',
+    'sec-posicionamiento': '🎯 Areas and suggested positioning',
+    'sec-fb': '⚖️ Strengths and areas for improvement',
+    'sec-proyeccion': '📈 Score projection with improvements',
+    'sec-secciones': '🗂 Sections and alerts',
+    'sec-acciones': '🚀 Action plan',
+    'sec-comparativa': '🔄 Resume version comparison',
+    'sec-capital': '🤝 Visible relational capital',
+    'sec-trayectoria': '📈 Professional trajectory diagnosis',
+    'sec-posicionamiento-pro': '🎯 Coherence, mobility and positioning',
+    'sec-narrativa-pro': '✍️ Strategic narrative recommendations',
+    'sec-ecs': '🌐 Employability in Social Key — strategic reading',
+    'sec-mercado': '📊 Labor market analysis',
+    'sec-ingles': '🇬🇧 English version',
     'loading-title': 'Analyzing your profile',
-    'loading-time': 'Analysis takes between 15 and 30 seconds',
     'loading-subtitle': 'Processing with real employability criteria...',
+    'loading-time': 'Analysis takes between 15 and 30 seconds',
     'step1': 'Reading structure and sections',
     'step2': 'Detecting achievements vs responsibilities',
     'step3': 'Analyzing verbs and impact',
@@ -1661,15 +1771,6 @@ var I18N = {
     'step6': 'Analyzing LinkedIn profile',
     'step7': 'Generating diagnosis and action plan',
     'back-fix': '← Back and fix',
-    'back-new': '← New analysis',
-    'back-home': '← Back',
-    'como-leer': 'How to read this diagnosis?',
-    'dl-pdf-btn': '⬇ Download PDF report',
-    'score-emp-lbl': 'Employability Score',
-    'score-potencial': 'Potential Score',
-    'score-impact': 'Impact Density',
-    'score-alcanzable': 'achievable with improvements',
-    'sig-title': 'The 3 most important signals',
     'filter-todas': 'All actions',
     'label-prioridad-alta': 'High priority',
     'label-prioridad-media': 'Medium priority',
@@ -1685,108 +1786,25 @@ var I18N = {
     'mi-li': 'My LinkedIn',
     'tab-cv': '📄 Resume',
     'tab-li': '🔗 LinkedIn',
-    'logo-sub': 'Employability in Social Key',
-    'home-badge': 'Professional diagnosis · Employability in Social Key',
-    'home-title': 'Discover the real impact of your profile',
-    'home-desc': 'A resume is not just a document. It shows how your career becomes visible in a changing labor market.',
-    'home-btn-cv': 'Analyze Resume',
-    'home-btn-cv-sub': 'Full diagnosis of your resume',
-    'home-btn-li': 'Analyze LinkedIn profile',
-    'home-btn-li-sub': 'Diagnosis of your digital presence',
-    'home-btn-ambos': 'Analyze Resume + LinkedIn',
-    'feat-cv-t': 'Resume Structure',
-    'feat-cv-d': 'How information is organized and how clear your resume reads.',
-    'feat-li-t': 'LinkedIn Profile',
-    'feat-li-d': 'Completeness, narrative and coherence of your digital presence.',
-    'feat-coh-t': 'Resume ↔ LinkedIn Coherence',
-    'feat-coh-d': 'Alignment between both documents and gaps to resolve.',
-    'home-about-label': 'About CVOptima',
-    'home-about-text': 'CVOptima analyzes how your resume communicates your trajectory. Both documents build employability in a relational and social way.',
-    'home-credit': 'By Alejandra Rolón — Professional Development and Employability',
-    'up-title': 'Upload your Resume',
-    'up-title-li': 'Upload your LinkedIn profile',
-    'up-title-ambos': 'Upload your Resume and LinkedIn',
-    'up-sub': 'PDF or text. Full diagnosis takes about 20 seconds.',
-    'up-sub-li': 'PDF downloaded from LinkedIn · Profile > More > Save to PDF.',
-    'up-sub-ambos': 'Load both documents for the diagnosis and coherence comparison.',
-    'tab-text': '✏ Paste text',
-    'tab-pdf': '📄 Upload PDF',
-    'drop-text': 'Drag your PDF or click to select',
-    'drop-hint': 'PDF only · Max 10 MB',
-    'cv-sec-lbl': 'Your Resume',
-    'li-sec-lbl': 'LinkedIn Profile',
-    'li-drop-text': 'Drag your LinkedIn PDF or click',
-    'flbl-role': 'Target role',
-    'flbl-sector': 'Sector',
-    'flbl-seniority': 'Target seniority',
-    'disclaim': 'Your information is processed in real time and not stored.',
-    'go-label': 'Analyze my Resume',
-    'go-label-li': 'Analyze my LinkedIn',
-    'go-label-ambos': 'Analyze Resume + LinkedIn',
-    'sec-dims': '📊 Profile dimensions',
-    'ats-badge': 'includes ATS ⓘ',
-    'dims-subtitle': 'WHAT EACH DIMENSION MEASURES',
-    'dims-intro': 'When you submit your resume to a company, in many cases an automated system reads it first. That system looks for keywords, structure and specific patterns. If your resume lacks them, it may be filtered out. These dimensions measure exactly that.',
-    'sec-alertas': 'Alerts',
-    'sec-logros': '🎯 Achievement, task and responsibility analysis',
-    'sec-verbos': '✍️ Impact verbs and professional narrative',
-    'sec-habilidades': '🧠 Skills map',
-    'sec-posicionamiento': '🎯 Areas and suggested positioning',
-    'sec-fb': '⚖️ Strengths and areas for improvement',
-    'sec-proyeccion': '📈 Score projection with improvements',
-    'sec-secciones': '🗂 Sections and alerts',
-    'sec-acciones': '🚀 Action plan',
-    'sec-comparativa': '🔄 Resume version comparison',
-    'sec-capital': '🤝 Visible relational capital',
-    'sec-trayectoria': '📈 Professional trajectory diagnosis',
-    'sec-narrativa-pro': '✍️ Strategic narrative recommendations',
-    'sec-ecs': '🌐 Employability in Social Key — strategic reading',
-    'sec-mercado': '📊 Labor market analysis',
-    'sec-ingles': '🇬🇧 English version',
-    'narrativa-lbl': 'Professional narrative',
-    'habilidades-dec-lbl': 'Declared skills',
-    'habilidades-det-lbl': 'Detected in text',
-    'habilidades-inc-lbl': 'To incorporate',
-    'verbos-lbl': 'Impact verbs detected',
-    'coherencia-lbl': 'Resume ↔ LinkedIn Coherence',
-    'secciones-lbl': 'Detected sections',
-    'no-detectado': 'Not detected',
-    'no-disponible': 'Not available.',
-    'radar-guide-title': 'How to read this chart',
-    'radar-guide-text': 'Each axis represents a dimension of your profile. The larger the colored area, the stronger your resume. A balanced and wide shape indicates a well-developed profile.',
-    'lock-analisis': '🔒 Full analysis in Diagnóstico plan',
-    'lock-desglose': '🔒 Full breakdown in Diagnóstico plan',
-    'lock-mapa': '🔒 Full skills map in Diagnóstico plan',
-    'disclaimer-title': 'Important notice:',
-    'disclaimer-text': 'This analysis is a first approximation generated by artificial intelligence. It may contain errors or interpretations that do not reflect the specific context of your search, sector or position. The results are indicative and should be read critically. We recommend complementing this diagnosis with your own judgment and professional guidance.',
     'guardar-version': '💾 Save current version',
     'ver-analisis': 'View full analysis →',
-    'ver-desglose': 'View full breakdown',
-    'logro-cuanti': 'Quantitative achievement',
-    'logro-cuali': 'Qualitative achievement',
-    'logro-fuerte': 'Strong achievement',
-    'logro-debil': 'Weak achievement',
-    'sec-logros-short': 'Achievement analysis',
-    'vista-previa-label': 'Analysis preview',
-    'anticipo-li': 'Preview · Resume ↔ LinkedIn Coherence',
-    'tab-coherencia': '🔗 Resume ↔ LinkedIn Coherence',
+    'generar-ingles': 'Generate English resume →',
+    'disclaimer-title': 'Important notice:',
+    'disclaimer-text': 'This analysis is generated by artificial intelligence and is indicative only. It may contain errors or interpretations that do not reflect your specific context. The results are indicative and should be read critically.',
+    'planes-titulo': 'Choose the depth level you need',
+    'planes-subtitulo': 'Start free. When you need to go deeper, the full analysis is one step away.',
+    'lock-title': 'Full analysis in Diagnóstico plan',
     'merc-rol-lbl': 'Target role *',
     'merc-sector-lbl': 'Sector *',
     'merc-seniority-lbl': 'Seniority',
     'merc-ubicacion-lbl': 'Location',
     'merc-empresa-lbl': 'Company type',
     'merc-modalidad-lbl': 'Modality',
-    'merc-btn': 'Analyze market →',
-    'merc-no-pref': 'No preference',
-    'merc-no-esp': 'Not specified',
-    'generar-ingles': 'Generate English resume →',
     'analizar-mercado': 'Analyze market →',
-    'merc-loading-text': 'Searching real-time market data... this may take a few seconds.',
-    'merc-rol-ph': 'e.g. HR Analyst',
-    'merc-sector-ph': 'e.g. Technology, Healthcare, Education',
-    'merc-ubicacion-ph': 'e.g. Buenos Aires, Argentina',
+    'ing-loading': 'Generating the optimized English version... this may take 20-30 seconds.',
+    'empl-social-title': 'Employability profile',
   }
-};;;
+};
 function t(key) {
   if (!key) return '';
   const lang = (typeof LANG !== 'undefined') ? LANG : 'es';
@@ -2068,7 +2086,7 @@ function animSteps(n){
 // ══════════════════════════════════════════════════════════════════════
 function startAnalysis(){
   if(MODO!=='li'&&!PFILE&&(document.getElementById('cv-ta')?.value.trim()||'').length<30){
-    showErr('Subí tu CV o pegá el texto antes de continuar.');return;
+    showErr(LANG==='en'?'Upload your resume or paste the text before continuing.':'Subí tu CV o pegá el texto antes de continuar.');return;
   }
   runAnalisis();
 }
@@ -2082,7 +2100,7 @@ async function runAnalisis(){
   let cvText='';
   if(MODO!=='li'){
     if(TAB==='p'){
-      if(!PFILE){showErr('Seleccioná un archivo PDF de CV primero.');return;}
+      if(!PFILE){showErr(LANG==='en'?'Select a resume PDF file first.':'Seleccioná un archivo PDF de CV primero.');return;}
       try{document.getElementById('go-btn').disabled=true;showPage('pg-load');document.getElementById('s1').classList.add('on');cvText=await extractPDF(PFILE);if(cvText.length<80)throw new Error('No se pudo extraer texto del PDF. Usá la pestaña "Pegar texto".');CV_TEXT_CACHE=cvText;}
       catch(e){showPage('pg-upload');document.getElementById('go-btn').disabled=false;showErr(e.message);return;}
     }else{
@@ -2132,7 +2150,7 @@ async function runAnalisis(){
     if(window._SHOW_TALLER){const t=document.getElementById('taller');if(t)t.style.display='block';}
   }catch(err){
     showPage('pg-upload');document.getElementById('go-btn').disabled=false;
-    showErr(err.message||'Error al conectar. Intentá de nuevo.');
+    showErr(err.message||(LANG==='en'?'Connection error. Please try again.':'Error al conectar. Intentá de nuevo.'));
   }
 }
 
@@ -2363,7 +2381,7 @@ function compararVersiones() {
                       label === 'Score potencial' ? v.scorePotencial :
                       label === 'Impact Density' ? v.impactDensity :
                       label === 'Logros detectados' ? v.logros :
-                      label === LANG==='en'?'Strengths':'Fortalezas' ? v.fortalezas : 0;
+                      label === LANG==='en'?'Strengths':LANG==='en'?'Strengths':'Fortalezas' ? v.fortalezas : 0;
           return `<span style="font-size:12px;font-weight:600;color:var(--tx);min-width:28px;text-align:center">${val}</span>`;
         }).join('<span style="font-size:11px;color:var(--tx3)">→</span>')}
         <span style="font-size:11px;font-weight:700;color:${col};min-width:32px;text-align:right">${sign}${diff}</span>
@@ -2385,7 +2403,7 @@ function compararVersiones() {
       ${delta(v1.scorePotencial, vN.scorePotencial, 'Score potencial')}
       ${delta(v1.impactDensity, vN.impactDensity, 'Impact Density')}
       ${delta(v1.logros, vN.logros, 'Logros detectados')}
-      ${delta(v1.fortalezas, vN.fortalezas, LANG==='en'?'Strengths':'Fortalezas')}
+      ${delta(v1.fortalezas, vN.fortalezas, LANG==='en'?'Strengths':LANG==='en'?'Strengths':'Fortalezas')}
     </div>
     ${vN.score > v1.score
       ? LANG==='en'?`<div style="font-size:12px;color:#22C55E;padding:8px 12px;background:rgba(34,197,94,0.08);border-radius:var(--r);border-left:3px solid #22C55E">Your profile improved. Score went up ${vN.score - v1.score} points.</div>`:`<div style="font-size:12px;color:#22C55E;padding:8px 12px;background:rgba(34,197,94,0.08);border-radius:var(--r);border-left:3px solid #22C55E">El perfil mejoró en la última versión. El score subió ${vN.score - v1.score} puntos.</div>`
@@ -2894,7 +2912,7 @@ function renderModuloCV(d){
 
   // Verbos
   const vi=d.verbosImpacto||{};
-  document.getElementById('v-detectados').innerHTML=(vi.detectados||[]).map(v=>`<span class="vd-tag">${v}</span>`).join('')||`<span style="font-size:12px;color:var(--tx3)">${LANG==='en'?'None detected.':LANG==='en'?'None detected.':'Ninguno detectado.'}</span>`;
+  document.getElementById('v-detectados').innerHTML=(vi.detectados||[]).map(v=>`<span class="vd-tag">${v}</span>`).join('')||`<span style="font-size:12px;color:var(--tx3)">${LANG==='en'?'None detected.':LANG==='en'?'None detected.':LANG==='en'?'None detected.':'Ninguno detectado.'}</span>`;
   document.getElementById('v-debiles').innerHTML=(vi.debiles||[]).map(v=>`<div class="verbo-row"><span class="verbo-tag-w">${v.verbo}</span><div class="verbo-body"><div class="verbo-ctx">"${v.contexto}"</div><div class="verbo-alts">${(v.alternativas||[]).map(a=>`<span class="verbo-alt">${a}</span>`).join('')}</div></div></div>`).join('')||`<div style="font-size:12px;color:var(--gr)">${LANG==='en'?'✓ No weak verbs detected.':'✓ No se detectaron verbos débiles.'}</div>`;
 
   // Narrativa
@@ -2905,7 +2923,7 @@ function renderModuloCV(d){
 
   // Habilidades
   const mh=d.mapaHabilidades||{};
-  document.getElementById('d-habs').innerHTML=`<div class="hab-section"><div class="hab-title dec">${LANG==='en'?'Declared':'Declaradas'}</div><div class="hab-tags">${(mh.declaradas||[]).map(h=>`<span class="hab-tag hab-dec">${h}</span>`).join('')}</div></div><div class="hab-section"><div class="hab-title det">${LANG==='en'?'Detected in text':LANG==='en'?'Detected in text':'Detectadas en el texto'}</div><div class="hab-tags">${(mh.detectadas||[]).map(h=>`<span class="hab-tag hab-det">${h}</span>`).join('')}</div></div><div class="hab-section"><div class="hab-title inc">${LANG==='en'?'To incorporate':'A incorporar explícitamente'}</div><div class="hab-tags">${(mh.aIncorporar||[]).map(h=>`<span class="hab-tag hab-inc">${h}</span>`).join('')}</div></div>`;
+  document.getElementById('d-habs').innerHTML=`<div class="hab-section"><div class="hab-title dec">${LANG==='en'?'Declared':'Declaradas'}</div><div class="hab-tags">${(mh.declaradas||[]).map(h=>`<span class="hab-tag hab-dec">${h}</span>`).join('')}</div></div><div class="hab-section"><div class="hab-title det">${LANG==='en'?'Detected in text':LANG==='en'?'Detected in text':LANG==='en'?'Detected in text':'Detectadas en el texto'}</div><div class="hab-tags">${(mh.detectadas||[]).map(h=>`<span class="hab-tag hab-det">${h}</span>`).join('')}</div></div><div class="hab-section"><div class="hab-title inc">${LANG==='en'?'To incorporate':'A incorporar explícitamente'}</div><div class="hab-tags">${(mh.aIncorporar||[]).map(h=>`<span class="hab-tag hab-inc">${h}</span>`).join('')}</div></div>`;
 
   // Áreas + Roles
   document.getElementById('d-areas').innerHTML=(d.areasProfesionales||[]).map(a=>`<span class="area-tag">${a}</span>`).join('');
@@ -3050,7 +3068,7 @@ function renderRadarComparativo(cvDet,liDims){
   if(window.RC2)window.RC2.destroy();
   window.RC2=new Chart(canvas.getContext('2d'),{type:'radar',data:{labels,datasets:[{label:'CV',data:cvData,backgroundColor:'rgba(8,145,178,0.12)',borderColor:'#0891B2',borderWidth:2,pointRadius:4,pointBackgroundColor:'#0DB4C4',pointBorderColor:'#080F16',pointBorderWidth:2},{label:'LinkedIn',data:liData,backgroundColor:'rgba(10,102,194,0.10)',borderColor:'#0A66C2',borderWidth:2,pointRadius:4,pointBackgroundColor:'#0A66C2',pointBorderColor:'#080F16',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(8,145,178,0.07)'},pointLabels:{color:'#2E6080',font:{size:10,family:"'DM Sans',sans-serif"}},angleLines:{color:'rgba(8,145,178,0.05)'}}},plugins:{legend:{display:false}}}});
   const bDiv=document.getElementById('li-brechas-dims');
-  const dimNames=['Keywords / Titular','Verbos de acción','Métricas y resultados','Estructura / Completitud','Habilidades','Claridad y narrativa'];
+  const dimNames=LANG==='en'?['Keywords / Headline','Action Verbs','Metrics & Results','Structure / Completeness','Skills','Role Clarity']:['Keywords / Titular','Verbos de acción','Métricas y resultados','Estructura / Completitud','Habilidades','Claridad y narrativa'];
   bDiv.innerHTML=dimNames.map((name,i)=>{const cv=cvData[i],li=liData[i],diff=li-cv,sign=diff>=0?'+':'',col=diff>=5?'var(--gr)':diff<=-5?'var(--rd)':'var(--am)';return `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2)"><span>${name}</span><span style="color:${col};font-weight:600;font-family:var(--mono)">${sign}${diff}</span></div><div style="position:relative;height:6px;background:var(--bg4);border-radius:3px"><div style="position:absolute;left:0;top:0;height:100%;width:${cv}%;background:#0891B2;border-radius:3px;opacity:0.7"></div><div style="position:absolute;left:0;top:0;height:100%;width:${li}%;background:#0A66C2;border-radius:3px;opacity:0.5"></div></div><div style="display:flex;gap:12px;font-size:10px;color:var(--tx3);font-family:var(--mono)"><span>CV: ${cv}</span><span>LI: ${li}</span></div></div>`;}).join('');
 }
 
@@ -3178,34 +3196,34 @@ function dlPDF(){
   const detN={keywords:'Keywords',verbosAccion:'Verbos de acción',metricas:'Métricas',estructura:'Estructura',densidadHabilidades:'Densidad habilidades',claridadRoles:'Claridad de roles'};
   const win=window.open('','_blank');
   const css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:\'DM Sans\',sans-serif;background:#fff;color:#1a2e3b;font-size:11pt;line-height:1.6}.page{max-width:780px;margin:0 auto;padding:32px 40px}h1{font-size:20pt;font-weight:700;color:#0D2137;margin-bottom:4px}.meta{font-size:9pt;color:#3D5A6E;margin-bottom:28px;padding-bottom:12px;border-bottom:2px solid #0891B2}.sec{margin:20px 0 10px;padding-bottom:4px;border-bottom:1px solid #0E5C8A;font-size:10pt;font-weight:700;color:#0E5C8A;text-transform:uppercase;letter-spacing:.8px}.txt{font-size:10pt;color:#1e3d52;margin-bottom:6px;line-height:1.65}.scores{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:12px}.score-box{background:#F0F7FA;border-radius:8px;padding:12px 16px;text-align:center}.score-n{font-size:28pt;font-weight:700;line-height:1}.score-l{font-size:8pt;color:#3D5A6E;text-transform:uppercase;letter-spacing:1px;margin-top:4px}.ats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ats-item{display:flex;justify-content:space-between;font-size:9.5pt;padding:4px 0;border-bottom:1px solid #e8f0f5}.ats-val{font-weight:600;color:#0891B2}.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:8.5pt;font-weight:500;margin:2px}.tag-g{background:#d1fae5;color:#065f46}.tag-a{background:#fef3c7;color:#92400e}.tag-b{background:#e0f2fe;color:#0369a1}.logro{padding:8px 12px;border-radius:6px;margin-bottom:6px;font-size:9.5pt}.logro-f{background:#d1fae5;border-left:3px solid #22C55E}.logro-d{background:#fef3c7;border-left:3px solid #F59E0B}.logro-r{background:#f1f5f9;border-left:3px solid #94a3b8}.logro-label{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}.lf{color:#065f46}.ld{color:#92400e}.lr{color:#475569}.frase{font-size:9pt;font-style:italic;margin-bottom:3px}.sug{font-size:8.5pt;color:#0891B2;margin-top:3px}.fb-item{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start}.fb-ico{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9pt;font-weight:700;flex-shrink:0;margin-top:1px}.ico-s{background:#d1fae5;color:#065f46}.ico-g{background:#fee2e2;color:#991b1b}.fb-t{font-weight:600;font-size:10pt;margin-bottom:2px}.fb-d{font-size:9.5pt;color:#475569}.fb-a{font-size:9pt;color:#0891B2;margin-top:2px}.rec{display:flex;gap:10px;padding:8px 12px;border:1px solid #e0eaf0;border-radius:6px;margin-bottom:6px}.rec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}.dot-a{background:#EF4444}.dot-m{background:#F59E0B}.dot-b{background:#0891B2}.rec-t{font-weight:600;font-size:10pt;margin-bottom:2px}.rec-d{font-size:9.5pt;color:#475569}.rec-imp{font-size:8.5pt;color:#22C55E;margin-top:3px;font-weight:600}.locked{font-size:8.5pt;color:#3D5A6E;font-style:italic;padding:8px 12px;background:#f0f7fa;border-radius:6px;margin:4px 0}.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e0eaf0;font-size:8pt;color:#94a3b8;text-align:center}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none}}';
-  win.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Diagnóstico — '+(d.candidateName||'Candidato')+'</title><style>@import url(\'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap\');'+css+'</style></head><body><div class="page">');
+  win.document.write((LANG==='en'?'<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Professional Diagnosis — ':'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Diagnóstico — ')+(d.candidateName||'Candidato')+'</title><style>@import url(\'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap\');'+css+'</style></head><body><div class="page">');
   win.document.write('<div class="no-print" style="background:#0E5C8A;color:#fff;padding:12px 20px;border-radius:8px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between"><span>'+(LANG==='en'?'To save: <strong>Ctrl+P</strong> → Destination: <strong>Save as PDF</strong>':'Para guardar: <strong>Ctrl+P</strong> → Destino: <strong>Guardar como PDF</strong>')+'</span><button onclick="window.print()" style="background:#fff;color:#0E5C8A;border:none;padding:8px 18px;border-radius:6px;font-weight:600;cursor:pointer">'+(LANG==='en'?'Print / Save PDF':'Imprimir / Guardar PDF')+'</button></div>');
-  win.document.write(LANG==='en'?'<h1>Professional Diagnosis</h1><div class="meta">' : '<h1>Diagnóstico Profesional</h1><div class="meta">'+(d.candidateName||'Candidato')+' · Score: '+d.atsScore+'/100 · Potencial: '+d.scorePotencial+'/100 · '+new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})+'</div>');
+  win.document.write(LANG==='en'?'<h1>Professional Diagnosis</h1><div class="meta">' : (LANG==='en'?'<h1>Professional Diagnosis</h1><div class="meta">':'<h1>Diagnóstico Profesional</h1><div class="meta">')+(d.candidateName||'Candidato')+' · Score: '+d.atsScore+'/100 · Potencial: '+d.scorePotencial+'/100 · '+new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})+'</div>');
   win.document.write('<div class="scores"><div class="score-box"><div class="score-n" style="color:#0891B2">'+d.atsScore+'</div><div class="score-l">Score de Empleabilidad</div></div><div class="score-box"><div class="score-n" style="color:#0DB4C4">'+d.scorePotencial+'</div><div class="score-l">Score potencial</div></div><div class="score-box"><div class="score-n" style="color:'+(d.impactDensityLabel==='Alto'?'#22C55E':d.impactDensityLabel==='Medio'?'#F59E0B':'#EF4444')+'">'+d.impactDensityScore+'</div><div class="score-l">Impact Density · '+(d.impactDensityLabel||'')+'</div></div></div>');
-  win.document.write('<div class="sec">Resumen ejecutivo</div><div class="txt">'+(d.resumenEjecutivo||'')+'</div>');
-  if(isStarter){const rd=prev.radarDescripcion||'';win.document.write('<div class="sec">Dimensiones del perfil</div>'+(rd?'<div class="txt">'+rd+'</div>':'')+(radarImg?'<div style="text-align:center;margin:12px 0"><img src="'+radarImg+'" style="max-width:260px;opacity:.7"></div>':'')+LANG==='en'?'<div class="locked">The exact breakdown by dimension is available in the Diagnóstico plan.</div>':'<div class="locked">El desglose exacto por dimensión está disponible en el plan Diagnóstico.</div>');}
+  win.document.write((LANG==='en'?'<div class="sec">Executive summary</div>':'<div class="sec">Resumen ejecutivo</div>')+'<div class="txt">'+(d.resumenEjecutivo||'')+'</div>');
+  if(isStarter){const rd=prev.radarDescripcion||'';win.document.write((LANG==='en'?'<div class="sec">Profile dimensions</div>':'<div class="sec">Dimensiones del perfil</div>')+(rd?'<div class="txt">'+rd+'</div>':'')+(radarImg?'<div style="text-align:center;margin:12px 0"><img src="'+radarImg+'" style="max-width:260px;opacity:.7"></div>':'')+LANG==='en'?'<div class="locked">The exact breakdown by dimension is available in the Diagnóstico plan.</div>':'<div class="locked">El desglose exacto por dimensión está disponible en el plan Diagnóstico.</div>');}
   else{
     const detDesc=LANG==='en'?{keywords:'Sector keywords present in the resume',verbosAccion:'Impact verbs in work experience (led, implemented, reduced...)',metricas:'Achievements with numbers, percentages or concrete figures',estructura:'Presence of key CV sections',densidadHabilidades:'Quantity and variety of declared skills',claridadRoles:'Legibility of roles, companies and periods'}:{keywords:'Palabras clave del sector presentes en el CV',verbosAccion:'Verbos de impacto en las experiencias (lideré, implementé, mejoré...)',metricas:'Logros con números, porcentajes o cifras concretas',estructura:'Presencia de las secciones clave del CV',densidadHabilidades:'Cantidad y variedad de habilidades declaradas',claridadRoles:'Legibilidad de roles, empresas y períodos'};
-    win.document.write('<div class="sec">Desglose del Score</div><div style="font-size:9pt;color:#3D5A6E;font-style:italic;margin-bottom:10px">El radar muestra la forma del perfil: cuanto más cerca del borde exterior, mejor en esa dimensión. Un polígono equilibrado indica un CV consistente; uno irregular señala áreas de mejora prioritarias.</div><div class="ats-grid">'+Object.entries(detN).map(([k,n])=>'<div class="ats-item"><div><span style="font-weight:600">'+n+'</span><div style="font-size:8.5pt;color:#3D5A6E;margin-top:2px">'+(detDesc[k]||'')+'</div></div><span class="ats-val">'+(det[k]||0)+'/100</span></div>').join('')+'</div>');
+    win.document.write((LANG==='en'?'<div class="sec">Score Breakdown</div><div style="font-size:9pt;color:#3D5A6E;font-style:italic;margin-bottom:10px">The radar shows the shape of the profile: the closer to the outer edge, the better in that dimension. A balanced polygon indicates a consistent resume; an irregular one shows priority improvement areas.</div>':'<div class="sec">Desglose del Score</div><div style="font-size:9pt;color:#3D5A6E;font-style:italic;margin-bottom:10px">El radar muestra la forma del perfil: cuanto más cerca del borde exterior, mejor en esa dimensión. Un polígono equilibrado indica un CV consistente; uno irregular señala áreas de mejora prioritarias.</div>')+'<div class="ats-grid">'+Object.entries(detN).map(([k,n])=>'<div class="ats-item"><div><span style="font-weight:600">'+n+'</span><div style="font-size:8.5pt;color:#3D5A6E;margin-top:2px">'+(detDesc[k]||'')+'</div></div><span class="ats-val">'+(det[k]||0)+'/100</span></div>').join('')+'</div>');
   }
   
   if(radarImg&&!isStarter)win.document.write('<div style="text-align:center;margin:12px 0 20px"><img src="'+radarImg+'" style="max-width:300px"></div>');
-  win.document.write('<div class="sec">Análisis de logros</div>');
-  win.document.write('<div style="font-size:8.5pt;color:#3D5A6E;font-style:italic;margin-bottom:10px">Los logros pueden ser cuantitativos (con cifras concretas) o cualitativos (con verbos de acción y resultado concreto, aunque sin número). Ambos tienen valor en un CV.</div>');
+  win.document.write(LANG==='en'?'<div class="sec">Achievement analysis</div>':'<div class="sec">Análisis de logros</div>');
+  win.document.write(LANG==='en'?'<div style="font-size:8.5pt;color:#3D5A6E;font-style:italic;margin-bottom:10px">Achievements can be quantitative (with figures) or qualitative (with action verbs and concrete results). Both have value in a resume.</div>':'<div style="font-size:8.5pt;color:#3D5A6E;font-style:italic;margin-bottom:10px">Los logros pueden ser cuantitativos (con cifras concretas) o cualitativos (con verbos de acción y resultado concreto, aunque sin número). Ambos tienen valor en un CV.</div>');
   if(al.logrosFuertes&&al.logrosFuertes.length){win.document.write('<div style="font-size:8pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#065f46;margin:8px 0 4px">Logros cuantitativos</div>');win.document.write(al.logrosFuertes.map(l=>'<div class="logro logro-f"><div class="logro-label lf">✓ Logro cuantitativo</div><div class="frase">"'+l.frase+'"</div>'+(l.motivo?'<div class="txt">'+l.motivo+'</div>':'')+'</div>').join(''));}
-  else if(!isStarter){win.document.write('<div class="txt" style="color:#3D5A6E;font-size:9pt">No se detectaron logros cuantitativos. Podés agregarlos incorporando cifras, porcentajes o cantidades concretas a tus experiencias.</div>');}
+  else if(!isStarter){win.document.write(LANG==='en'?'<div class="txt" style="color:#3D5A6E;font-size:9pt">No quantitative achievements detected. Add numbers or percentages to your experience descriptions.</div>':'<div class="txt" style="color:#3D5A6E;font-size:9pt">No se detectaron logros cuantitativos. Podés agregarlos incorporando cifras, porcentajes o cantidades concretas a tus experiencias.</div>');}
   if(al.logrosCualitativos&&al.logrosCualitativos.length){win.document.write('<div style="font-size:8pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7C3AED;margin:8px 0 4px">Logros cualitativos</div>');win.document.write(al.logrosCualitativos.map(l=>'<div class="logro" style="background:#f3f0ff;border-left:3px solid #7C3AED"><div class="logro-label" style="color:#7C3AED">◈ Logro cualitativo</div><div class="frase">"'+l.frase+'"</div>'+(l.motivo?'<div class="txt">'+l.motivo+'</div>':'')+'</div>').join(''));}
-  else if(!isStarter){win.document.write('<div class="txt" style="color:#3D5A6E;font-size:9pt">No se detectaron logros cualitativos. Un logro cualitativo describe un resultado concreto con verbo de acción: "Reorganicé el proceso de atención mejorando la experiencia del equipo", "Implementé un sistema de seguimiento que mejoró la coordinación".</div>');}
+  else if(!isStarter){win.document.write(LANG==='en'?'<div class="txt" style="color:#3D5A6E;font-size:9pt">No qualitative achievements detected. A qualitative achievement describes a concrete result with an action verb.</div>':'<div class="txt" style="color:#3D5A6E;font-size:9pt">No se detectaron logros cualitativos. Un logro cualitativo describe un resultado concreto con verbo de acción: "Reorganicé el proceso de atención mejorando la experiencia del equipo", "Implementé un sistema de seguimiento que mejoró la coordinación".</div>');}
   if(isStarter){win.document.write(LANG==='en'?'<div class="locked">Full analysis available in Diagnóstico plan.</div>':'<div class="locked">Análisis completo disponible en plan Diagnóstico.</div>');}
   else{
     if(al.logrosDebiles&&al.logrosDebiles.length){win.document.write(LANG==='en'?'<div style="font-size:8pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#92400e;margin:8px 0 4px">Weak achievements — you can improve these</div>':'<div style="font-size:8pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#92400e;margin:8px 0 4px">Logros débiles — podés mejorarlos</div>');win.document.write(al.logrosDebiles.map(l=>(LANG==='en'?'<div class="logro logro-d"><div class="logro-label ld">◆ Weak achievement</div>':'<div class="logro logro-d"><div class="logro-label ld">◆ Logro débil</div>')+'<div class="frase">"'+l.frase+'"</div><div class="txt">'+l.motivo+'</div><div class="sug">→ '+l.sugerencia+'</div></div>').join(''));}
     if(al.responsabilidadesSinImpacto&&al.responsabilidadesSinImpacto.length){win.document.write(LANG==='en'?'<div style="font-size:8pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#475569;margin:8px 0 4px">Responsibilities without impact — improvement opportunities</div>':'<div style="font-size:8pt;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#475569;margin:8px 0 4px">Responsabilidades sin impacto — oportunidades de mejora</div>');win.document.write(al.responsabilidadesSinImpacto.map(l=>'<div class="logro logro-r"><div class="logro-label lr">Responsabilidad sin impacto</div><div class="frase">"'+l.frase+'"</div><div class="sug">→ '+l.oportunidad+'</div></div>').join(''));}
   }
-  win.document.write('<div class="sec">Narrativa profesional</div>');
-  if(narr.tipo){win.document.write('<div class="txt"><strong>'+narr.tipo+'</strong>'+(narr.descripcion?' — '+narr.descripcion:'')+'</div>');if(isStarter){win.document.write('<div class="locked">Análisis completo disponible en plan Diagnóstico.</div>');}else{if(narr.progresion)win.document.write('<div class="txt" style="background:#f1f5f9;padding:8px 12px;border-radius:6px;border-left:2px solid #0891B2">'+narr.progresion+'</div>');win.document.write(narr.oportunidades.map(o=>'<div class="txt" style="color:#0891B2">→ '+o+'</div>').join(''));}}
+  win.document.write(LANG==='en'?'<div class="sec">Professional narrative</div>':'<div class="sec">Narrativa profesional</div>');
+  if(narr.tipo){win.document.write('<div class="txt"><strong>'+translateLabel(narr.tipo)+'</strong>'+(narr.descripcion?' — '+narr.descripcion:'')+'</div>');if(isStarter){win.document.write('<div class="locked">Análisis completo disponible en plan Diagnóstico.</div>');}else{if(narr.progresion)win.document.write('<div class="txt" style="background:#f1f5f9;padding:8px 12px;border-radius:6px;border-left:2px solid #0891B2">'+narr.progresion+'</div>');win.document.write(narr.oportunidades.map(o=>'<div class="txt" style="color:#0891B2">→ '+o+'</div>').join(''));}}
   else{win.document.write('<div class="txt" style="color:#3D5A6E">No disponible.</div>');}
   win.document.write(LANG==='en'?'<div class="sec">Skills map</div>':'<div class="sec">Mapa de habilidades</div>');
-  if(mh.declaradas&&mh.declaradas.length){win.document.write((LANG==='en'?'<div class="txt"><strong style="color:#065f46">Declared:</strong> ':'<div class="txt"><strong style="color:#065f46">Detectadas:</strong> ')+mh.declaradas.map(h=>'<span class="tag tag-g">'+h+'</span>').join('')+'</div>');if(isStarter){win.document.write(LANG==='en'?'<div class="locked">Full map available in Diagnóstico plan.</div>':'<div class="locked">Mapa completo disponible en plan Diagnóstico.</div>');}else{if(mh.detectadas&&mh.detectadas.length)win.document.write((LANG==='en'?'<div class="txt"><strong style="color:#0369a1">Detected in text:</strong> ':'<div class="txt"><strong style="color:#0369a1">En el texto:</strong> ')+mh.detectadas.map(h=>'<span class="tag tag-b">'+h+'</span>').join('')+'</div>');if(mh.aIncorporar&&mh.aIncorporar.length)win.document.write((LANG==='en'?'<div class="txt"><strong style="color:#92400e">To incorporate:</strong> ':'<div class="txt"><strong style="color:#92400e">A incorporar:</strong> ')+mh.aIncorporar.map(h=>'<span class="tag tag-a">'+h+'</span>').join('')+'</div>');}}
+  if(mh.declaradas&&mh.declaradas.length){win.document.write((LANG==='en'?'<div class="txt"><strong style="color:#065f46">Declared:</strong> ':(LANG==='en'?'<div class="txt"><strong style="color:#065f46">Declared:</strong> ':'<div class="txt"><strong style="color:#065f46">Detectadas:</strong> '))+mh.declaradas.map(h=>'<span class="tag tag-g">'+h+'</span>').join('')+'</div>');if(isStarter){win.document.write(LANG==='en'?'<div class="locked">Full map available in Diagnóstico plan.</div>':'<div class="locked">Mapa completo disponible en plan Diagnóstico.</div>');}else{if(mh.detectadas&&mh.detectadas.length)win.document.write((LANG==='en'?'<div class="txt"><strong style="color:#0369a1">Detected in text:</strong> ':(LANG==='en'?'<div class="txt"><strong style="color:#0369a1">Detected in text:</strong> ':'<div class="txt"><strong style="color:#0369a1">En el texto:</strong> '))+mh.detectadas.map(h=>'<span class="tag tag-b">'+h+'</span>').join('')+'</div>');if(mh.aIncorporar&&mh.aIncorporar.length)win.document.write((LANG==='en'?'<div class="txt"><strong style="color:#92400e">To incorporate:</strong> ':(LANG==='en'?'<div class="txt"><strong style="color:#92400e">To incorporate:</strong> ':'<div class="txt"><strong style="color:#92400e">A incorporar:</strong> '))+mh.aIncorporar.map(h=>'<span class="tag tag-a">'+h+'</span>').join('')+'</div>');}}
   else{win.document.write('<div class="txt" style="color:#3D5A6E">No se detectaron habilidades.</div>');}
   // Perfil de empleabilidad social
   const pef=d.perfilEmpleabilidad||null;
@@ -3221,7 +3239,7 @@ function dlPDF(){
   // Verbos de impacto
   const vi=d.verbosImpacto||{};
   if(!isStarter&&(vi.detectados?.length||vi.debiles?.length)){
-    win.document.write('<div class="sec">Verbos de impacto</div>');
+    win.document.write(LANG==='en'?'<div class="sec">Impact verbs</div>':'<div class="sec">Verbos de impacto</div>');
     if(vi.detectados?.length)win.document.write('<div class="txt"><strong style="color:#065f46">Detectados:</strong> '+vi.detectados.map(v=>'<span class="tag tag-g">'+v+'</span>').join('')+'</div>');
     if(vi.debiles?.length)win.document.write(vi.debiles.map(v=>'<div class="txt" style="background:#fef3c7;border-left:2px solid #F59E0B;padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:4px"><strong>"'+v.verbo+'"</strong> en contexto: <em>'+v.contexto+'</em><br><span style="color:#0891B2;font-size:8.5pt">→ Alternativas: '+v.alternativas.join(', ')+'</span></div>').join(''));
   }
@@ -3230,7 +3248,7 @@ function dlPDF(){
   const secs=d.seccionesDetectadas||null;
   if(!isStarter&&secs){
     const secNames={titular:'Titular',perfilProfesional:'Perfil profesional',experiencia:'Experiencia laboral',educacion:'Educación',habilidades:'Habilidades',logros:'Logros',idiomas:'Idiomas',referencias:'Referencias'};
-    win.document.write('<div class="sec">Secciones del CV</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+
+    win.document.write((LANG==='en'?'<div class="sec">Resume sections</div>':'<div class="sec">Secciones del CV</div>')+'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+
       Object.entries(secNames).map(([k,n])=>{
         const tiene=secs[k]===true||secs[k]==='si'||secs[k]==='sí';
         return '<span style="padding:3px 10px;border-radius:20px;font-size:8.5pt;background:'+(tiene?'#d1fae5':'#fee2e2')+';color:'+(tiene?'#065f46':'#991b1b')+'">'+(tiene?'✓':'✗')+' '+n+'</span>';
@@ -3240,12 +3258,12 @@ function dlPDF(){
   // Roles objetivo
   const roles=d.rolesObjetivo||[];
   if(!isStarter&&roles.length){
-    win.document.write('<div class="sec">Roles objetivo sugeridos</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">'+roles.map(r=>{const titulo=typeof r==='string'?r:(r.titulo||'');const match=r.matchPct?(' · '+r.matchPct+'% de compatibilidad'):'';const just=r.justificacion?('<div style="font-size:8.5pt;color:#475569;margin-top:3px">'+r.justificacion+'</div>'):'';return '<div style="background:#e0f2fe;border-radius:6px;padding:8px 12px;border-left:3px solid #0891B2"><span style="font-weight:600;color:#0369a1">'+titulo+'</span><span style="font-size:8.5pt;color:#3D5A6E">'+match+'</span>'+just+'</div>';}).join('')+'</div>');
+    win.document.write((LANG==='en'?'<div class="sec">Suggested target roles</div>':'<div class="sec">Roles objetivo sugeridos</div>')+'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">'+roles.map(r=>{const titulo=typeof r==='string'?r:(r.titulo||'');const match=r.matchPct?(' · '+r.matchPct+(LANG==='en'?'% compatibility':'% de compatibilidad')):'';const just=r.justificacion?('<div style="font-size:8.5pt;color:#475569;margin-top:3px">'+r.justificacion+'</div>'):'';return '<div style="background:#e0f2fe;border-radius:6px;padding:8px 12px;border-left:3px solid #0891B2"><span style="font-weight:600;color:#0369a1">'+titulo+'</span><span style="font-size:8.5pt;color:#3D5A6E">'+match+'</span>'+just+'</div>';}).join('')+'</div>');
   }
 
   // Análisis LinkedIn
   if(!isStarter&&la&&!la._coherencia_locked){
-    win.document.write('<div class="sec">Análisis LinkedIn</div>');
+    win.document.write(LANG==='en'?'<div class="sec">LinkedIn analysis</div>':'<div class="sec">Análisis LinkedIn</div>');
     if(la.liScore)win.document.write('<div class="txt"><strong>Score LinkedIn:</strong> '+la.liScore+'/100</div>');
     if(la.headlineAnalisis)win.document.write('<div class="txt" style="background:#f0f7fa;padding:8px 12px;border-radius:6px;border-left:2px solid #0891B2;margin-bottom:6px"><strong>Titular actual:</strong> '+la.headlineAnalisis+'</div>');
     if(la.resumen_coherencia)win.document.write('<div class="txt"><strong>Coherencia CV↔LinkedIn:</strong> '+la.resumen_coherencia+'</div>');
@@ -3253,9 +3271,9 @@ function dlPDF(){
     if(la.brechas?.length)win.document.write('<div class="txt"><strong style="color:#991b1b">Brechas detectadas:</strong> '+la.brechas.map(b=>'<div style="color:#475569;font-size:9pt;padding:2px 0">✗ '+b+'</div>').join('')+'</div>');
   }
 
-  win.document.write('<div class="sec">Fortalezas</div>'+(d.fortalezas||[]).map(f=>'<div class="fb-item"><span class="fb-ico ico-s">✓</span><div><div class="fb-t">'+f.titulo+'</div><div class="fb-d">'+f.detalle+'</div></div></div>').join(''));
-  win.document.write('<div class="sec">Debilidades y cómo resolverlas</div>'+(d.debilidades||[]).map(g=>'<div class="fb-item"><span class="fb-ico ico-g">!</span><div><div class="fb-t">'+g.titulo+'</div><div class="fb-d">'+g.detalle+'</div><div class="fb-a">→ '+g.accion+'</div></div></div>').join(''));
-  win.document.write('<div class="sec">Plan de acción</div>');
+  win.document.write((LANG==='en'?'<div class="sec">Strengths</div>':'<div class="sec">Fortalezas</div>')+(d.fortalezas||[]).map(f=>'<div class="fb-item"><span class="fb-ico ico-s">✓</span><div><div class="fb-t">'+f.titulo+'</div><div class="fb-d">'+f.detalle+'</div></div></div>').join(''));
+  win.document.write((LANG==='en'?'<div class="sec">Areas for improvement</div>':'<div class="sec">Debilidades y cómo resolverlas</div>')+(d.debilidades||[]).map(g=>'<div class="fb-item"><span class="fb-ico ico-g">!</span><div><div class="fb-t">'+g.titulo+'</div><div class="fb-d">'+g.detalle+'</div><div class="fb-a">→ '+g.accion+'</div></div></div>').join(''));
+  win.document.write(LANG==='en'?'<div class="sec">Action plan</div>':'<div class="sec">Plan de acción</div>');
   const recsAlta=(d.recomendaciones||[]).filter(r=>r.prioridad==='Alta');
   const recsMedia=(d.recomendaciones||[]).filter(r=>r.prioridad==='Media');
   const recsBaja=(d.recomendaciones||[]).filter(r=>r.prioridad==='Baja'||!r.prioridad||r.prioridad==='baja');
