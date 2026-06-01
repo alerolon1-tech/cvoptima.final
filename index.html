@@ -416,96 +416,11 @@ select.fi option{background:var(--bg3)}
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-83BFP3NT71');
-
-  // Language setup - available before any user interaction
-  var LANG = 'es';
-  window.LANG = LANG;
-
-  function translateLabel(val) {
-    if (!val) return val;
-    if (LANG !== 'en') return val;
-    const map = {
-      'Alto':'High','Medio':'Medium','Bajo':'Low',
-      'Alta':'High','Media':'Medium','Baja':'Low',
-      'Consistente':'Consistent','En crecimiento':'Growing',
-      'En transicion':'In transition','Dispersa':'Scattered'
-    };
-    return map[val] || val;
-  }
-  window.translateLabel = translateLabel;
-
-  function t(key) {
-    if (!key) return '';
-    const lang = (typeof LANG !== 'undefined') ? LANG : 'es';
-    const i18n = (typeof I18N !== 'undefined') ? I18N : {};
-    return (i18n[lang] && i18n[lang][key]) || (i18n['es'] && i18n['es'][key]) || key;
-  }
-  window.t = t;
-
-  function setIdioma(lang) {
-    LANG = lang;
-    window.LANG = lang;
+  // Language pre-selection: store in sessionStorage before main script loads
+  window._setLangEarly = function(lang) {
     sessionStorage.setItem('cvoptima_lang', lang);
-
-    const activeStyle = 'padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:var(--teal);color:#fff;font-family:var(--sans);transition:all .2s';
-    const inactiveStyle = 'padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--tx3);font-family:var(--sans);transition:all .2s';
-    const btnEs = document.getElementById('lang-es');
-    const btnEn = document.getElementById('lang-en');
-    if (btnEs) { btnEs.innerHTML = '🇪🇸 ES'; btnEs.style.cssText = lang === 'es' ? activeStyle : inactiveStyle; }
-    if (btnEn) { btnEn.innerHTML = '🇬🇧 EN'; btnEn.style.cssText = lang === 'en' ? activeStyle : inactiveStyle; }
-
-    // Update home title
-    const homeTitle = document.getElementById('home-title');
-    if (homeTitle) homeTitle.innerHTML = lang === 'en'
-      ? 'Discover the real<br><i>impact</i> of your profile'
-      : 'Conocé el impacto<br><i>real</i> de tu perfil';
-
-    // Update instructivo link
-    const instrLink = document.getElementById('instructivo-link');
-    if (instrLink) instrLink.href = lang === 'en' ? '/instructivo-en.pdf' : '/instructivo.pdf';
-
-    // Translate all data-i18n elements
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const val = t(key);
-      if (!val || val === key) return;
-      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-        el.placeholder = val;
-      } else {
-        el.textContent = val;
-      }
-    });
-
-    // Translate select options
-    document.querySelectorAll('option[data-es]').forEach(opt => {
-      opt.textContent = lang === 'en' ? opt.getAttribute('data-en') : opt.getAttribute('data-es');
-    });
-    document.querySelectorAll('option[data-i18n-opt]').forEach(opt => {
-      const key = opt.getAttribute('data-i18n-opt');
-      const map = {
-        'sector-any': {es:'Cualquier sector', en:'Any sector'},
-        'seniority-any': {es:'Cualquier nivel', en:'Any level'},
-        'merc-no-pref': {es:'Sin preferencia', en:'No preference'},
-        'merc-no-esp': {es:'No especificado', en:'Not specified'},
-      };
-      if (map[key]) opt.textContent = map[key][lang] || map[key].es;
-    });
-
-    // Update upload page
-    const upTitle = document.getElementById('up-title');
-    if (upTitle) upTitle.textContent = t('up-title');
-    const upSub = document.getElementById('up-sub');
-    if (upSub) upSub.textContent = t('up-sub');
-    const goLabel = document.getElementById('go-label');
-    if (goLabel) goLabel.textContent = t('go-label');
-
-    // Re-render dashboard if visible
-    const dash = document.getElementById('pg-dash');
-    if (dash && dash.style.display !== 'none' && window.D && typeof window.renderDash === 'function') {
-      window.renderDash(window.D);
-    }
-  }
-  window.setIdioma = setIdioma;
+    window._earlyLang = lang;
+  };
 </script>
 <!-- Schema.org -->
 <script type="application/ld+json">
@@ -531,8 +446,8 @@ select.fi option{background:var(--bg3)}
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <div style="display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--b1);border-radius:20px;padding:3px 4px">
-      <button onclick="setIdioma('es')" id="lang-es" style="padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:var(--teal);color:#fff;font-family:var(--sans);transition:all .2s">🇪🇸 ES</button>
-      <button onclick="setIdioma('en')" id="lang-en" style="padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--tx3);font-family:var(--sans);transition:all .2s">🇬🇧 EN</button>
+      <button onclick="(typeof setIdioma!=='undefined'?setIdioma('es'):window._setLangEarly('es'))" id="lang-es" style="padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:var(--teal);color:#fff;font-family:var(--sans);transition:all .2s">🇪🇸 ES</button>
+      <button onclick="(typeof setIdioma!=='undefined'?setIdioma('en'):window._setLangEarly('en'))" id="lang-en" style="padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--tx3);font-family:var(--sans);transition:all .2s">🇬🇧 EN</button>
     </div>
     <span class="hdr-badge">Por Alejandra Rolón</span>
   </div>
@@ -2042,8 +1957,11 @@ async function iniciarPago(metodo) {
 
 // Detectar retorno post-pago con token
 document.addEventListener('DOMContentLoaded', async () => {
-  // Siempre arrancar en español — el usuario elige el idioma si lo necesita
-  // No restaurar desde sessionStorage para evitar confusión
+  // Restore language from sessionStorage or early selection
+  const savedLang = sessionStorage.getItem('cvoptima_lang') || window._earlyLang || 'es';
+  if (savedLang && savedLang !== 'es') {
+    setIdioma(savedLang);
+  }
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('pago') === 'ok') {
