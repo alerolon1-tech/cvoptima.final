@@ -1793,6 +1793,17 @@ function t(key) {
   return (I18N[lang] && I18N[lang][key]) || (I18N['es'] && I18N['es'][key]) || key;
 }
 
+function translateLabel(val) {
+  if (!val || LANG !== 'en') return val;
+  const map = {
+    'Alto':'High','Medio':'Medium','Bajo':'Low',
+    'Alta':'High','Media':'Medium','Baja':'Low',
+    'Consistente':'Consistent','En crecimiento':'Growing',
+    'En transicion':'In transition','Dispersa':'Scattered'
+  };
+  return map[val] || val;
+}
+
 // ══════════════════════════════════════════════════════════════════════
 if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 let D=null,RC=null,PC=null,TAB='t',PFILE=null,LI_FILE=null,LI_TEXT=null,MODO='cv',PLAN='starter',CV_TEXT_CACHE='';
