@@ -926,7 +926,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
               <div class="ats-grid" id="d-ats-det"></div>
             </div>
             <div class="pn" style="border:none;padding:0;background:transparent">
-              <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px">Radar profesional</div>
+              <div style="font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px" data-i18n="radar-profesional-lbl">Radar profesional</div>
               <div class="chart-wrap"><canvas id="radar-c"></canvas></div>
             </div>
           </div>
@@ -1689,6 +1689,7 @@ var I18N = {
     'sec-proyeccion-lbl': '📈 Proyección de score con mejoras',
     'radar-inline-desc': 'Cómo leer el radar: cada eje representa una dimensión. Cuanto más cerca del borde exterior, mejor posicionado está tu perfil en esa área. Un polígono con lados parejos indica un CV equilibrado; uno irregular muestra dónde están las oportunidades de mejora.',
     'dl-guia': 'Descargar guía',
+    'radar-profesional-lbl': 'Radar profesional',
     'li-score-lbl-static': 'Score LinkedIn',
     'li-titular-perfil': 'Titular del perfil',
     'li-actual': 'Actual:',
@@ -2058,6 +2059,7 @@ var I18N = {
     'sec-proyeccion-lbl': '📈 Score projection with improvements',
     'radar-inline-desc': 'How to read the radar: each axis represents a dimension. The closer to the outer edge, the better your profile is in that area. A balanced polygon indicates a well-rounded resume; an irregular one shows where your improvement opportunities are.',
     'dl-guia': 'Download guide',
+    'radar-profesional-lbl': 'Professional radar',
     'prompt-email': 'Enter your email to receive the diagnosis:',
     'alert-pago-ok': 'Payment confirmed! Your Diagnóstico analysis is ready. Upload your resume to begin.',
     'alert-pago-error': 'Payment was not completed. You can try again whenever you want.',
@@ -2872,9 +2874,9 @@ function renderProModules(d) {
       <span style="font-size:13px;font-weight:600;background:${tipoColor}22;color:${tipoColor};padding:4px 14px;border-radius:20px">${dt.tipo}</span>
     </div>
     <div style="font-size:13px;color:var(--tx2);line-height:1.65;margin-bottom:14px">${dt.descripcion||''}</div>
-    ${dt.patrones?.length ? `<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2);margin-bottom:6px">Patrones detectados</div>${dt.patrones.map(p=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">• ${p}</div>`).join('')}</div>` : ''}
-    ${dt.oportunidades?.length ? `<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#22C55E;margin-bottom:6px">Oportunidades de reposicionamiento</div>${dt.oportunidades.map(o=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">→ ${o}</div>`).join('')}</div>` : ''}
-    ${dt.riesgos?.length ? `<div><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#EF4444;margin-bottom:6px">Tensiones a resolver</div>${dt.riesgos.map(r=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">⚠ ${r}</div>`).join('')}</div>` : ''}
+    ${dt.patrones?.length ? `<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2);margin-bottom:6px">${t('pro-patrones')}</div>${dt.patrones.map(p=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">• ${p}</div>`).join('')}</div>` : ''}
+    ${dt.oportunidades?.length ? `<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#22C55E;margin-bottom:6px">${t('pro-oportunidades')}</div>${dt.oportunidades.map(o=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">→ ${o}</div>`).join('')}</div>` : ''}
+    ${dt.riesgos?.length ? `<div><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#EF4444;margin-bottom:6px">${t('pro-tensiones-tray')}</div>${dt.riesgos.map(r=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">⚠ ${r}</div>`).join('')}</div>` : ''}
   ` : `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 
   // Posicionamiento
@@ -2924,7 +2926,7 @@ function renderProModules(d) {
     ${dimCard(t('pro-dim-subjetiva'),'#7C3AED',ecs.dimensionSubjetiva)}
     ${dimCard(t('pro-dim-colectiva'),'#F59E0B',ecs.dimensionColectiva)}
     ${ecs.posicionamientoMercado?`<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2);margin-bottom:6px">Posicionamiento frente al mercado actual</div><div style="font-size:13px;color:var(--tx2);line-height:1.65">${ecs.posicionamientoMercado}</div></div>`:''}
-    ${ecs.tensiones?.length?`<div><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#F59E0B;margin-bottom:8px">Tensiones a considerar</div>${ecs.tensiones.map(t=>`<div style="font-size:12px;color:var(--tx2);padding:6px 0;border-bottom:1px solid var(--b1)">⚡ ${t}</div>`).join('')}</div>`:''}
+    ${ecs.tensiones?.length?`<div><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#F59E0B;margin-bottom:8px">${t('pro-tensiones-ecs')}</div>${ecs.tensiones.map(t=>`<div style="font-size:12px;color:var(--tx2);padding:6px 0;border-bottom:1px solid var(--b1)">⚡ ${t}</div>`).join('')}</div>`:''}
   ` : `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 
   // Versión en inglés
