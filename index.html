@@ -1690,6 +1690,9 @@ var I18N = {
     'radar-inline-desc': 'Cómo leer el radar: cada eje representa una dimensión. Cuanto más cerca del borde exterior, mejor posicionado está tu perfil en esa área. Un polígono con lados parejos indica un CV equilibrado; uno irregular muestra dónde están las oportunidades de mejora.',
     'dl-guia': 'Descargar guía',
     'radar-profesional-lbl': 'Radar profesional',
+    'merc-rol-ph': 'Ej: Analista de RRHH',
+    'merc-sector-ph': 'Ej: Tecnología, Salud, Educación',
+    'merc-ubicacion-ph': 'Ej: Buenos Aires, Argentina',
     'li-score-lbl-static': 'Score LinkedIn',
     'li-titular-perfil': 'Titular del perfil',
     'li-actual': 'Actual:',
@@ -2060,6 +2063,9 @@ var I18N = {
     'radar-inline-desc': 'How to read the radar: each axis represents a dimension. The closer to the outer edge, the better your profile is in that area. A balanced polygon indicates a well-rounded resume; an irregular one shows where your improvement opportunities are.',
     'dl-guia': 'Download guide',
     'radar-profesional-lbl': 'Professional radar',
+    'merc-rol-ph': 'E.g.: HR Analyst',
+    'merc-sector-ph': 'E.g.: Technology, Health, Education',
+    'merc-ubicacion-ph': 'E.g.: New York, USA',
     'prompt-email': 'Enter your email to receive the diagnosis:',
     'alert-pago-ok': 'Payment confirmed! Your Diagnóstico analysis is ready. Upload your resume to begin.',
     'alert-pago-error': 'Payment was not completed. You can try again whenever you want.',
@@ -2581,6 +2587,13 @@ function setIdioma(lang) {
     } else {
       el.textContent = val;
     }
+  });
+
+  // Apply placeholder translations with data-i18n-placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = t(key);
+    if (val) el.placeholder = val;
   });
 
   // Translate select options with data-es/data-en
