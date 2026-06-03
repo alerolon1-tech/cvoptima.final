@@ -695,11 +695,11 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 <!-- ══ LOADING ════════════════════════════════════════════════════════════════ -->
 <div id="pg-load" class="page" style="display:none">
 <div class="load">
-  <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="justify-content:center;margin-bottom:20px"><span data-i18n="back-fix"><span data-i18n="back-fix"><span data-i18n="back-fix">← Volver y corregir</span></span></span></button>
+  <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="justify-content:center;margin-bottom:20px"><span data-i18n="back-fix">← Volver y corregir</span></button>
   <div class="spin"></div>
-  <h2 data-i18n="loading-title"><span data-i18n="loading-title"><span data-i18n="loading-title">Analizando tu perfil</span></span></h2>
-  <p data-i18n="loading-subtitle"><span data-i18n="loading-subtitle">Procesando con criterios de empleabilidad reales...</span></p>
-  <p data-i18n="loading-time" style="font-size:12px;color:var(--tx3);margin-top:-8px;margin-bottom:4px"><span data-i18n="loading-time"><span data-i18n="loading-time">El análisis tarda entre 15 y 30 segundos</span></span></p>
+  <h2 data-i18n="loading-title">Analizando tu perfil</h2>
+  <p data-i18n="loading-subtitle">Procesando con criterios de empleabilidad reales...</p>
+  <p data-i18n="loading-time" style="font-size:12px;color:var(--tx3);margin-top:-8px;margin-bottom:4px">El análisis tarda entre 15 y 30 segundos</p>
   <ul class="steps">
     <li class="step" id="s1"><span class="sdot"></span><span data-i18n="step1">Leyendo estructura y secciones</li>
     <li class="step" id="s2"><span class="sdot"></span><span data-i18n="step2">Detectando logros vs responsabilidades</li>
@@ -724,7 +724,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
   <!-- ── Dash header ── -->
   <div class="dh fu">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
-      <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="margin-bottom:0"><span data-i18n="back-new"><span data-i18n="back-new">← Nuevo análisis</span></span></button>
+      <button class="back-btn" onclick="showPage('pg-upload');document.getElementById('go-btn').disabled=false;" style="margin-bottom:0"><span data-i18n="back-new">← Nuevo análisis</span></button>
     </div>
     <div>
       <div class="dh-name" id="d-name">Diagnóstico</div>
@@ -764,7 +764,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="veredicto-content">
         <div class="veredicto-lectura" id="v-lectura"></div>
-        <div data-i18n="sig-title" class="senales-titulo"><span data-i18n="sig-title">Las 3 señales más importantes</span></div>
+        <div data-i18n="sig-title" class="senales-titulo">Las 3 señales más importantes</div>
         <div class="senales-list" id="v-senales"></div>
       </div>
     </div>
@@ -772,7 +772,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       <div class="vmeta-card">
         <div data-i18n="score-potencial" class="vmeta-lbl">Score potencial</div>
         <div class="vmeta-val" id="v-pot">—</div>
-        <div data-i18n="score-alcanzable" class="vmeta-sub"><span data-i18n="score-alcanzable">alcanzable con mejoras</span></div>
+        <div data-i18n="score-alcanzable" class="vmeta-sub">alcanzable con mejoras</div>
       </div>
       <div class="vmeta-card">
         <div data-i18n="score-impact" class="vmeta-lbl">Impact Density</div>
@@ -820,7 +820,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
   <!-- Preview campos bloqueados (Starter) -->
   <div id="starter-preview-section" style="display:none">
     <div class="pn">
-      <div class="pn-t"><span data-i18n="vista-previa-label">Vista previa del análisis</span> <span style="cursor:pointer;font-size:10px" data-i18n="ver-analisis" onclick="scrollToPlanes()"><span data-i18n="ver-analisis">Ver análisis completo →</span></span></div>
+      <div class="pn-t"><span data-i18n="vista-previa-label">Vista previa del análisis</span> <span style="cursor:pointer;font-size:10px" data-i18n="ver-analisis" onclick="scrollToPlanes()">Ver análisis completo →</span></div>
       <div id="starter-preview-body"></div>
     </div>
   </div>
@@ -834,12 +834,12 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
           <canvas id="starter-radar-c"></canvas>
           <div class="starter-radar-overlay">
             <span>🔒</span>
-            <div data-i18n="ver-desglose"><span data-i18n="ver-desglose">Ver desglose completo</span></div>
+            <div data-i18n="ver-desglose">Ver desglose completo</div>
           </div>
         </div>
       </div>
       <div class="radar-how">
-        <div data-i18n="radar-guide-title" class="radar-how-t"><span data-i18n="radar-guide-title">Cómo leer este gráfico</span></div>
+        <div data-i18n="radar-guide-title" class="radar-how-t">Cómo leer este gráfico</div>
         <div data-i18n="radar-guide-text" class="radar-how-d">Cada eje representa una dimensión de tu perfil. Cuanto más grande es el área coloreada, más sólido es tu CV en esa dimensión. Una forma equilibrada y amplia indica un perfil bien desarrollado.</div>
       </div>
       <div id="starter-radar-legend" class="radar-legend"></div>
@@ -858,7 +858,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
           <div class="lock-title">Análisis completo de coherencia disponible en plan Diagnóstico</div>
           <div class="lock-sub">Incluye diagnóstico por sección, radar comparativo CV↔LinkedIn y plan de alineación.</div>
         </div>
-        <button class="lock-btn" onclick="scrollToPlanes()"><span data-i18n="ver-planes"><span data-i18n="ver-planes">Ver planes →</span></span></button>
+        <button class="lock-btn" onclick="scrollToPlanes()"><span data-i18n="ver-planes">Ver planes →</span></button>
       </div>
     </div>
   </div>
@@ -948,7 +948,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
               <div id="d-faltantes" style="margin-top:12px"></div>
             </div>
             <div>
-              <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px"><span data-i18n="sec-alertas"><span data-i18n="sec-alertas">Alertas</span></span></div>
+              <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px"><span data-i18n="sec-alertas">Alertas</span></div>
               <div id="d-alertas"></div>
             </div>
           </div>
@@ -1179,11 +1179,11 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
   ════════════════════════════════════════════ -->
   <div id="acciones-wrap" style="display:none">
     <div class="acciones-panel">
-      <div data-i18n="label-plan-accion" class="acciones-title" data-i18n="label-plan-accion"><span data-i18n="label-plan-accion">Plan de acción · ordenado por prioridad e impacto</span></div>
+      <div data-i18n="label-plan-accion" class="acciones-title">Plan de acción · ordenado por prioridad e impacto</div>
       <div class="horizonte-tabs">
-        <button class="ht active" onclick="filterAcciones('todas', this)"><span data-i18n="filter-todas"><span data-i18n="filter-todas">Todas las acciones</span></span></button>
-        <button data-i18n="label-prioridad-alta" class="ht" onclick="filterAcciones('Alta', this)"><span data-i18n="label-prioridad-alta"><span data-i18n="label-prioridad-alta">Prioridad alta</span></button>
-        <button data-i18n="label-prioridad-media" class="ht" onclick="filterAcciones('Media', this)"><span data-i18n="label-prioridad-media">Prioridad media</span></button>
+        <button class="ht active" onclick="filterAcciones('todas', this)"><span data-i18n="filter-todas">Todas las acciones</span></button>
+        <button data-i18n="label-prioridad-alta" class="ht" onclick="filterAcciones('Alta', this)"><span data-i18n="label-prioridad-alta">Prioridad alta</button>
+        <button data-i18n="label-prioridad-media" class="ht" onclick="filterAcciones('Media', this)">Prioridad media</button>
         <button class="ht" onclick="filterAcciones('Baja', this)"><span data-i18n="label-prioridad-baja">Prioridad baja</span></button>
       </div>
       <div id="d-acciones"></div>
@@ -1192,7 +1192,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
   <!-- Disclaimer -->
   <div class="fu" style="margin-top:32px;padding:16px 20px;border-top:1px solid var(--b2);border-radius:8px;background:var(--bg2)">
-    <p style="font-size:11px;color:var(--tx3);line-height:1.7;text-align:center;max-width:680px;margin:0 auto"><strong data-i18n="disclaimer-title" style="color:var(--tx2)"><span data-i18n="disclaimer-title">Aviso importante:</span></strong> <span data-i18n="disclaimer-text">Este análisis es una primera aproximación generada por inteligencia artificial. Puede contener errores o interpretaciones que no reflejen el contexto específico de tu búsqueda, sector o puesto. Los resultados son orientativos y deben leerse de manera crítica. Te recomendamos complementar este diagnóstico con tu propio criterio y, cuando sea posible, con la mirada de un profesional de empleabilidad.</span></p>
+    <p style="font-size:11px;color:var(--tx3);line-height:1.7;text-align:center;max-width:680px;margin:0 auto"><strong data-i18n="disclaimer-title" style="color:var(--tx2)">Aviso importante:</strong> <span data-i18n="disclaimer-text">Este análisis es una primera aproximación generada por inteligencia artificial. Puede contener errores o interpretaciones que no reflejen el contexto específico de tu búsqueda, sector o puesto. Los resultados son orientativos y deben leerse de manera crítica. Te recomendamos complementar este diagnóstico con tu propio criterio y, cuando sea posible, con la mirada de un profesional de empleabilidad.</span></p>
   </div>
 
   <!-- Botón nuevo diagnóstico -->
@@ -1216,7 +1216,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
         <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0" data-i18n="comp-guardar-desc">Guardá el análisis actual para compararlo con una versión mejorada del CV. Podés guardar hasta 3 versiones durante la sesión.</div>
         <div id="comp-versions-list" style="margin-bottom:14px"></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button onclick="guardarVersion()" id="comp-save-btn" style="padding:9px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer"><span data-i18n="guardar-version"><span data-i18n="guardar-version">💾 Guardar versión actual</span></span></button>
+          <button onclick="guardarVersion()" id="comp-save-btn" style="padding:9px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer"><span data-i18n="guardar-version">💾 Guardar versión actual</span></button>
           <button onclick="compararVersiones()" id="comp-compare-btn" style="display:none;padding:9px 18px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer">📊 Ver comparativa</button>
         </div>
         <div id="comp-resultado" style="margin-top:16px"></div>
@@ -1299,15 +1299,15 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-rol-lbl"><span data-i18n="merc-rol-lbl">Rol buscado *</span></span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-rol-lbl">Rol buscado *</span></label>
             <input id="merc-rol" type="text" placeholder="Ej: Analista de RRHH" data-i18n-placeholder="merc-rol-ph" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-sector-lbl"><span data-i18n="merc-sector-lbl">Sector *</span></span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-sector-lbl">Sector *</span></label>
             <input id="merc-sector" type="text" placeholder="Ej: Tecnología, Salud, Educación" data-i18n-placeholder="merc-sector-ph" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-seniority-lbl"><span data-i18n="merc-seniority-lbl">Seniority</span></span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-seniority-lbl">Seniority</span></label>
             <select id="merc-seniority" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
               <option value="" data-i18n-opt="merc-no-esp">No especificado</option>
               <option value="Junior">Junior</option>
@@ -1317,11 +1317,11 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
             </select>
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-ubicacion-lbl"><span data-i18n="merc-ubicacion-lbl">Ubicación</span></span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-ubicacion-lbl">Ubicación</span></label>
             <input id="merc-ubicacion" type="text" placeholder="Ej: Buenos Aires, Argentina" data-i18n-placeholder="merc-ubicacion-ph" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-empresa-lbl"><span data-i18n="merc-empresa-lbl">Tipo de empresa</span></span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-empresa-lbl">Tipo de empresa</span></label>
             <select id="merc-empresa" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
               <option value="" data-i18n-opt="merc-no-pref">Sin preferencia</option>
               <option value="Startup">Startup</option>
@@ -1332,7 +1332,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
             </select>
           </div>
           <div>
-            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-modalidad-lbl"><span data-i18n="merc-modalidad-lbl">Modalidad</span></span></label>
+            <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);display:block;margin-bottom:6px"><span data-i18n="merc-modalidad-lbl">Modalidad</span></label>
             <select id="merc-modalidad" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);color:var(--tx);font-family:var(--sans);font-size:13px;outline:none">
               <option value="" data-i18n-opt="merc-no-pref">Sin preferencia</option>
               <option value="Presencial">Presencial</option>
@@ -1345,7 +1345,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
 
         <div id="merc-error" style="display:none;font-size:11px;color:var(--rd);margin-bottom:8px"></div>
         <button onclick="analizarMercado()" id="merc-btn" style="padding:11px 24px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer">
-          <span id="merc-label" data-i18n="analizar-mercado"><span data-i18n="analizar-mercado">Analizar mercado →</span></span>
+          <span id="merc-label" data-i18n="analizar-mercado">Analizar mercado →</span>
         </button>
 
         <div id="merc-loading" style="display:none;margin-top:16px;font-size:12px;color:var(--tx3)"><span data-i18n="merc-loading-text">Buscando datos del mercado en tiempo real... esto puede tardar unos segundos.</span></div>
@@ -1363,7 +1363,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
         <div style="height:16px"></div>
         <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px;padding:10px 14px;background:var(--bg3);border-left:3px solid #0891B2;border-radius:0 var(--r) var(--r) 0" data-i18n="ing-desc">Genera un CV profesional completo en inglés siguiendo las convenciones del mercado anglosajón — no es una traducción sino una reescritura optimizada para ATS y reclutadores de habla inglesa.</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-          <button onclick="generarCVIngles()" id="cv-ing-btn" style="padding:10px 20px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span id="cv-ing-label" data-i18n="generar-ingles"><span data-i18n="generar-ingles">Generar CV en inglés →</span></span></button>
+          <button onclick="generarCVIngles()" id="cv-ing-btn" style="padding:10px 20px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span id="cv-ing-label" data-i18n="generar-ingles">Generar CV en inglés →</span></button>
           <button onclick="dlCVIngles()" id="cv-ing-dl" style="display:none;padding:10px 20px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span data-i18n="dl-ingles">⬇ Descargar PDF</span></button>
         </div>
         <div id="cv-ing-loading" style="display:none;font-size:12px;color:var(--tx3);margin-bottom:12px" data-i18n="ing-generando-desc">Generando la versión optimizada en inglés... esto puede tardar 20-30 segundos.</div>
