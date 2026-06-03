@@ -84,7 +84,8 @@ export async function onRequest(context) {
       "5. All scores are integers between 0 and 100. NEVER use 0-10 scale.\n" +
       "6. NEVER set atsScore, scorePotencial or impactDensityScore to 0.\n" +
       "7. NO LEADERSHIP recommendations unless the CV shows concrete evidence of managing people.\n" +
-      "8. Respond ONLY with the JSON. No extra text, no markdown."
+      "8. Respond ONLY with the JSON. No extra text, no markdown.\n" +
+      "9. CRITICAL — LANGUAGE: The UI language is ENGLISH. ALL text fields in the JSON MUST be in English, including currentRole, seniority, candidateName context, and ALL narrative fields. If the document is in Spanish, translate role titles and descriptions to English. Example: 'Fundadora' → 'Founder', 'Gerente de RRHH' → 'HR Manager', 'Coordinadora' → 'Coordinator'."
     ) : (
       "Sos un experto senior en empleabilidad. Tu unica funcion es analizar el documento que el usuario te proporciona y devolver un JSON valido en espanol rioplatense.\n\n" +
       "REGLA PRINCIPAL — LEE ESTO PRIMERO:\n" +
@@ -104,7 +105,7 @@ export async function onRequest(context) {
       "2. Cada campo debe mencionar datos concretos del documento: empresa, rol, herramienta, fecha o logro especifico.\n" +
       "3. NUNCA inventes datos que no figuren en el documento. Si algo no existe escribe 'No detectado en el documento'.\n" +
       "4. ANTES de generar brechas o recomendaciones, identifica mentalmente el rol, sector y habilidades principales del documento. Una brecha o recomendacion NUNCA puede referirse a algo que ya figura como presente en el documento.\n" +
-      "5. Si el documento esta en ingles, analizalo en ingles internamente pero escribe todo el JSON en espanol rioplatense.\n" +
+      "5. El idioma de la UI es ESPAÑOL. Escribe TODO el JSON en español rioplatense sin importar el idioma del documento. Los únicos campos que pueden estar en otro idioma son las frases textuales citadas entre comillas directamente del CV.\n" +
       "6. Genera MINIMO 3 recomendaciones de prioridad Alta y 2 de prioridad Media. Cada recomendacion debe referirse a mejoras concretas del documento: redaccion, estructura, logros, keywords, secciones faltantes, verbos, formato. NUNCA recomiendes buscar empleo, cambiar de sector o aplicar a empresas. Si el CV no tiene titular, perfil profesional o logros cuantificados, esas DEBEN ser recomendaciones de prioridad Alta. REGLAS ESTRICTAS DE RECOMENDACIONES: (a) cada recomendacion debe ser sobre un tema DISTINTO — no repitas el mismo tema con diferente título ni diferente redacción; (b) el tema 'logros' solo puede aparecer UNA SOLA VEZ en todo el plan de acción — si el CV tiene logros cualitativos, reconocelos y recomendá cuantificarlos en lugar de decir que no hay logros; (c) NUNCA uses frases genéricas como 'mejorar la redacción' o 'mejorar el formato' sin especificar exactamente qué mejorar y cómo; (d) antes de escribir cada recomendacion verificá que no haya otra sobre el mismo tema.\n" +
       "7. Todos los scores son numeros enteros entre 0 y 100. NUNCA uses escala 0-10.\n" +
       "8. NUNCA dejes atsScore, scorePotencial o impactDensityScore en 0.\n" +
