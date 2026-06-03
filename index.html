@@ -1069,27 +1069,27 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
           </div>
           <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;margin-bottom:16px">
             <div style="text-align:center;min-width:100px">
-              <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px" id="li-score-lbl">Score LinkedIn</div>
+              <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px" id="li-score-lbl" data-i18n="li-score-lbl-static">Score LinkedIn</div>
               <div class="li-score-big" id="li-score">—</div>
               <div style="font-size:10px;color:var(--tx3);margin-top:4px">/ 100</div>
             </div>
             <div>
               <div class="resumen" id="li-resumen" style="font-size:13px;margin-bottom:12px"></div>
               <div id="li-titular-wrap" style="display:none;background:var(--bg3);border-radius:var(--r);padding:12px 14px;margin-top:8px">
-                <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Titular del perfil</div>
-                <div style="font-size:12px;color:var(--tx2);margin-bottom:6px"><span style="color:var(--tx3)">Actual:</span> <span id="li-titular-actual"></span></div>
-                <div style="font-size:12px;color:var(--teal2)"><span style="color:var(--tx3)">Sugerido:</span> <span id="li-titular-sugerido"></span></div>
+                <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px" data-i18n="li-titular-perfil">Titular del perfil</div>
+                <div style="font-size:12px;color:var(--tx2);margin-bottom:6px"><span style="color:var(--tx3)" data-i18n="li-actual">Actual:</span> <span id="li-titular-actual"></span></div>
+                <div style="font-size:12px;color:var(--teal2)"><span style="color:var(--tx3)" data-i18n="li-sugerido">Sugerido:</span> <span id="li-titular-sugerido"></span></div>
               </div>
             </div>
           </div>
           <!-- Dimensiones LinkedIn -->
           <div id="li-dims-wrap" style="display:none;margin-bottom:16px">
-            <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:10px">Dimensiones del perfil</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:10px" data-i18n="li-dims-perfil">Dimensiones del perfil</div>
             <div class="ats-grid" id="li-dims-grid"></div>
           </div>
           <!-- Extracto diagnóstico -->
           <div id="li-extracto-wrap" style="display:none;margin-bottom:16px;background:var(--bg3);border-left:3px solid rgba(10,102,194,0.5);padding:10px 14px;border-radius:0 var(--r) var(--r) 0">
-            <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Diagnóstico del extracto / about</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px" data-i18n="li-extracto-lbl">Diagnóstico del extracto / about</div>
             <div style="font-size:12px;color:var(--tx2);line-height:1.65" id="li-extracto-diag"></div>
           </div>
           <!-- Diagnóstico por sección -->
@@ -1107,7 +1107,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
           </div>
           <!-- Acciones LinkedIn -->
           <div id="li-recs-wrap" style="border-top:1px solid var(--b1);padding-top:12px;display:none">
-            <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal2);margin-bottom:8px">Acciones para mejorar el perfil</div>
+            <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal2);margin-bottom:8px" data-i18n="li-acciones-lbl">Acciones para mejorar el perfil</div>
             <ol id="li-recs" style="list-style:none;display:flex;flex-direction:column;gap:6px"></ol>
           </div>
         </div>
@@ -1123,7 +1123,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
             <div data-i18n="coherencia-lbl" class="pn-t">Coherencia CV ↔ LinkedIn</div>
             <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start">
               <div style="text-align:center;min-width:100px">
-                <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Score</div>
+                <div style="font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px" data-i18n="coh-score-lbl">Score</div>
                 <div class="li-score-big" id="coh-score">—</div>
                 <div style="font-size:10px;color:var(--tx3);margin-top:4px">/ 100</div>
                 <div id="coh-nivel" style="margin-top:6px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block">—</div>
@@ -1135,19 +1135,19 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
         <!-- Coincidencias + Brechas -->
         <div class="g2">
           <div class="pn" style="background:rgba(34,197,94,0.04);border-color:rgba(34,197,94,0.2)">
-            <div class="pn-t" style="color:var(--gr)">✓ Coincidencias</div>
+            <div class="pn-t" style="color:var(--gr)" data-i18n="coh-coincidencias-lbl">✓ Coincidencias</div>
             <ul id="coh-coincidencias" style="list-style:none;display:flex;flex-direction:column;gap:6px"></ul>
           </div>
           <div class="pn" style="background:rgba(245,158,11,0.04);border-color:rgba(245,158,11,0.2)">
-            <div class="pn-t" style="color:var(--am)">◆ Brechas detectadas</div>
+            <div class="pn-t" style="color:var(--am)" data-i18n="coh-brechas-lbl">◆ Brechas detectadas</div>
             <ul id="coh-brechas" style="list-style:none;display:flex;flex-direction:column;gap:6px"></ul>
           </div>
         </div>
         <!-- Radar comparativo -->
         <div class="g2">
           <div class="pn">
-            <div class="pn-t">Radar comparativo: CV vs LinkedIn</div>
-            <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.6">Las brechas visuales señalan dónde ajustar la narrativa de cada documento.</div>
+            <div class="pn-t" data-i18n="coh-radar-titulo">Radar comparativo: CV vs LinkedIn</div>
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.6" data-i18n="coh-radar-desc">Las brechas visuales señalan dónde ajustar la narrativa de cada documento.</div>
             <div class="chart-wrap"><canvas id="radar-comp-c"></canvas></div>
             <div style="display:flex;gap:16px;justify-content:center;margin-top:12px">
               <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx2)"><span style="width:12px;height:3px;background:#0891B2;display:inline-block;border-radius:2px"></span>CV</div>
@@ -1155,7 +1155,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
             </div>
           </div>
           <div class="pn">
-            <div class="pn-t">Brechas dimensión por dimensión</div>
+            <div class="pn-t" data-i18n="coh-brechas-dims">Brechas dimensión por dimensión</div>
             <div id="li-brechas-dims" style="display:flex;flex-direction:column;gap:10px;margin-top:4px"></div>
           </div>
         </div>
@@ -1213,7 +1213,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-comp-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0">Guardá el análisis actual para compararlo con una versión mejorada del CV. Podés guardar hasta 3 versiones durante la sesión.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0" data-i18n="comp-guardar-desc">Guardá el análisis actual para compararlo con una versión mejorada del CV. Podés guardar hasta 3 versiones durante la sesión.</div>
         <div id="comp-versions-list" style="margin-bottom:14px"></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button onclick="guardarVersion()" id="comp-save-btn" style="padding:9px 18px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer"><span data-i18n="guardar-version"><span data-i18n="guardar-version">💾 Guardar versión actual</span></span></button>
@@ -1231,7 +1231,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-capital-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0">El capital relacional visible analiza qué tan presente está el trabajo con otros en el perfil — verbos que indican colaboración, organizaciones y stakeholders mencionados. La empleabilidad no es solo lo que sabés hacer, sino también con quiénes trabajaste y cómo lo comunicás.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0" data-i18n="cap-rel-desc">El capital relacional visible analiza qué tan presente está el trabajo con otros en el perfil — verbos que indican colaboración, organizaciones y stakeholders mencionados. La empleabilidad no es solo lo que sabés hacer, sino también con quiénes trabajaste y cómo lo comunicás.</div>
         <div id="d-capital-relacional"></div>
       </div>
     </div>
@@ -1244,7 +1244,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-tray-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0">Analiza la secuencia de roles, los cambios de sector y la progresión de responsabilidad a lo largo del tiempo. Identifica qué tipo de trayectoria comunica el perfil — consistente, en crecimiento, en transición o dispersa — y qué oportunidades y tensiones genera eso frente al mercado actual.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0" data-i18n="tray-desc">Analiza la secuencia de roles, los cambios de sector y la progresión de responsabilidad a lo largo del tiempo. Identifica qué tipo de trayectoria comunica el perfil — consistente, en crecimiento, en transición o dispersa — y qué oportunidades y tensiones genera eso frente al mercado actual.</div>
         <div id="d-trayectoria"></div>
       </div>
     </div>
@@ -1257,7 +1257,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-pos-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0">Evalúa tres tipos de movimiento posibles desde el perfil actual: <strong style="color:var(--teal2)">vertical</strong> (crecer dentro del mismo rol o área), <strong style="color:var(--teal2)">lateral</strong> (moverse a roles equivalentes en otras áreas o funciones) y <strong style="color:var(--teal2)">transición de sector</strong> (cambiar de industria). Para cada uno analiza si es viable con el perfil actual y qué acciones lo facilitarían.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0" data-i18n="mov-desc">Evalúa tres tipos de movimiento posibles desde el perfil actual: <strong style="color:var(--teal2)">vertical</strong> (crecer dentro del mismo rol o área), <strong style="color:var(--teal2)">lateral</strong> (moverse a roles equivalentes en otras áreas o funciones) y <strong style="color:var(--teal2)">transición de sector</strong> (cambiar de industria). Para cada uno analiza si es viable con el perfil actual y qué acciones lo facilitarían.</div>
         <div id="d-posicionamiento"></div>
       </div>
     </div>
@@ -1270,7 +1270,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-narr-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0">No son sugerencias de formato — son reescrituras concretas del titular, perfil profesional y experiencias para que comuniquen mejor la trayectoria y el posicionamiento buscado. Cada recomendación incluye el texto actual, el texto sugerido listo para usar, y la justificación estratégica del cambio.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0" data-i18n="narr-desc">No son sugerencias de formato — son reescrituras concretas del titular, perfil profesional y experiencias para que comuniquen mejor la trayectoria y el posicionamiento buscado. Cada recomendación incluye el texto actual, el texto sugerido listo para usar, y la justificación estratégica del cambio.</div>
         <div id="d-recomendaciones-narrativa"></div>
       </div>
     </div>
@@ -1295,7 +1295,7 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-merc-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px">Completá los campos para obtener un análisis en tiempo real del mercado laboral para tu perfil — demanda, competencia, skills requeridos, remuneración y estrategia de búsqueda.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px" data-i18n="merc-desc">Completá los campos para obtener un análisis en tiempo real del mercado laboral para tu perfil — demanda, competencia, skills requeridos, remuneración y estrategia de búsqueda.</div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
           <div>
@@ -1361,12 +1361,12 @@ Desde la computadora: podés usar esta opción o subir el PDF directamente."></t
       </div>
       <div class="expand-body" id="exp-ing-b">
         <div style="height:16px"></div>
-        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px;padding:10px 14px;background:var(--bg3);border-left:3px solid #0891B2;border-radius:0 var(--r) var(--r) 0">Genera un CV profesional completo en inglés siguiendo las convenciones del mercado anglosajón — no es una traducción sino una reescritura optimizada para ATS y reclutadores de habla inglesa.</div>
+        <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px;padding:10px 14px;background:var(--bg3);border-left:3px solid #0891B2;border-radius:0 var(--r) var(--r) 0" data-i18n="ing-desc">Genera un CV profesional completo en inglés siguiendo las convenciones del mercado anglosajón — no es una traducción sino una reescritura optimizada para ATS y reclutadores de habla inglesa.</div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
           <button onclick="generarCVIngles()" id="cv-ing-btn" style="padding:10px 20px;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span id="cv-ing-label" data-i18n="generar-ingles"><span data-i18n="generar-ingles">Generar CV en inglés →</span></span></button>
-          <button onclick="dlCVIngles()" id="cv-ing-dl" style="display:none;padding:10px 20px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer">⬇ Descargar PDF</button>
+          <button onclick="dlCVIngles()" id="cv-ing-dl" style="display:none;padding:10px 20px;background:var(--petrol);color:var(--tx);border:1px solid var(--tc-b);border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer"><span data-i18n="dl-ingles">⬇ Descargar PDF</span></button>
         </div>
-        <div id="cv-ing-loading" style="display:none;font-size:12px;color:var(--tx3);margin-bottom:12px">Generando la versión optimizada en inglés... esto puede tardar 20-30 segundos.</div>
+        <div id="cv-ing-loading" style="display:none;font-size:12px;color:var(--tx3);margin-bottom:12px" data-i18n="ing-generando-desc">Generando la versión optimizada en inglés... esto puede tardar 20-30 segundos.</div>
         <div id="cv-ing-error" style="display:none;font-size:11px;color:var(--rd);margin-bottom:8px"></div>
         <div id="d-version-ingles"></div>
       </div>
@@ -1689,6 +1689,50 @@ var I18N = {
     'sec-proyeccion-lbl': '📈 Proyección de score con mejoras',
     'radar-inline-desc': 'Cómo leer el radar: cada eje representa una dimensión. Cuanto más cerca del borde exterior, mejor posicionado está tu perfil en esa área. Un polígono con lados parejos indica un CV equilibrado; uno irregular muestra dónde están las oportunidades de mejora.',
     'dl-guia': 'Descargar guía',
+    'li-score-lbl-static': 'Score LinkedIn',
+    'li-titular-perfil': 'Titular del perfil',
+    'li-actual': 'Actual:',
+    'li-sugerido': 'Sugerido:',
+    'li-dims-perfil': 'Dimensiones del perfil',
+    'li-extracto-lbl': 'Diagnóstico del extracto / about',
+    'li-acciones-lbl': 'Acciones para mejorar el perfil',
+    'coh-score-lbl': 'Score',
+    'coh-coincidencias-lbl': '✓ Coincidencias',
+    'coh-brechas-lbl': '◆ Brechas detectadas',
+    'coh-radar-titulo': 'Radar comparativo: CV vs LinkedIn',
+    'coh-radar-desc': 'Las brechas visuales señalan dónde ajustar la narrativa de cada documento.',
+    'coh-brechas-dims': 'Brechas dimensión por dimensión',
+    'pro-verbos-rel': 'Verbos relacionales detectados',
+    'pro-orgs': 'Organizaciones y stakeholders mencionados',
+    'pro-recomendaciones': 'Recomendaciones',
+    'pro-patrones': 'Patrones detectados',
+    'pro-oportunidades': 'Oportunidades de reposicionamiento',
+    'pro-tensiones-tray': 'Tensiones a resolver',
+    'pro-mov-vertical': 'Movilidad vertical',
+    'pro-mov-lateral': 'Movilidad lateral',
+    'pro-mov-sector': 'Transición de sector',
+    'pro-viable': 'Viable',
+    'pro-requiere': 'Requiere trabajo',
+    'pro-actual': 'Actual:',
+    'pro-sugerido': 'Sugerido:',
+    'pro-ecs-dims': 'Las 4 dimensiones de la empleabilidad',
+    'pro-dim-estructural': 'Dimensión estructural — mercado, tecnología y organización del trabajo',
+    'pro-dim-relacional': 'Dimensión relacional — redes, vínculos y reconocimiento social',
+    'pro-dim-subjetiva': 'Dimensión subjetiva — identidad laboral, sentido y agencia',
+    'pro-dim-colectiva': 'Dimensión colectiva — construcción social del futuro del trabajo',
+    'pro-posicionamiento': 'Posicionamiento frente al mercado actual',
+    'pro-tensiones-ecs': 'Tensiones a considerar',
+    'pro-no-datos': 'No se detectaron datos relacionales suficientes en el documento.',
+    'pro-no-disponible': 'No disponible.',
+    'comp-guardar-desc': 'Guardá el análisis actual para compararlo con una versión mejorada del CV. Podés guardar hasta 3 versiones durante la sesión.',
+    'cap-rel-desc': 'El capital relacional visible analiza qué tan presente está el trabajo con otros en el perfil — verbos que indican colaboración, organizaciones y stakeholders mencionados. La empleabilidad no es solo lo que sabés hacer, sino también con quiénes trabajaste y cómo lo comunicás.',
+    'tray-desc': 'Analiza la secuencia de roles, los cambios de sector y la progresión de responsabilidad a lo largo del tiempo. Identifica qué tipo de trayectoria comunica el perfil — consistente, en crecimiento, en transición o dispersa — y qué oportunidades y tensiones genera eso frente al mercado actual.',
+    'mov-desc': 'Evalúa tres tipos de movimiento posibles desde el perfil actual: <strong style="color:var(--teal2)">vertical</strong> (crecer dentro del mismo rol o área), <strong style="color:var(--teal2)">lateral</strong> (moverse a roles equivalentes en otras áreas o funciones) y <strong style="color:var(--teal2)">transición de sector</strong> (cambiar de industria). Para cada uno analiza si es viable con el perfil actual y qué acciones lo facilitarían.',
+    'narr-desc': 'No son sugerencias de formato — son reescrituras concretas del titular, perfil profesional y experiencias para que comuniquen mejor la trayectoria y el posicionamiento buscado. Cada recomendación incluye el texto actual, el texto sugerido listo para usar, y la justificación estratégica del cambio.',
+    'merc-desc': 'Completá los campos para obtener un análisis en tiempo real del mercado laboral para tu perfil — demanda, competencia, skills requeridos, remuneración y estrategia de búsqueda.',
+    'ing-desc': 'Genera un CV profesional completo en inglés siguiendo las convenciones del mercado anglosajón.',
+    'ing-generando-desc': 'Generando la versión optimizada en inglés... esto puede tardar 20-30 segundos.',
+  },
     'prompt-email': 'Ingresá tu email para recibir el diagnóstico:',
     'alert-pago-ok': '¡Pago confirmado! Tu análisis Diagnóstico está listo. Subí tu CV para comenzar.',
     'alert-pago-error': 'El pago no se completó. Podés intentarlo de nuevo cuando quieras.',
@@ -1963,6 +2007,49 @@ var I18N = {
     'label-oportunidades': 'Areas for improvement',
     'label-fortalezas-li': '✓ Strengths',
     'label-oportunidades-li': '◆ Areas for improvement',
+    'li-score-lbl-static': 'LinkedIn Score',
+    'li-titular-perfil': 'Profile headline',
+    'li-actual': 'Current:',
+    'li-sugerido': 'Suggested:',
+    'li-dims-perfil': 'Profile dimensions',
+    'li-extracto-lbl': 'About / summary diagnosis',
+    'li-acciones-lbl': 'Actions to improve the profile',
+    'coh-score-lbl': 'Score',
+    'coh-coincidencias-lbl': '✓ Alignments',
+    'coh-brechas-lbl': '◆ Gaps detected',
+    'coh-radar-titulo': 'Comparative radar: Resume vs LinkedIn',
+    'coh-radar-desc': 'Visual gaps show where to adjust the narrative of each document.',
+    'coh-brechas-dims': 'Dimension-by-dimension gaps',
+    'pro-verbos-rel': 'Relational verbs detected',
+    'pro-orgs': 'Organizations and stakeholders mentioned',
+    'pro-recomendaciones': 'Recommendations',
+    'pro-patrones': 'Detected patterns',
+    'pro-oportunidades': 'Repositioning opportunities',
+    'pro-tensiones-tray': 'Tensions to resolve',
+    'pro-mov-vertical': 'Vertical mobility',
+    'pro-mov-lateral': 'Lateral mobility',
+    'pro-mov-sector': 'Sector transition',
+    'pro-viable': 'Viable',
+    'pro-requiere': 'Needs work',
+    'pro-actual': 'Current:',
+    'pro-sugerido': 'Suggested:',
+    'pro-ecs-dims': 'The 4 dimensions of employability',
+    'pro-dim-estructural': 'Structural dimension — market, technology and work organization',
+    'pro-dim-relacional': 'Relational dimension — networks, bonds and social recognition',
+    'pro-dim-subjetiva': 'Subjective dimension — work identity, meaning and agency',
+    'pro-dim-colectiva': 'Collective dimension — social construction of the future of work',
+    'pro-posicionamiento': 'Positioning in the current market',
+    'pro-tensiones-ecs': 'Tensions to consider',
+    'pro-no-datos': 'No sufficient relational data detected in the document.',
+    'pro-no-disponible': 'Not available.',
+    'comp-guardar-desc': 'Save the current analysis to compare it with an improved version of your resume. You can save up to 3 versions during the session.',
+    'cap-rel-desc': 'Visible relational capital analyzes how present collaborative work is in the profile — verbs indicating collaboration, organizations and stakeholders mentioned. Employability is not only what you know how to do, but also who you worked with and how you communicate it.',
+    'tray-desc': 'Analyzes the sequence of roles, sector changes and the progression of responsibility over time. Identifies what type of trajectory the profile communicates — consistent, growing, in transition or scattered — and what opportunities and tensions this generates in the current market.',
+    'mov-desc': 'Evaluates three types of possible movement from the current profile: <strong style="color:var(--teal2)">vertical</strong> (growing within the same role or area), <strong style="color:var(--teal2)">lateral</strong> (moving to equivalent roles in other areas or functions) and <strong style="color:var(--teal2)">sector transition</strong> (changing industry). For each one it analyzes whether it is viable with the current profile and what actions would facilitate it.',
+    'narr-desc': 'These are not formatting suggestions — they are concrete rewrites of the headline, professional profile and experiences to better communicate the trajectory and desired positioning. Each recommendation includes the current text, the suggested text ready to use, and the strategic justification for the change.',
+    'merc-desc': 'Fill in the fields to get a real-time analysis of the labor market for your profile — demand, competition, required skills, compensation and search strategy.',
+    'ing-desc': 'Generates a complete professional resume in English following Anglo-Saxon market conventions.',
+    'ing-generando-desc': 'Generating the optimized English version... this may take 20-30 seconds.',
     'by-author': 'By Alejandra Rolón',
     'merc-loading-text': 'Searching real-time market data... this may take a few seconds.',
     'up-desc-ambos': 'Upload your resume and your LinkedIn profile to get the individual diagnosis and coherence comparison.',
@@ -2789,7 +2876,7 @@ function renderProModules(d) {
     ${dt.patrones?.length ? `<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2);margin-bottom:6px">Patrones detectados</div>${dt.patrones.map(p=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">• ${p}</div>`).join('')}</div>` : ''}
     ${dt.oportunidades?.length ? `<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#22C55E;margin-bottom:6px">Oportunidades de reposicionamiento</div>${dt.oportunidades.map(o=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">→ ${o}</div>`).join('')}</div>` : ''}
     ${dt.riesgos?.length ? `<div><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#EF4444;margin-bottom:6px">Tensiones a resolver</div>${dt.riesgos.map(r=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">⚠ ${r}</div>`).join('')}</div>` : ''}
-  ` : '<div style="font-size:12px;color:var(--tx3)">No disponible.</div>';
+  ` : `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 
   // Posicionamiento
   const pos = d.posicionamiento || {};
@@ -2800,17 +2887,17 @@ function renderProModules(d) {
     return `<div style="background:var(--bg3);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;border-left:3px solid ${col}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div style="font-size:12px;font-weight:600;color:var(--tx)">${icon} ${label}</div>
-        <span style="font-size:10px;font-weight:600;color:${col};background:${col}22;padding:2px 10px;border-radius:20px">${m.posible?'Viable':'Requiere trabajo'}</span>
+        <span style="font-size:10px;font-weight:600;color:${col};background:${col}22;padding:2px 10px;border-radius:20px">${m.posible?t('pro-viable'):t('pro-requiere')}</span>
       </div>
       <div style="font-size:12px;color:var(--tx2);line-height:1.55;margin-bottom:8px">${m.diagnostico}</div>
       ${m.acciones?.length?`<div>${m.acciones.map(a=>`<div style="font-size:11px;color:var(--teal2);padding:3px 0">→ ${a}</div>`).join('')}</div>`:''}
     </div>`;
   };
   document.getElementById('d-posicionamiento').innerHTML =
-    renderMov('movilidadVertical','Movilidad vertical','↑') +
-    renderMov('movilidadLateral','Movilidad lateral','↔') +
-    renderMov('transicionSector','Transición de sector','⟳') ||
-    '<div style="font-size:12px;color:var(--tx3)">No disponible.</div>';
+    renderMov('movilidadVertical',t('pro-mov-vertical'),'↑') +
+    renderMov('movilidadLateral',t('pro-mov-lateral'),'↔') +
+    renderMov('transicionSector',t('pro-mov-sector'),'⟳') ||
+    `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 
   // Recomendaciones de narrativa
   const rn = d.recomendacionesNarrativa || [];
@@ -2818,13 +2905,13 @@ function renderProModules(d) {
     <div style="margin-bottom:16px;border:1px solid var(--b1);border-radius:var(--r);overflow:hidden">
       <div style="background:var(--bg3);padding:10px 14px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2)">${r.tipo||''}</div>
       <div style="padding:12px 14px">
-        ${r.actual?`<div style="font-size:11px;color:var(--tx3);margin-bottom:4px">Actual:</div><div style="font-size:12px;color:var(--tx2);font-style:italic;margin-bottom:12px;padding:8px 10px;background:var(--bg3);border-radius:var(--r)">"${r.actual}"</div>`:''}
-        <div style="font-size:11px;color:var(--teal2);margin-bottom:4px">Sugerido:</div>
+        ${r.actual?`<div style="font-size:11px;color:var(--tx3);margin-bottom:4px">${t('pro-actual')}</div><div style="font-size:12px;color:var(--tx2);font-style:italic;margin-bottom:12px;padding:8px 10px;background:var(--bg3);border-radius:var(--r)">"${r.actual}"</div>`:''}
+        <div style="font-size:11px;color:var(--teal2);margin-bottom:4px">${t('pro-sugerido')}</div>
         <div style="font-size:12px;color:var(--tx);padding:8px 10px;background:rgba(8,145,178,0.06);border-left:2px solid var(--teal);border-radius:0 var(--r) var(--r) 0;margin-bottom:10px">"${r.sugerido||''}"</div>
         ${r.justificacion?`<div style="font-size:11px;color:var(--tx3)">→ ${r.justificacion}</div>`:''}
       </div>
     </div>
-  `).join('') : '<div style="font-size:12px;color:var(--tx3)">No disponible.</div>';
+  `).join('') : `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 
   // Módulo Empleabilidad en Clave Social
   const ecs = d.moduloEmpleabilidadClaveSocial || {};
@@ -2833,13 +2920,13 @@ function renderProModules(d) {
   document.getElementById('d-modulo-ecs').innerHTML = ecs.lectura ? `
     <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:16px;padding:14px 16px;background:var(--bg3);border-radius:var(--r);border-left:3px solid var(--teal)">${ecs.lectura}</div>
     <div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2);margin-bottom:10px">Las 4 dimensiones de la empleabilidad</div>
-    ${dimCard('Dimensión estructural — mercado, tecnología y organización del trabajo','#0891B2',ecs.dimensionEstructural)}
-    ${dimCard('Dimensión relacional — redes, vínculos y reconocimiento social','#22C55E',ecs.dimensionRelacional)}
-    ${dimCard('Dimensión subjetiva — identidad laboral, sentido y agencia','#7C3AED',ecs.dimensionSubjetiva)}
-    ${dimCard('Dimensión colectiva — construcción social del futuro del trabajo','#F59E0B',ecs.dimensionColectiva)}
+    ${dimCard(t('pro-dim-estructural'),'#0891B2',ecs.dimensionEstructural)}
+    ${dimCard(t('pro-dim-relacional'),'#22C55E',ecs.dimensionRelacional)}
+    ${dimCard(t('pro-dim-subjetiva'),'#7C3AED',ecs.dimensionSubjetiva)}
+    ${dimCard(t('pro-dim-colectiva'),'#F59E0B',ecs.dimensionColectiva)}
     ${ecs.posicionamientoMercado?`<div style="margin-bottom:12px"><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teal2);margin-bottom:6px">Posicionamiento frente al mercado actual</div><div style="font-size:13px;color:var(--tx2);line-height:1.65">${ecs.posicionamientoMercado}</div></div>`:''}
     ${ecs.tensiones?.length?`<div><div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#F59E0B;margin-bottom:8px">Tensiones a considerar</div>${ecs.tensiones.map(t=>`<div style="font-size:12px;color:var(--tx2);padding:6px 0;border-bottom:1px solid var(--b1)">⚡ ${t}</div>`).join('')}</div>`:''}
-  ` : '<div style="font-size:12px;color:var(--tx3)">No disponible.</div>';
+  ` : `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 
   // Versión en inglés
   const ving = d.versionIngles || {};
@@ -2852,7 +2939,7 @@ function renderProModules(d) {
     ${ving.habilidades?.tecnicas?.length||ving.habilidades?.blandas?.length?ingCard('Skills',`${ving.habilidades?.tecnicas?.length?`<div style="margin-bottom:6px"><span style="font-size:10px;color:#0891B2;font-weight:600">Technical: </span>${ving.habilidades.tecnicas.map(s=>`<span style="background:var(--tc-d);color:var(--teal2);padding:2px 8px;border-radius:20px;font-size:11px;margin:2px">${s}</span>`).join('')}</div>`:''}${ving.habilidades?.blandas?.length?`<div><span style="font-size:10px;color:#6BA8C0;font-weight:600">Soft skills: </span>${ving.habilidades.blandas.map(s=>`<span style="background:var(--bg3);color:var(--tx2);padding:2px 8px;border-radius:20px;font-size:11px;margin:2px;border:1px solid var(--b1)">${s}</span>`).join('')}</div>`:''}`):'' }
     ${ving.logrosDestacados?.length?ingCard('Key Achievements',ving.logrosDestacados.map(l=>`<div style="font-size:12px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--b1)">• ${l}</div>`).join('')):''}
     ${ving.sugerenciasAdaptacion?.length?`<div style="padding:12px 14px;background:rgba(8,145,178,0.06);border-radius:var(--r);border:1px solid var(--tc-b)"><div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#0891B2;margin-bottom:8px">Tips to adapt for the Anglo-Saxon market</div>${ving.sugerenciasAdaptacion.map(s=>`<div style="font-size:11px;color:var(--tx2);padding:4px 0">→ ${s}</div>`).join('')}</div>`:''}
-  ` : '<div style="font-size:12px;color:var(--tx3)">No disponible.</div>';
+  ` : `<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 }
 
 function renderDash(d){
@@ -3426,7 +3513,7 @@ function renderCVIngles(cv) {
   if(cv.skills?.technical?.length||cv.skills?.languages?.length||cv.skills?.core?.length)html+=ingCard('Skills',`${cv.skills.technical?.length?`<div style="margin-bottom:6px"><span style="font-size:10px;color:#0891B2;font-weight:600">Technical: </span>${cv.skills.technical.map(s=>`<span style="background:var(--tc-d);color:var(--teal2);padding:2px 8px;border-radius:20px;font-size:11px;margin:2px">${s}</span>`).join('')}</div>`:''}${cv.skills.languages?.length?`<div style="margin-bottom:6px"><span style="font-size:10px;color:#0891B2;font-weight:600">Languages: </span>${cv.skills.languages.map(s=>`<span style="background:var(--bg3);color:var(--tx2);padding:2px 8px;border-radius:20px;font-size:11px;margin:2px;border:1px solid var(--b1)">${s}</span>`).join('')}</div>`:''}${cv.skills.core?.length?`<div><span style="font-size:10px;color:#0891B2;font-weight:600">Core competencies: </span>${cv.skills.core.map(s=>`<span style="background:var(--bg3);color:var(--tx2);padding:2px 8px;border-radius:20px;font-size:11px;margin:2px;border:1px solid var(--b1)">${s}</span>`).join('')}</div>`:''}`);
   if(cv.certifications?.length)html+=ingCard('Certifications',cv.certifications.map(c=>`<div style="font-size:12px;color:var(--tx2);padding:3px 0">• ${c.name}${c.issuer?` — ${c.issuer}`:''}${c.year?` (${c.year})`:''}</div>`).join(''));
   if(cv.adaptationNotes?.length)html+=`<div style="padding:12px 14px;background:rgba(8,145,178,0.06);border-radius:var(--r);border:1px solid var(--tc-b)"><div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#0891B2;margin-bottom:8px">Tips for the Anglo-Saxon market</div>${cv.adaptationNotes.map(t=>`<div style="font-size:11px;color:var(--tx2);padding:4px 0">→ ${t}</div>`).join('')}</div>`;
-  document.getElementById('d-version-ingles').innerHTML=html||'<div style="font-size:12px;color:var(--tx3)">No disponible.</div>';
+  document.getElementById('d-version-ingles').innerHTML=html||`<div style="font-size:12px;color:var(--tx3)">${t('pro-no-disponible')}</div>`;
 }
 
 function dlCVIngles(){
