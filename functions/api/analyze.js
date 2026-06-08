@@ -206,176 +206,15 @@ export async function onRequest(context) {
 
     result.has_linkedin = liText.length > 30;
     result._modelUsed = groqData._modelUsed || 'unknown';
-    result._modelUsed = groqData._modelUsed || 'unknown';
     result.atsDetalle = atsDetalleCalculado;
     if (!result.linkedin_analysis) result.linkedin_analysis = null;
 
-    // Normalizar scores: si el modelo los devuelve en escala 0-10, convertir a 0-100
-    const norm = (v) => (typeof v === "number" && v > 0 && v <= 10) ? Math.round(v * 10) : (v || 0);
-    result.atsScore           = norm(result.atsScore);
-    result.scorePotencial     = norm(result.scorePotencial);
-    result.impactDensityScore = Math.min(85, norm(result.impactDensityScore));
-
-    // Ajustar impactDensityScore según logros cualitativos y cuantitativos reales
-    const logrosFuertes    = (result.analisisLogros?.logrosFuertes || []).length;
-    const logrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length;
-    const diagLower = (result.impactDensityDiagnostico || '').toLowerCase();
-
-    if (logrosFuertes === 0 && logrosCualitativos === 0) {
-      // Sin ningún logro — score muy bajo
-      result.impactDensityScore = Math.min(result.impactDensityScore, 20);
-      result.impactDensityDiagnostico = 'No se detectaron logros cuantitativos ni cualitativos en el documento. Las experiencias describen tareas pero no muestran resultados ni impacto.';
-    } else if (logrosFuertes === 0 && logrosCualitativos > 0) {
-      // Solo logros cualitativos — score medio, no penalizar como si no hubiera nada
-      result.impactDensityScore = Math.max(result.impactDensityScore, 35);
-      result.impactDensityScore = Math.min(result.impactDensityScore, 60);
-      result.impactDensityDiagnostico = `Tu CV muestra ${logrosCualitativos} logro${logrosCualitativos > 1 ? 's' : ''} cualitativo${logrosCualitativos > 1 ? 's' : ''} — acciones concretas con verbos de impacto que comunican valor real. Para aumentar el score, podés sumar cifras a esos logros cuando sea posible.`;
-    } else if (logrosFuertes > 0 && logrosCualitativos > 0) {
-      // Tiene ambos tipos — score alto
-      result.impactDensityScore = Math.max(result.impactDensityScore, 55);
-    }
-
-    // Calcular label desde el score
-    if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
-    else if (result.impactDensityScore >= 35) result.impactDensityLabel = "Medio";
-    else result.impactDensityLabel = "Bajo";
-
-    if (result.atsDetalle) {
-      for (const k of Object.keys(result.atsDetalle)) {
-        if (typeof result.atsDetalle[k] === "number") result.atsDetalle[k] = norm(result.atsDetalle[k]);
-      }
-    }
-    if (result.perfilEmpleabilidad) {
-      for (const k of ["visibilidad", "coherencia", "movilidad"]) {
-        if (result.perfilEmpleabilidad[k]?.score !== undefined) {
-          result.perfilEmpleabilidad[k].score = norm(result.perfilEmpleabilidad[k].score);
-        }
-      }
-    }
-
-    // Fallback: si los scores principales siguen en 0, estimarlos desde perfilEmpleabilidad
-    if (result.atsScore === 0 && result.perfilEmpleabilidad) {
-      const pe = result.perfilEmpleabilidad;
-      const vis = pe.visibilidad?.score || 0;
-      const coh = pe.coherencia?.score  || 0;
-      const mov = pe.movilidad?.score   || 0;
-      result.atsScore = Math.round((vis + coh + mov) / 3);
-    }
-    if (result.scorePotencial === 0) result.scorePotencial = Math.min(100, result.atsScore + 15);
-    if (result.impactDensityScore === 0) result.impactDensityScore = 15; // bajo por defecto si no se detectaron logros
+    // ── NORMALIZACIÓN CENTRALIZADA ────────────────────────────────────────────
+    result = normalizeResult(result, cvText, isEnglish);
 
     // Registrar email aunque sea Starter (para llevar registro de usuarios)
     if (userEmail && env.SUPABASE_URL && env.SUPABASE_KEY) {
       await registrarEmail(env, userEmail, plan);
-    }
-
-    // Filtrar logrosCualitativos que son en realidad responsabilidades o atributos
-    if (result.analisisLogros?.logrosCualitativos) {
-      const iniciosResponsabilidad = ['coordinación', 'gestión', 'atención', 'manejo', 'control', 'soporte', 'apoyo', 'asistencia', 'administración', 'elaboración', 'ejecución', 'seguimiento', 'monitoreo', 'realización', 'preparación', 'supervisión', 'revisión'];
-      const atributosPersonalidad = ['responsable', 'proactiv', 'comprometid', 'dedicad', 'apasionad', 'motivad', 'entusiasta', 'puntual', 'ordenad', 'organizado', 'creativ', 'innovador', 'flexibl', 'adaptabl', 'comunicativ', 'trabajo en equipo', 'ganas de crecer', 'ganas de aprender', 'con muchas ganas', 'deseos de', 'buen manejo', 'buena predisposición'];
-      result.analisisLogros.logrosCualitativos = result.analisisLogros.logrosCualitativos.filter(l => {
-        const frase = (l.frase || '').toLowerCase().trim();
-        if (frase.split(' ').length < 5) return false;
-        if (iniciosResponsabilidad.some(p => frase.startsWith(p))) return false;
-        if (atributosPersonalidad.some(p => frase.includes(p))) return false;
-        return true;
-      });
-    }
-
-    // ── Filtro anti-duplicados en recomendaciones ──────────────────────────
-    if (result.recomendaciones?.length) {
-      const tieneLogrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length > 0;
-      const tieneLogrosCuantitativos = (result.analisisLogros?.logrosFuertes || []).length > 0;
-
-      // Palabras que identifican recomendaciones sobre logros
-      const palabrasLogros = ['logro', 'cuantif', 'métric', 'resultado', 'impacto', 'incorporar', 'agreg', 'número'];
-
-      // Separar recomendaciones de logros de las demás
-      const recsLogros = result.recomendaciones.filter(r =>
-        palabrasLogros.some(p => (r.titulo || '').toLowerCase().includes(p) || (r.detalle || '').toLowerCase().includes(p))
-      );
-      const recsOtras = result.recomendaciones.filter(r =>
-        !palabrasLogros.some(p => (r.titulo || '').toLowerCase().includes(p) || (r.detalle || '').toLowerCase().includes(p))
-      );
-
-      // Construir UNA SOLA recomendación de logros
-      let recLogro = null;
-      if (recsLogros.length > 0) {
-        if (tieneLogrosCualitativos && !tieneLogrosCuantitativos) {
-          recLogro = {
-            prioridad: 'Alta',
-            categoria: 'Logros',
-            titulo: 'Tus logros cualitativos comunican impacto — potenciá algunos con cifras',
-            detalle: 'Tu CV ya muestra acciones concretas con verbos de impacto. Eso tiene valor real. Si podés recordar alguna cifra — cantidad de personas, tiempo, volumen, proyectos — sumársela a uno o dos logros va a reforzar aún más lo que ya comunicás. No es obligatorio, pero suma.',
-            impactoScore: recsLogros[0]?.impactoScore || '+8 puntos'
-          };
-        } else if (!tieneLogrosCuantitativos) {
-          const resps = (result.analisisLogros?.responsabilidadesSinImpacto || []).slice(0, 2);
-          let ejemplos = resps.length > 0
-            ? ' Por ejemplo, a partir de lo que figura en tu CV: ' + resps.map(r => '"' + (r.frase||'') + '" → sumale una cifra concreta o un verbo de impacto con resultado').join('; ')
-            : ' Ejemplo: "Atendí 50 clientes por día" (cuantitativo) o "Mejoré la experiencia de atención implementando un nuevo proceso" (cualitativo).';
-          recLogro = {
-            prioridad: 'Alta',
-            categoria: 'Logros',
-            titulo: 'Incorporá logros en tus experiencias — cuantitativos o cualitativos',
-            detalle: (isEnglish ? 'Your experience sections describe tasks but do not show results. You can add quantitative achievements (with number, percentage or figure) or qualitative ones (with action verb and concrete result).' : 'Tus experiencias describen tareas pero no muestran resultados. Podés agregar logros cuantitativos (con número, porcentaje o cifra) o cualitativos (con verbo de acción y resultado concreto).') + ejemplos,
-            impactoScore: (recsLogros[0] && recsLogros[0].impactoScore) || '+15 puntos'
-          };
-        } else {
-          recLogro = recsLogros[0]; // Ya tiene logros cuantitativos, usar la primera recomendación
-        }
-      }
-
-      // Eliminar duplicados en las demás recomendaciones por palabras clave del título
-      const temasVistos = new Set();
-      const recsOtrasFiltradas = recsOtras.filter(r => {
-        const palabrasClave = (r.titulo || '').toLowerCase().split(' ').filter(w => w.length > 4).slice(0, 3).join('-');
-        if (temasVistos.has(palabrasClave)) return false;
-        temasVistos.add(palabrasClave);
-        return true;
-      });
-
-      // Reconstruir recomendaciones: logro primero (si hay), resto después
-      result.recomendaciones = recLogro
-        ? [recLogro, ...recsOtrasFiltradas]
-        : recsOtrasFiltradas;
-    }
-
-    // Detectar secciones faltantes críticas y agregar recomendaciones automáticas
-    const secciones = result.seccionesDetectadas || {};
-    const recsAuto = [];
-    if (!secciones.perfilProfesional) {
-      recsAuto.push(isEnglish ? {
-        prioridad: "Alta",
-        categoria: "Headline",
-        titulo: "Add a headline and professional summary",
-        detalle: "Your resume does not have a headline or professional summary. These are the first sections a recruiter reads — without them, your profile does not communicate who you are or what you are looking for. Add 2-3 lines summarizing your role, experience and value proposition.",
-        impactoScore: "+12"
-      } : {
-        prioridad: "Alta",
-        categoria: "Estructura",
-        titulo: "Agregar titular y perfil profesional",
-        detalle: "Tu CV no tiene titular ni perfil profesional. Son las primeras secciones que lee un reclutador — sin ellas, tu perfil no comunica quién sos ni qué buscás. Agregá 2-3 líneas que resuman tu rol, experiencia y propuesta de valor.",
-        impactoScore: "+12"
-      });
-    }
-    if (!secciones.logros && result.impactDensityScore < 30) {
-      recsAuto.push(isEnglish ? {
-        prioridad: "Alta",
-        categoria: "Achievements",
-        titulo: "Add quantified achievements to your experience",
-        detalle: "Your experience sections describe responsibilities but do not show results. Transform at least one task per position into an achievement with a number: number of clients served, percentage of improvement, volume managed.",
-        impactoScore: "+15"
-      } : {
-        prioridad: "Alta",
-        categoria: "Logros",
-        titulo: "Incorporar logros cuantificados en tus experiencias",
-        detalle: "Tus experiencias describen responsabilidades pero no muestran resultados. Transformá al menos una tarea por puesto en un logro con número: cantidad de clientes atendidos, porcentaje de mejora, volumen gestionado.",
-        impactoScore: "+15"
-      });
-    }
-    if (recsAuto.length > 0) {
-      result.recomendaciones = [...recsAuto, ...(result.recomendaciones || [])];
     }
 
     const response = applyTierVisibility(result, plan, modo);
@@ -553,6 +392,206 @@ function calcularAtsDetalle(texto) {
   const claridadRoles = Math.min(90, tieneEmpresas ? Math.min(50 + verbosCount * 5, 80) : 25);
 
   return { keywords, verbosAccion, metricas, estructura, densidadHabilidades, claridadRoles };
+}
+
+// ── NORMALIZACIÓN CENTRALIZADA ────────────────────────────────────────────────
+// Toda la lógica de corrección post-modelo en un único lugar.
+// isEnglish: si la UI está en inglés. cvText: texto completo del CV.
+function normalizeResult(result, cvText, isEnglish) {
+
+  // 1. Normalizar scores de escala 0-10 a 0-100
+  const norm = (v) => (typeof v === "number" && v > 0 && v <= 10) ? Math.round(v * 10) : (v || 0);
+  result.atsScore           = norm(result.atsScore);
+  result.scorePotencial     = norm(result.scorePotencial);
+  result.impactDensityScore = Math.min(85, norm(result.impactDensityScore));
+
+  if (result.atsDetalle) {
+    for (const k of Object.keys(result.atsDetalle)) {
+      if (typeof result.atsDetalle[k] === "number") result.atsDetalle[k] = norm(result.atsDetalle[k]);
+    }
+  }
+  if (result.perfilEmpleabilidad) {
+    for (const k of ["visibilidad", "coherencia", "movilidad"]) {
+      if (result.perfilEmpleabilidad[k]?.score !== undefined) {
+        result.perfilEmpleabilidad[k].score = norm(result.perfilEmpleabilidad[k].score);
+      }
+    }
+  }
+
+  // 2. Fallback si scores siguen en 0
+  if (result.atsScore === 0 && result.perfilEmpleabilidad) {
+    const pe = result.perfilEmpleabilidad;
+    result.atsScore = Math.round(((pe.visibilidad?.score || 0) + (pe.coherencia?.score || 0) + (pe.movilidad?.score || 0)) / 3);
+  }
+  if (result.scorePotencial === 0) result.scorePotencial = Math.min(100, result.atsScore + 15);
+  if (result.impactDensityScore === 0) result.impactDensityScore = 15;
+
+  // 3. Ajustar impactDensityScore y label según logros reales
+  const logrosFuertes      = (result.analisisLogros?.logrosFuertes || []).length;
+  const logrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length;
+
+  if (logrosFuertes === 0 && logrosCualitativos === 0) {
+    result.impactDensityScore = Math.min(result.impactDensityScore, 20);
+    result.impactDensityDiagnostico = isEnglish
+      ? 'No quantitative or qualitative achievements were detected. Experience sections describe tasks but do not show results or impact.'
+      : 'No se detectaron logros cuantitativos ni cualitativos. Las experiencias describen tareas pero no muestran resultados ni impacto.';
+  } else if (logrosFuertes === 0 && logrosCualitativos > 0) {
+    result.impactDensityScore = Math.max(Math.min(result.impactDensityScore, 60), 35);
+    result.impactDensityDiagnostico = isEnglish
+      ? `Your resume shows ${logrosCualitativos} qualitative achievement${logrosCualitativos > 1 ? 's' : ''} — concrete actions with impact verbs that communicate real value. To increase the score, add figures to some of these achievements when possible.`
+      : `Tu CV muestra ${logrosCualitativos} logro${logrosCualitativos > 1 ? 's' : ''} cualitativo${logrosCualitativos > 1 ? 's' : ''} — acciones concretas con verbos de impacto que comunican valor real. Para aumentar el score, podés sumar cifras a esos logros cuando sea posible.`;
+  } else if (logrosFuertes > 0) {
+    result.impactDensityScore = Math.max(result.impactDensityScore, 55);
+  }
+
+  // Calcular label desde el score (siempre en español — el frontend lo traduce con translateLabel)
+  if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
+  else if (result.impactDensityScore >= 35) result.impactDensityLabel = "Medio";
+  else result.impactDensityLabel = "Bajo";
+
+  // 4. Filtrar logrosCualitativos que son responsabilidades o atributos — bilingüe
+  if (result.analisisLogros?.logrosCualitativos) {
+    const iniciosResp = isEnglish
+      ? ['coordination of', 'management of', 'responsible for', 'support of', 'assistance', 'monitoring', 'preparation', 'supervision', 'review of', 'tracking', 'execution of']
+      : ['coordinación', 'gestión', 'atención', 'manejo', 'control', 'soporte', 'apoyo', 'asistencia', 'administración', 'elaboración', 'ejecución', 'seguimiento', 'monitoreo', 'realización', 'preparación', 'supervisión', 'revisión'];
+    const atributos = isEnglish
+      ? ['responsible', 'proactive', 'committed', 'dedicated', 'passionate', 'motivated', 'enthusiastic', 'punctual', 'organized', 'creative', 'innovative', 'flexible', 'adaptable', 'eager to learn', 'team player', 'good communicat']
+      : ['responsable', 'proactiv', 'comprometid', 'dedicad', 'apasionad', 'motivad', 'entusiasta', 'puntual', 'ordenad', 'organizado', 'creativ', 'innovador', 'flexibl', 'adaptabl', 'comunicativ', 'trabajo en equipo', 'ganas de crecer', 'ganas de aprender', 'con muchas ganas', 'deseos de', 'buen manejo', 'buena predisposición'];
+    result.analisisLogros.logrosCualitativos = result.analisisLogros.logrosCualitativos.filter(l => {
+      const frase = (l.frase || '').toLowerCase().trim();
+      if (frase.split(' ').length < 5) return false;
+      if (iniciosResp.some(p => frase.startsWith(p))) return false;
+      if (atributos.some(p => frase.includes(p))) return false;
+      return true;
+    });
+  }
+
+  // 5. Corregir seccionesDetectadas para CVs con headers en inglés
+  if (result.seccionesDetectadas) {
+    const sec = result.seccionesDetectadas;
+    if (!sec.educacion)         sec.educacion         = /\beducation\b|\bdegree\b|\bbachelor\b|\bmaster\b|\bphd\b|\bdoctorate\b|\buniversity\b|\bcollege\b|\bdiploma\b/i.test(cvText);
+    if (!sec.habilidades)       sec.habilidades       = /\bskills\b|\bcompetencies\b|\btools\b|\btechnical skills\b|\bcore skills\b|\bmethods\b/i.test(cvText);
+    if (!sec.idiomas)           sec.idiomas           = /\blanguages?\b|\bnative\b|\bfluent\b|\badvanced\b|\bproficient\b|\benglish\b|\bspanish\b|\bfrench\b|\bportuguese\b/i.test(cvText);
+    if (!sec.herramientas)      sec.herramientas      = /\btools?\b|\bsoftware\b|\bplatform\b|\bexcel\b|\bpower bi\b|\bqgis\b|\bpython\b|\bsql\b|\bcrm\b/i.test(cvText);
+    if (!sec.experienciaLaboral) sec.experienciaLaboral = /\bexperience\b|\bwork history\b|\bemployment\b|\bpositions?\b|\bexperiencia\b|\btrabajo\b|\bempleo\b/i.test(cvText);
+    if (!sec.perfilProfesional)  sec.perfilProfesional  = /\bsummary\b|\bprofile\b|\babout\b|\bobjective\b|\bperfil\b|\bresumen\b|\bsobre mí\b/i.test(cvText);
+    if (!sec.logros)             sec.logros             = /\bachievement\b|\baccomplishment\b|\blogros\b|\bresultados\b/i.test(cvText);
+  }
+
+  // 6. Recalcular seccionesFaltantes con nombres en el idioma correcto
+  if (result.seccionesDetectadas) {
+    const NOMBRES = {
+      perfilProfesional:  isEnglish ? 'Professional summary'  : 'Perfil profesional',
+      experienciaLaboral: isEnglish ? 'Work experience'        : 'Experiencia laboral',
+      educacion:          isEnglish ? 'Education'              : 'Educación',
+      habilidades:        isEnglish ? 'Skills'                 : 'Habilidades',
+      herramientas:       isEnglish ? 'Tools'                  : 'Herramientas',
+      idiomas:            isEnglish ? 'Languages'              : 'Idiomas',
+    };
+    result.seccionesFaltantes = Object.entries(result.seccionesDetectadas)
+      .filter(([k, v]) => !v && NOMBRES[k])
+      .map(([k]) => NOMBRES[k]);
+  }
+
+  // 7. Filtro anti-duplicados en recomendaciones
+  if (result.recomendaciones?.length) {
+    const tieneLogrosC = (result.analisisLogros?.logrosCualitativos || []).length > 0;
+    const tieneLogrosQ = (result.analisisLogros?.logrosFuertes || []).length > 0;
+    const palabrasLogros = isEnglish
+      ? ['achievement', 'quantif', 'metric', 'result', 'impact', 'add', 'number', 'figure']
+      : ['logro', 'cuantif', 'métric', 'resultado', 'impacto', 'incorporar', 'agreg', 'número'];
+
+    const recsLogros = result.recomendaciones.filter(r =>
+      palabrasLogros.some(p => (r.titulo || '').toLowerCase().includes(p) || (r.detalle || '').toLowerCase().includes(p))
+    );
+    const recsOtras = result.recomendaciones.filter(r =>
+      !palabrasLogros.some(p => (r.titulo || '').toLowerCase().includes(p) || (r.detalle || '').toLowerCase().includes(p))
+    );
+
+    let recLogro = null;
+    if (recsLogros.length > 0) {
+      if (tieneLogrosC && !tieneLogrosQ) {
+        recLogro = {
+          prioridad: 'Alta',
+          categoria: isEnglish ? 'Achievements' : 'Logros',
+          titulo: isEnglish
+            ? 'Your qualitative achievements communicate impact — strengthen some with figures'
+            : 'Tus logros cualitativos comunican impacto — potenciá algunos con cifras',
+          detalle: isEnglish
+            ? 'Your resume already shows concrete actions with impact verbs. That has real value. If you can recall any figure — number of people, time saved, volume, projects — adding it to one or two achievements will reinforce what you already communicate.'
+            : 'Tu CV ya muestra acciones concretas con verbos de impacto. Eso tiene valor real. Si podés recordar alguna cifra — cantidad de personas, tiempo, volumen, proyectos — sumársela a uno o dos logros va a reforzar aún más lo que ya comunicás.',
+          impactoScore: recsLogros[0]?.impactoScore || '+8'
+        };
+      } else if (!tieneLogrosQ) {
+        const resps = (result.analisisLogros?.responsabilidadesSinImpacto || []).slice(0, 2);
+        const ejemplos = resps.length > 0
+          ? (isEnglish
+              ? ' For example, based on what is in your resume: ' + resps.map(r => '"' + (r.frase || '') + '" → add a concrete figure or an impact verb with result').join('; ')
+              : ' Por ejemplo, a partir de lo que figura en tu CV: ' + resps.map(r => '"' + (r.frase || '') + '" → sumale una cifra concreta o un verbo de impacto con resultado').join('; '))
+          : (isEnglish
+              ? ' Example: "Served 50 clients per day" (quantitative) or "Improved the onboarding process reducing time by 30%" (qualitative).'
+              : ' Ejemplo: "Atendí 50 clientes por día" (cuantitativo) o "Mejoré el proceso de onboarding reduciendo el tiempo un 30%" (cualitativo).');
+        recLogro = {
+          prioridad: 'Alta',
+          categoria: isEnglish ? 'Achievements' : 'Logros',
+          titulo: isEnglish
+            ? 'Add achievements to your experience — quantitative or qualitative'
+            : 'Incorporá logros en tus experiencias — cuantitativos o cualitativos',
+          detalle: (isEnglish
+            ? 'Your experience sections describe tasks but do not show results. You can add quantitative achievements (with number, percentage or figure) or qualitative ones (with action verb and concrete result).'
+            : 'Tus experiencias describen tareas pero no muestran resultados. Podés agregar logros cuantitativos (con número, porcentaje o cifra) o cualitativos (con verbo de acción y resultado concreto).') + ejemplos,
+          impactoScore: recsLogros[0]?.impactoScore || '+15'
+        };
+      } else {
+        recLogro = recsLogros[0];
+      }
+    }
+
+    const temasVistos = new Set();
+    const recsOtrasFiltradas = recsOtras.filter(r => {
+      const clave = (r.titulo || '').toLowerCase().split(' ').filter(w => w.length > 4).slice(0, 3).join('-');
+      if (temasVistos.has(clave)) return false;
+      temasVistos.add(clave);
+      return true;
+    });
+
+    result.recomendaciones = recLogro ? [recLogro, ...recsOtrasFiltradas] : recsOtrasFiltradas;
+  }
+
+  // 8. Recomendaciones automáticas para secciones críticas faltantes
+  const secciones = result.seccionesDetectadas || {};
+  const recsAuto = [];
+  if (!secciones.perfilProfesional) {
+    recsAuto.push(isEnglish ? {
+      prioridad: "Alta", categoria: "Headline",
+      titulo: "Add a professional summary",
+      detalle: "Your resume does not have a professional summary. Add 3-4 lines summarizing your role, years of experience and key value proposition — it is the first thing recruiters read.",
+      impactoScore: "+12"
+    } : {
+      prioridad: "Alta", categoria: "Estructura",
+      titulo: "Agregar titular y perfil profesional",
+      detalle: "Tu CV no tiene titular ni perfil profesional. Agregá 3-4 líneas que resuman tu rol, experiencia y propuesta de valor — es lo primero que lee un reclutador.",
+      impactoScore: "+12"
+    });
+  }
+  if (!secciones.logros && result.impactDensityScore < 30) {
+    recsAuto.push(isEnglish ? {
+      prioridad: "Alta", categoria: "Achievements",
+      titulo: "Add quantified achievements to your experience",
+      detalle: "Your experience sections describe responsibilities but do not show results. Transform at least one task per position into an achievement with a number: clients served, improvement percentage, volume managed.",
+      impactoScore: "+15"
+    } : {
+      prioridad: "Alta", categoria: "Logros",
+      titulo: "Incorporar logros cuantificados en tus experiencias",
+      detalle: "Tus experiencias describen responsabilidades pero no muestran resultados. Transformá al menos una tarea por puesto en un logro con número: clientes atendidos, porcentaje de mejora, volumen gestionado.",
+      impactoScore: "+15"
+    });
+  }
+  if (recsAuto.length > 0) {
+    result.recomendaciones = [...recsAuto, ...(result.recomendaciones || [])];
+  }
+
+  return result;
 }
 
 function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma = 'es') {
@@ -775,6 +814,15 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "STRENGTHS/OPPORTUNITIES: minimum 4 each, specific to the document.\n\n";
   instrBlock += "NO LEADERSHIP: do not recommend leadership development unless there is concrete evidence of people management.\n\n";
   instrBlock += "IMPORTANT: The 'prioridad' field values MUST always be exactly 'Alta', 'Media', or 'Baja'.\n\n";
+  instrBlock += "SECTION DETECTION — CRITICAL: The document may use English section headers. Map them to the JSON keys as follows:\n";
+  instrBlock += "  'perfilProfesional': true if document contains Summary, Profile, About, Objective, or equivalent\n";
+  instrBlock += "  'experienciaLaboral': true if document contains Experience, Work Experience, Employment History, or equivalent\n";
+  instrBlock += "  'educacion': true if document contains Education, Academic Background, Degrees, Qualifications, or equivalent\n";
+  instrBlock += "  'habilidades': true if document contains Skills, Competencies, Tools, Technical Skills, Core Skills, Methods, or equivalent\n";
+  instrBlock += "  'logros': true if any position lists bullet points with concrete results or achievements\n";
+  instrBlock += "  'herramientas': true if document mentions specific tools, software, or platforms\n";
+  instrBlock += "  'idiomas': true if document contains Languages section or mentions language proficiency (e.g. Spanish native, English advanced)\n";
+  instrBlock += "  If a section exists but uses a different header name, still mark it as true. Only mark false if the section is genuinely absent from the document.\n\n";
   instrBlock += "Return ONLY the following JSON:\n\n";
 
   const proSchema = plan === "pro" || plan === "professional" ? (
@@ -1033,3 +1081,4 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
+
