@@ -493,6 +493,31 @@ function normalizeResult(result, cvText, isEnglish) {
       .map(([k]) => NOMBRES[k]);
   }
 
+  // 7. Limpiar alertas inconsistentes con seccionesDetectadas corregidas
+  // El modelo puede haber generado alertas sobre secciones que sí existen en el documento
+  if (result.alertas?.length && result.seccionesDetectadas) {
+    const sec = result.seccionesDetectadas;
+    // Patrones de alertas de sección en ES y EN que deben eliminarse si la sección existe
+    const alertasSecciones = [
+      { key: 'educacion',          patterns: ['educaci', 'educación', 'education', 'formaci', 'academic'] },
+      { key: 'habilidades',        patterns: ['habilidad', 'skills', 'competencias', 'tools', 'methods'] },
+      { key: 'idiomas',            patterns: ['idioma', 'language', 'idiomas'] },
+      { key: 'herramientas',       patterns: ['herramienta', 'tool', 'software'] },
+      { key: 'experienciaLaboral', patterns: ['experiencia', 'experience', 'empleo', 'trabajo'] },
+      { key: 'perfilProfesional',  patterns: ['perfil profesional', 'titular', 'headline', 'summary', 'profile'] },
+    ];
+    result.alertas = result.alertas.filter(alerta => {
+      const msg = (alerta.mensaje || '').toLowerCase();
+      for (const { key, patterns } of alertasSecciones) {
+        if (sec[key] && patterns.some(p => msg.includes(p))) {
+          // La sección existe pero la alerta dice que falta — eliminar la alerta
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+
   // 7. Filtro anti-duplicados en recomendaciones
   if (result.recomendaciones?.length) {
     const tieneLogrosC = (result.analisisLogros?.logrosCualitativos || []).length > 0;
@@ -1081,4 +1106,3 @@ async function saveToSupabase(env, userId, cvText, liText, result, plan) {
     }),
   });
 }
-
