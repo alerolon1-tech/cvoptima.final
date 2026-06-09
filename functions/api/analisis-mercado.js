@@ -32,19 +32,16 @@ export async function onRequest(context) {
     const segmento = esAcademico && esConsultor ? 'académico-consultor' : esCorporativo ? 'corporativo' : 'consultor';
     const canalesProhibidos = ['computrabajo', 'bumeran', 'zonajobs', 'indeed'];
 
-    // ── Extraer empleadores actuales del CV para excluirlos ──────────────────
-    // Busca líneas con "Present|Actual|actualidad|2024|2025|2026" cerca de nombres de empresa
+    // ── Extraer empleadores actuales del CV ───────────────────────────────────
     const empleadoresActuales = [];
     if (cvText) {
       const lineas = cvText.split('\n');
       lineas.forEach((linea, i) => {
         if (/present|actual|actualidad|2025|2026/i.test(linea)) {
-          // Buscar el nombre de empresa en las líneas cercanas
           const contexto = lineas.slice(Math.max(0, i-2), i+2).join(' ');
-          // Extraer palabras que parecen nombres de empresa (2+ palabras en mayúscula o con siglas)
           const matches = contexto.match(/([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ+]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ+]*){0,3})/g) || [];
           matches.forEach(m => {
-            if (m.length > 3 && !['Partner', 'Present', 'Current', 'Actual'].includes(m)) {
+            if (m.length > 3 && !['Partner', 'Present', 'Current', 'Actual', 'April', 'March'].includes(m)) {
               empleadoresActuales.push(m.trim());
             }
           });
@@ -53,45 +50,98 @@ export async function onRequest(context) {
     }
     const empleadoresStr = [...new Set(empleadoresActuales)].slice(0, 5).join(', ');
 
-    // ── Búsquedas Tavily ─────────────────────────────────────────────────────
-    let contextoMercado = 'Sin datos externos disponibles.';
+    // ── Búsquedas Tavily — orientadas a organizaciones y datos concretos ─────
+    // La clave: buscar información que el modelo NO puede inventar —
+    // nombres de organizaciones reales, proyectos activos, datos de remuneración
+    let datosMercado = {
+      organizaciones: '',
+      remuneracion: '',
+      tendencias: '',
+      canales: '',
+    };
+
     if (env.TAVILY_API_KEY) {
-      const queries = [
-        `"${sector}" Argentina consultoras organizaciones contratan investigador 2026`,
-        `"${rol}" OR "investigación social aplicada" Argentina mercado laboral demanda 2025 2026`,
-        `consultor investigación social Argentina honorarios fee proyecto 2025`,
+      // Queries diseñadas para traer nombres de organizaciones y datos concretos
+      const queriesOrg = [
+        // Buscar consultoras que trabajen con investigación social en Argentina
+        `consultoras Argentina "investigación social" OR "estudios cualitativos" OR "análisis territorial" site:linkedin.com OR site:infobae.com`,
+        // Buscar organismos internacionales con proyectos activos en Argentina
+        `BID CEPAL PNUD OIT "investigación social" OR "ciencias sociales" Argentina proyectos 2025 2026`,
+        // Buscar empresas que contraten investigadores sociales aplicados
+        `Argentina empresas "investigador social" OR "research consultant" OR "analista social" busca contrata 2026`,
       ];
+      const queryRem = `honorarios consultor investigación cualitativa Argentina 2025 fee proyecto`;
+      const queryTend = `"investigación social" OR "ciencias sociales aplicadas" Argentina mercado demanda tendencias 2025 2026`;
 
       try {
-        const results = await Promise.all(
-          queries.map(q =>
+        const [orgResults, remResult, tendResult] = await Promise.all([
+          Promise.all(queriesOrg.map(q =>
             fetch("https://api.tavily.com/search", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 api_key: env.TAVILY_API_KEY,
                 query: q,
-                search_depth: "basic",
-                max_results: 3,
-                include_answer: true,
+                search_depth: "advanced",
+                max_results: 4,
+                include_answer: false,
               }),
-            }).then(r => r.json()).catch(() => ({ results: [], answer: "" }))
-          )
-        );
+            }).then(r => r.json()).catch(() => ({ results: [] }))
+          )),
+          fetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              api_key: env.TAVILY_API_KEY,
+              query: queryRem,
+              search_depth: "basic",
+              max_results: 3,
+              include_answer: true,
+            }),
+          }).then(r => r.json()).catch(() => ({ results: [], answer: "" })),
+          fetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              api_key: env.TAVILY_API_KEY,
+              query: queryTend,
+              search_depth: "basic",
+              max_results: 3,
+              include_answer: true,
+            }),
+          }).then(r => r.json()).catch(() => ({ results: [], answer: "" })),
+        ]);
 
-        const fragmentos = results.map((res, i) => {
-          const answer = res.answer ? `Respuesta: ${res.answer}` : "";
-          const snippets = (res.results || []).slice(0, 2).map(r =>
-            `[${r.title}] (${r.url}): ${(r.content || '').slice(0, 200)}`
-          ).join("\n");
-          return `[Búsqueda: ${queries[i]}]\n${answer}\n${snippets}`;
-        }).join("\n\n");
+        // Organizaciones: extraer nombres y URLs de los resultados
+        datosMercado.organizaciones = orgResults.flat()
+          .flatMap(res => res.results || [])
+          .slice(0, 10)
+          .map(r => `- ${r.title} (${r.url}): ${(r.content || '').slice(0, 150)}`)
+          .join('\n');
 
-        if (fragmentos.trim().length > 50) contextoMercado = fragmentos.slice(0, 5000);
+        // Remuneración: preservar el answer + snippets con URL
+        datosMercado.remuneracion = [
+          remResult.answer ? `Síntesis: ${remResult.answer}` : '',
+          ...(remResult.results || []).slice(0, 2).map(r => `[${r.title}] (${r.url}): ${(r.content || '').slice(0, 200)}`),
+        ].filter(Boolean).join('\n');
+
+        // Tendencias
+        datosMercado.tendencias = [
+          tendResult.answer ? `Síntesis: ${tendResult.answer}` : '',
+          ...(tendResult.results || []).slice(0, 2).map(r => `[${r.title}] (${r.url}): ${(r.content || '').slice(0, 200)}`),
+        ].filter(Boolean).join('\n');
+
       } catch (e) {
-        // continuar sin datos Tavily
+        // continuar sin datos
       }
     }
+
+    // ── Construir el contexto de mercado para el modelo ───────────────────────
+    const contextoMercado = [
+      datosMercado.organizaciones ? `ORGANIZACIONES ENCONTRADAS EN BÚSQUEDA REAL:\n${datosMercado.organizaciones}` : '',
+      datosMercado.remuneracion ? `DATOS DE REMUNERACIÓN ENCONTRADOS:\n${datosMercado.remuneracion}` : '',
+      datosMercado.tendencias ? `TENDENCIAS DEL SECTOR:\n${datosMercado.tendencias}` : '',
+    ].filter(Boolean).join('\n\n') || 'Sin datos externos disponibles de Tavily.';
 
     // ── Prompt ────────────────────────────────────────────────────────────────
     const cvExtracto = cvText ? cvText.slice(0, 2000) : '';
@@ -100,45 +150,32 @@ export async function onRequest(context) {
     const prompt = `Sos un consultor senior de empleabilidad para perfiles académicos y consultores altamente calificados en Argentina.
 
 PERFIL DEL CANDIDATO:
-- Nombre: ${candidateName || 'Candidato'}
-- Rol buscado: ${rol}
-- Sector: ${sector}
-- Seniority: ${seniority || 'Senior'}
-- Ubicación: ${ubicacion || 'Buenos Aires, Argentina'}
-- Modalidad: ${modalidad || 'no especificado'}
-- Tipo empresa preferida: ${tipoEmpresa || 'no especificado'}
-- Segmento: ${segmento}
-${resumenPerfil ? '- Resumen: ' + resumenPerfil : ''}
+Nombre: ${candidateName || 'Candidato'}
+Rol buscado: ${rol} | Sector: ${sector} | Seniority: ${seniority || 'Senior'}
+Ubicación: ${ubicacion || 'Buenos Aires, Argentina'} | Modalidad: ${modalidad || 'no especificado'}
+Segmento: ${segmento}
+${resumenPerfil ? 'Resumen: ' + resumenPerfil : ''}
 
-CV COMPLETO (leé esto antes de sugerir cualquier organización o ruta):
+CV (leé esto antes de todo — es la base de cualquier sugerencia):
 ${cvExtracto || 'No disponible'}
 
-DATOS DE MERCADO (búsquedas en tiempo real):
+DATOS REALES DE MERCADO (resultados de búsquedas en tiempo real — son tu fuente):
 ${contextoMercado}
 
-REGLAS — INCUMPLIRLAS INVALIDA EL ANÁLISIS:
+INSTRUCCIÓN CENTRAL:
+Usá los datos de mercado de arriba como tu fuente principal. Para las organizaciones, trabajá con lo que encontraron las búsquedas. Si las búsquedas trajeron nombres de consultoras, organismos o empresas, usálos — citando la URL como fuente. Si no trajeron datos suficientes, completá con tu conocimiento pero marcá explícitamente qué es conocimiento propio y qué viene de las búsquedas.
 
-REGLA 1 — EMPLEADORES ACTUALES EXCLUIDOS:
-${empleadoresStr ? `Las siguientes organizaciones aparecen en el CV como empleadores actuales o recientes: ${empleadoresStr}. NUNCA las sugerás como destino de búsqueda. Son parte de la trayectoria del candidato, no opciones de postulación.` : 'Identificá en el CV las organizaciones donde trabaja actualmente y excluílas de las sugerencias.'}
-
-REGLA 2 — REMUNERACIÓN SIN ALUCINACIÓN:
-Si no tenés datos verificables con fuente concreta para la remuneración de este perfil exacto en Argentina, escribí en el campo "rango" exactamente: "Sin datos verificables disponibles". No inventes rangos. No uses promedios genéricos. Solo citá datos reales si tenés la fuente.
-
-REGLA 3 — CANALES PROHIBIDOS:
-Nunca menciones: ${canalesStr}. Son plataformas de empleo masivo inapropiadas para este segmento.
-
-REGLA 4 — ORGANIZACIONES ESPECÍFICAS Y VERIFICABLES:
-Solo sugerí organizaciones que existan en Argentina y que genuinamente contraten este tipo de perfil. Para cada organización indicá por qué ese candidato específico encaja (basándote en su experiencia real del CV, no en generalidades).
-
-REGLA 5 — RUTAS ANCLADAS EN EL CV:
-Las rutas posibles deben ser extensión directa de lo que el candidato ya hace. Nada que requiera reentrenamiento completo o cambio radical de campo.
-
-REGLA 6 — HONESTIDAD SOBRE INCERTIDUMBRE:
-Cuando no tenés datos verificables, decilo. Es mejor admitir incertidumbre que inventar.
+REGLAS NO NEGOCIABLES:
+1. EMPLEADORES EXCLUIDOS: ${empleadoresStr ? `"${empleadoresStr}" son empleadores actuales o recientes del candidato. NUNCA los sugerás como destino.` : 'Identificá en el CV las organizaciones actuales del candidato y excluílas.'}
+2. REMUNERACIÓN: Si los datos de búsqueda tienen información de honorarios o fees, usala citando la fuente. Si no, escribí exactamente "Sin datos verificables disponibles" en el campo rango. No inventes números.
+3. CANALES PROHIBIDOS: ${canalesStr} — nunca los menciones.
+4. ORGANIZACIONES: Preferí las que aparecen en los resultados de búsqueda. Si agregás otras de tu conocimiento, marcálas como "(Conocimiento propio — verificar)".
+5. RUTAS: Solo extensión natural de lo que el candidato ya hace según su CV. Sin cambios radicales de campo.
+6. ALERTAS: Solo riesgos reales y específicos para este perfil. Nada genérico.
 
 Respondé SOLO con JSON válido y completo:
 
-{"demanda":{"nivel":"Alta|Media|Baja","diagnostico":"situación real de demanda para este perfil — qué organizaciones contratan y con qué frecuencia, con fuente si la tenés","tendencia":"creciente|estable|decreciente|sin datos suficientes","justificacion":"por qué está así — con fuente o aclaración explícita de que es estimación"},"competencia":{"nivel":"Alta|Media|Baja","diagnostico":"quiénes son los candidatos que compiten con este perfil exacto","diferenciadores":["diferenciador genuino de este candidato basado en su CV real"]},"skillsRequeridos":{"criticos":["skill técnico real que demanda el mercado para este rol"],"deseables":["skill deseable concreto para este sector"],"emergentes":["skill emergente con evidencia de demanda"]},"remuneracion":{"rango":"Sin datos verificables disponibles — O rango real con fuente citada","modalidad":"cómo se estructura la remuneración en este segmento (honorarios por proyecto, fee mensual, etc.)","nota":"fuente del dato o: Estimación sin fuente verificable — consultá con reclutadores especializados"},"canalesRecomendados":[{"canal":"canal real apropiado para este segmento","razon":"por qué este canal específicamente para este perfil"}],"empresasOrganizaciones":[{"nombre":"organización real que contrata este perfil — NO los empleadores actuales del candidato","tipo":"consultora|organismo internacional|ONG|empresa|universidad|think tank","por_que":"conexión específica con la experiencia real del CV del candidato","como_aplicar":"canal concreto: LinkedIn directo a [persona/área], web, referido, etc."}],"rutasPosibles":[{"ruta":"ruta basada en lo que ya hace el candidato","descripcion":"extensión natural de su trayectoria actual — sin reentrenamiento radical","organizaciones_tipo":"tipo específico de organizaciones","tiempo_estimado":"estimación realista","acciones":["acción concreta y específica"]}],"estrategiaRecomendada":{"acciones":["acción concreta, específica, accionable — sin generalidades"],"tiempoEstimado":"estimación realista para este perfil en este mercado","alertas":["riesgo real y específico para este perfil"]},"resumenMercado":"síntesis de 4-5 oraciones honestas sobre el panorama real — distinguiendo qué es verificable y qué es estimación"}`;
+{"demanda":{"nivel":"Alta|Media|Baja","diagnostico":"situación real de demanda — qué tipo de organizaciones contratan este perfil y con qué frecuencia","tendencia":"creciente|estable|decreciente|sin datos suficientes","justificacion":"fundamentación con fuente de los datos de búsqueda o aclaración de que es estimación propia"},"competencia":{"nivel":"Alta|Media|Baja","diagnostico":"quiénes compiten con este candidato exactamente en el mercado argentino","diferenciadores":["diferenciador genuino de este candidato basado en su CV real"]},"skillsRequeridos":{"criticos":["skill técnico real que demanda el mercado para este rol"],"deseables":["skill deseable concreto"],"emergentes":["skill emergente con evidencia"]},"remuneracion":{"rango":"dato de las búsquedas con URL — O exactamente: Sin datos verificables disponibles","modalidad":"estructura real de remuneración en este segmento (honorarios por proyecto, fee mensual, relación de dependencia)","nota":"URL de la fuente — O: Estimación sin fuente verificable, consultá con reclutadores especializados en el sector"},"canalesRecomendados":[{"canal":"canal específico y apropiado para este segmento","razon":"por qué este canal para este perfil exacto"}],"empresasOrganizaciones":[{"nombre":"nombre de la organización — preferentemente de los resultados de búsqueda","tipo":"consultora|organismo internacional|ONG|empresa|universidad|think tank","fuente":"URL de donde proviene este dato — O: Conocimiento propio — verificar","por_que":"conexión específica con la experiencia real del CV del candidato","como_aplicar":"canal concreto"}],"rutasPosibles":[{"ruta":"ruta basada en lo que ya hace el candidato según su CV","descripcion":"extensión natural de su trayectoria — sin reentrenamiento radical","organizaciones_tipo":"tipo específico de organizaciones","tiempo_estimado":"estimación realista","acciones":["acción concreta y específica"]}],"estrategiaRecomendada":{"acciones":["acción concreta y específica — no genérica"],"tiempoEstimado":"estimación realista para este perfil en este mercado","alertas":["riesgo real y específico"]},"resumenMercado":"síntesis de 4-5 oraciones honestas sobre el panorama real para este perfil — distinguiendo datos verificados de estimaciones propias"}`;
 
     // ── Llamar a Groq ─────────────────────────────────────────────────────────
     const models = [
@@ -162,11 +199,11 @@ Respondé SOLO con JSON válido y completo:
             messages: [
               {
                 role: "system",
-                content: "Sos un consultor senior de empleabilidad para perfiles académicos y consultores altamente calificados en Argentina. Respondé SOLO con JSON válido y completo. NUNCA inventes remuneraciones sin fuente. NUNCA sugerás como destino de búsqueda las organizaciones donde el candidato ya trabaja. NUNCA uses Computrabajo, Bumeran, ZonaJobs ni Indeed para estos perfiles.",
+                content: "Sos un consultor senior de empleabilidad para perfiles académicos y altamente calificados en Argentina. Tu análisis se basa en los datos reales que te proveen las búsquedas — no inventás. NUNCA usás Computrabajo, Bumeran, ZonaJobs ni Indeed. NUNCA inventás remuneraciones sin fuente verificable. NUNCA sugerás como destino las organizaciones donde el candidato ya trabaja. Cuando no tenés datos verificables, lo decís explícitamente. Respondé SOLO con JSON válido y completo.",
               },
               { role: "user", content: prompt },
             ],
-            temperature: 0.15,
+            temperature: 0.1,
             max_tokens: 2500,
           }),
         });
