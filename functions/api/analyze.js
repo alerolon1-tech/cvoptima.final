@@ -606,7 +606,9 @@ function normalizeResult(result, cvText, isEnglish) {
           impactoScore: recsLogros[0]?.impactoScore || '+15'
         };
       } else {
-        recLogro = recsLogros[0];
+        // Tiene logros cuantitativos — recomendar "incorporar logros" sería contradictorio.
+        // No incluir recLogro.
+        recLogro = null;
       }
     }
 
