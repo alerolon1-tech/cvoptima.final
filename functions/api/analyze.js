@@ -426,28 +426,66 @@ function normalizeResult(result, cvText, isEnglish) {
   if (result.scorePotencial === 0) result.scorePotencial = Math.min(100, result.atsScore + 15);
   if (result.impactDensityScore === 0) result.impactDensityScore = 15;
 
-  // 3. Ajustar impactDensityScore y label según logros reales
+  // 3. Ajustar impactDensityScore y sincronizar diagnóstico
   const logrosFuertes      = (result.analisisLogros?.logrosFuertes || []).length;
   const logrosCualitativos = (result.analisisLogros?.logrosCualitativos || []).length;
+  const totalLogros        = logrosFuertes + logrosCualitativos;
 
-  if (logrosFuertes === 0 && logrosCualitativos === 0) {
-    result.impactDensityScore = Math.min(result.impactDensityScore, 20);
-    result.impactDensityDiagnostico = isEnglish
-      ? 'No quantitative or qualitative achievements were detected. Experience sections describe tasks but do not show results or impact.'
-      : 'No se detectaron logros cuantitativos ni cualitativos. Las experiencias describen tareas pero no muestran resultados ni impacto.';
-  } else if (logrosFuertes === 0 && logrosCualitativos > 0) {
-    result.impactDensityScore = Math.max(Math.min(result.impactDensityScore, 60), 35);
-    result.impactDensityDiagnostico = isEnglish
-      ? `Your resume shows ${logrosCualitativos} qualitative achievement${logrosCualitativos > 1 ? 's' : ''} — concrete actions with impact verbs that communicate real value. To increase the score, add figures to some of these achievements when possible.`
-      : `Tu CV muestra ${logrosCualitativos} logro${logrosCualitativos > 1 ? 's' : ''} cualitativo${logrosCualitativos > 1 ? 's' : ''} — acciones concretas con verbos de impacto que comunican valor real. Para aumentar el score, podés sumar cifras a esos logros cuando sea posible.`;
-  } else if (logrosFuertes > 0) {
-    result.impactDensityScore = Math.max(result.impactDensityScore, 55);
-  }
+  // Calcular el score esperado según la cantidad real de logros detectados
+  // Esto actúa como ancla cuando el modelo subestima o sobreestima
+  let scoreEsperado;
+  if (totalLogros === 0)                        scoreEsperado = 15;
+  else if (totalLogros <= 2)                    scoreEsperado = 25;
+  else if (totalLogros <= 4)                    scoreEsperado = 42;
+  else if (totalLogros <= 7)                    scoreEsperado = 58;
+  else if (totalLogros <= 12 || logrosFuertes >= 3) scoreEsperado = 72;
+  else                                           scoreEsperado = 82;
 
-  // Calcular label desde el score (siempre en español — el frontend lo traduce con translateLabel)
+  // Si hay cuantitativos, el score no puede ser "Medio" — mínimo 65
+  if (logrosFuertes > 0) scoreEsperado = Math.max(scoreEsperado, 65);
+
+  // Tomar el promedio entre lo que calculó el modelo y el score esperado
+  // Esto evita que un solo número domine — respeta el criterio del modelo pero lo ancla
+  const scoreFinal = logrosFuertes > 0 || logrosCualitativos > 0
+    ? Math.round((result.impactDensityScore + scoreEsperado) / 2)
+    : Math.min(result.impactDensityScore, 20);
+
+  result.impactDensityScore = Math.min(Math.max(scoreFinal, 5), 90);
+
+  // Calcular label desde el score
   if (result.impactDensityScore >= 65) result.impactDensityLabel = "Alto";
   else if (result.impactDensityScore >= 35) result.impactDensityLabel = "Medio";
   else result.impactDensityLabel = "Bajo";
+
+  // Sincronizar diagnóstico con el score resultante — siempre
+  // El diagnóstico del modelo puede haber quedado desincronizado si el score cambió
+  const diagnosticoModelo = result.impactDensityDiagnostico || '';
+  const labelResultante = result.impactDensityLabel;
+  const diagnosticoCoherente = (() => {
+    if (totalLogros === 0) {
+      return isEnglish
+        ? 'No quantitative or qualitative achievements were detected. Experience sections describe tasks but do not show results or impact.'
+        : 'No se detectaron logros cuantitativos ni cualitativos. Las experiencias describen tareas pero no muestran resultados ni impacto.';
+    }
+    if (logrosFuertes === 0 && logrosCualitativos > 0) {
+      return isEnglish
+        ? `Your resume shows ${logrosCualitativos} qualitative achievement${logrosCualitativos > 1 ? 's' : ''} — concrete actions with impact verbs that communicate real value. To increase the score, add figures to some of these achievements when possible.`
+        : `Tu CV muestra ${logrosCualitativos} logro${logrosCualitativos > 1 ? 's' : ''} cualitativo${logrosCualitativos > 1 ? 's' : ''} — acciones concretas con verbos de impacto. Para subir el score, sumale cifras a alguno de esos logros cuando sea posible.`;
+    }
+    if (logrosFuertes > 0 && logrosCualitativos > 0) {
+      return isEnglish
+        ? `Your resume shows ${logrosFuertes} quantitative achievement${logrosFuertes > 1 ? 's' : ''} with figures and ${logrosCualitativos} qualitative ${logrosCualitativos > 1 ? 'ones' : 'one'} with concrete results — strong impact density. ${diagnosticoModelo.includes('?') ? '' : diagnosticoModelo}`
+        : `Tu CV muestra ${logrosFuertes} logro${logrosFuertes > 1 ? 's' : ''} cuantitativo${logrosFuertes > 1 ? 's' : ''} con cifras y ${logrosCualitativos} cualitativo${logrosCualitativos > 1 ? 's' : ''} con resultados concretos — densidad de impacto alta. ${diagnosticoModelo}`;
+    }
+    if (logrosFuertes > 0) {
+      return isEnglish
+        ? `Your resume shows ${logrosFuertes} quantitative achievement${logrosFuertes > 1 ? 's' : ''} with specific figures. ${diagnosticoModelo}`
+        : `Tu CV muestra ${logrosFuertes} logro${logrosFuertes > 1 ? 's' : ''} cuantitativo${logrosFuertes > 1 ? 's' : ''} con cifras concretas. ${diagnosticoModelo}`;
+    }
+    return diagnosticoModelo;
+  })();
+
+  result.impactDensityDiagnostico = diagnosticoCoherente.trim();
 
   // 4. Filtrar logrosCualitativos que son responsabilidades o atributos — bilingüe
   if (result.analisisLogros?.logrosCualitativos) {
@@ -642,7 +680,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
   instrBlock += "- atsScore: calidad global del documento. Un CV sin titular, sin perfil profesional y sin logros NO puede superar 50.\n";
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
-  instrBlock += "- impactDensityScore: cuenta cuantas experiencias tienen numeros, porcentajes o resultados medibles. Si ninguna los tiene, el score es menor a 20.\n\n";
+  instrBlock += "- impactDensityScore: cuenta cuántas experiencias tienen logros cuantitativos (números, porcentajes, cifras) o cualitativos (verbo de acción + resultado concreto). Usá esta escala: 0-2 logros totales → 15-30. 3-4 logros → 35-50. 5-7 logros → 50-65. 8-12 logros → 65-80. Más de 12 logros o más de 3 cuantitativos → 75-90. Si ninguna experiencia tiene logros → menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto. Si no la encontras, escribi 'No detectado en el documento'.\n\n";
   instrBlock += "ESTRUCTURA ÓPTIMA: (1) Titular específico, (2) Perfil profesional 3-4 líneas, (3) Experiencias con empresa/rol/fechas y logros cuantificados, (4) Educación con institución/título/año, (5) Habilidades, (6) Contacto completo.\n";
   instrBlock += "PENALIZACIÓN: sin titular → max 55. Sin perfil profesional → max 60. Sin logros cuantificados → max 50.\n\n";
@@ -654,11 +692,21 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Devuelve SOLO el siguiente JSON:\n\n";
 
   const proSchema = plan === "pro" || plan === "professional" ? (
-    '  "capitalRelacional": {"score": 60, "diagnostico": "descripcion", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": []},\n' +
-    '  "diagnosticoTrayectoria": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "que comunica esta trayectoria hoy", "patrones": [], "oportunidades": [], "riesgos": []},\n' +
-    '  "posicionamiento": {"movilidadVertical": {"posible": true, "diagnostico": "texto", "acciones": []}, "movilidadLateral": {"posible": true, "diagnostico": "texto", "acciones": []}, "transicionSector": {"posible": false, "diagnostico": "texto", "acciones": []}},\n' +
-    '  "recomendacionesNarrativa": [{"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual exacto", "sugerido": "texto reescrito listo para usar", "justificacion": "por que mejora el posicionamiento", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}],\n' +
-    '  "moduloEmpleabilidadClaveSocial": {"lectura": "4-5 oraciones concretas sobre este perfil", "dimensionEstructural": "impacto del mercado en este perfil", "dimensionRelacional": "redes y vinculos visibles", "dimensionSubjetiva": "identidad laboral que se infiere", "dimensionColectiva": "organizaciones aliadas para el desarrollo", "posicionamientoMercado": "posicion frente al mercado actual", "tensiones": []},\n' +
+    '  "capitalRelacional": {"score": 60, "diagnostico": "diagnóstico concreto sobre visibilidad del trabajo colaborativo en este CV — mencioná verbos y organizaciones específicas del documento", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": ["acción específica basada en este perfil, no genérica"]},\n' +
+    '  "diagnosticoTrayectoria": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "qué comunica esta trayectoria específica hoy — usando los roles y empresas reales del CV", "patrones": ["patrón real detectado en el CV"], "oportunidades": ["oportunidad concreta basada en esta trayectoria"], "riesgos": ["riesgo real detectado"]},\n' +
+    '  "posicionamiento": {\n' +
+    '    "movilidadVertical": {"posible": true, "diagnostico": "diagnóstico concreto sobre movilidad vertical para ESTE perfil — qué rol superior es alcanzable y por qué, basándote en la experiencia real del CV. NUNCA menciones liderazgo o gestión de equipos salvo que el CV muestre evidencia concreta de gestión de personas.", "acciones": ["acción concreta y específica para este perfil"]},\n' +
+    '    "movilidadLateral": {"posible": true, "diagnostico": "diagnóstico concreto sobre movilidad lateral — qué sectores o roles equivalentes son accesibles para ESTE perfil específico y por qué. NUNCA menciones liderazgo o gestión de equipos salvo que el CV muestre evidencia concreta de gestión de personas.", "acciones": ["acción concreta y específica"]},\n' +
+    '    "transicionSector": {"posible": false, "diagnostico": "diagnóstico concreto sobre transición sectorial para este perfil — qué sectores son alcanzables y cuáles no, basándote en las habilidades reales del CV. NUNCA menciones liderazgo o gestión de equipos salvo que el CV muestre evidencia concreta.", "acciones": ["acción concreta y específica"]}},\n' +
+    '  "recomendacionesNarrativa": [{"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual exacto del CV — copialo literalmente", "sugerido": "texto reescrito listo para usar — concreto y específico", "justificacion": "por qué esta reescritura mejora el posicionamiento de este perfil", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}],\n' +
+    '  "moduloEmpleabilidadClaveSocial": {\n' +
+    '    "lectura": "4-5 oraciones concretas sobre este perfil específico — usando sus experiencias, sectores y logros reales",\n' +
+    '    "dimensionEstructural": "impacto del mercado en este perfil concreto — mencioná el sector, la demanda real y el contexto específico de este candidato",\n' +
+    '    "dimensionRelacional": "redes y vínculos visibles en este CV — organizaciones, clientes, instituciones mencionadas explícitamente",\n' +
+    '    "dimensionSubjetiva": "identidad laboral que se infiere de este CV específico — cómo se posiciona, qué valores laborales comunica",\n' +
+    '    "dimensionColectiva": "organizaciones, sectores o movimientos donde este perfil puede generar impacto colectivo — basado en su experiencia real",\n' +
+    '    "posicionamientoMercado": "posición frente al mercado actual — específica para este perfil, sector y momento",\n' +
+    '    "tensiones": ["tensión real y específica que enfrenta este perfil — no genérica"]},\n' +
     '  "versionIngles": {"nota": "reescritura no traduccion", "titular": "Professional Title", "perfilProfesional": "Professional summary", "experiencias": [], "habilidades": {"tecnicas": [], "blandas": []}, "logrosDestacados": [], "sugerenciasAdaptacion": []}\n'
   ) : '';
 
@@ -829,7 +877,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Calculate these scores before writing the JSON (scale 0-100, NEVER leave at 0):\n";
   instrBlock += "- atsScore: overall document quality. A resume without headline, professional summary and achievements CANNOT exceed 50.\n";
   instrBlock += "- scorePotencial: possible score if improvements are implemented (always higher than atsScore)\n";
-  instrBlock += "- impactDensityScore: count how many experiences have numbers, percentages or measurable results. If none, score is below 20.\n\n";
+  instrBlock += "- impactDensityScore: count how many experiences have quantitative achievements (numbers, percentages, figures) or qualitative ones (action verb + concrete result). Use this scale: 0-2 total achievements → 15-30. 3-4 achievements → 35-50. 5-7 achievements → 50-65. 8-12 achievements → 65-80. More than 12 or more than 3 quantitative → 75-90. If no experience has achievements → below 20.\n\n";
   instrBlock += "CRITICAL: before writing any diagnostic field, look for evidence in the document. If not found, write 'Not detected in document'.\n\n";
   instrBlock += "OPTIMAL RESUME STRUCTURE: (1) Specific headline, (2) Professional summary 3-4 lines, (3) Experience with company/role/dates and quantified achievements, (4) Education with institution/degree/year, (5) Skills, (6) Complete contact info.\n";
   instrBlock += "SCORE PENALTY: no headline → max 55. No professional summary → max 60. No quantified achievements → max 50.\n\n";
@@ -837,7 +885,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "LANGUAGE: ALL text fields in English. Professional, clear language.\n\n";
   instrBlock += "TARGET ROLES: minimum 4, including similar and adjacent roles in compatible sectors.\n\n";
   instrBlock += "STRENGTHS/OPPORTUNITIES: minimum 4 each, specific to the document.\n\n";
-  instrBlock += "NO LEADERSHIP: do not recommend leadership development unless there is concrete evidence of people management.\n\n";
+  instrBlock += "NO LEADERSHIP: do not recommend leadership development unless there is concrete evidence of people management. NEVER use generic phrases like 'you should develop leadership skills' or 'team management will improve your opportunities'. Every diagnostic field must be specific to this profile — based on the real roles, companies and achievements in the document.\n\n";
   instrBlock += "IMPORTANT: The 'prioridad' field values MUST always be exactly 'Alta', 'Media', or 'Baja'.\n\n";
   instrBlock += "SECTION DETECTION — CRITICAL: The document may use English section headers. Map them to the JSON keys as follows:\n";
   instrBlock += "  'perfilProfesional': true if document contains Summary, Profile, About, Objective, or equivalent\n";
@@ -851,11 +899,21 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan) {
   instrBlock += "Return ONLY the following JSON:\n\n";
 
   const proSchema = plan === "pro" || plan === "professional" ? (
-    '  "capitalRelacional": {"score": 60, "diagnostico": "how collaborative work is visible in the profile", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": []},\n' +
-    '  "diagnosticoTrayectoria": {"tipo": "Consistent|Growing|In transition|Scattered", "descripcion": "what this trajectory communicates to the market today", "patrones": [], "oportunidades": [], "riesgos": []},\n' +
-    '  "posicionamiento": {"movilidadVertical": {"posible": true, "diagnostico": "text", "acciones": []}, "movilidadLateral": {"posible": true, "diagnostico": "text", "acciones": []}, "transicionSector": {"posible": false, "diagnostico": "text", "acciones": []}},\n' +
-    '  "recomendacionesNarrativa": [{"tipo": "headline|profile|experience|linkedin", "actual": "current exact text", "sugerido": "rewritten text ready to use", "justificacion": "why this change improves positioning", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}],\n' +
-    '  "moduloEmpleabilidadClaveSocial": {"lectura": "4-5 concrete sentences about this specific profile", "dimensionEstructural": "market impact on this profile", "dimensionRelacional": "visible networks and connections", "dimensionSubjetiva": "work identity inferred from profile", "dimensionColectiva": "allied organizations for development", "posicionamientoMercado": "position vs current market", "tensiones": []},\n' +
+    '  "capitalRelacional": {"score": 60, "diagnostico": "specific diagnosis about visibility of collaborative work in THIS resume — mention specific verbs and organizations from the document", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": ["specific action based on this profile, not generic"]},\n' +
+    '  "diagnosticoTrayectoria": {"tipo": "Consistent|Growing|In transition|Scattered", "descripcion": "what this specific trajectory communicates today — using the real roles and companies from the resume", "patrones": ["real pattern detected in the resume"], "oportunidades": ["concrete opportunity based on this specific trajectory"], "riesgos": ["real risk detected"]},\n' +
+    '  "posicionamiento": {\n' +
+    '    "movilidadVertical": {"posible": true, "diagnostico": "concrete diagnosis about vertical mobility for THIS specific profile — what senior role is reachable and why, based on the real experience in the resume. NEVER mention leadership or team management unless the resume shows concrete evidence of managing people.", "acciones": ["concrete and specific action for this profile"]},\n' +
+    '    "movilidadLateral": {"posible": true, "diagnostico": "concrete diagnosis about lateral mobility — which sectors or equivalent roles are accessible for THIS specific profile and why. NEVER mention leadership or team management unless the resume shows concrete evidence of managing people.", "acciones": ["concrete and specific action"]},\n' +
+    '    "transicionSector": {"posible": false, "diagnostico": "concrete diagnosis about sector transition for this profile — which sectors are reachable and which are not, based on the real skills in the resume. NEVER mention leadership or team management unless the resume shows concrete evidence.", "acciones": ["concrete and specific action"]}},\n' +
+    '  "recomendacionesNarrativa": [{"tipo": "headline|profile|experience|linkedin", "actual": "exact current text from the resume — copy it literally", "sugerido": "rewritten text ready to use — concrete and specific", "justificacion": "why this rewrite improves positioning for this specific profile", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}],\n' +
+    '  "moduloEmpleabilidadClaveSocial": {\n' +
+    '    "lectura": "4-5 concrete sentences about this specific profile — using their real experiences, sectors and achievements",\n' +
+    '    "dimensionEstructural": "market impact on this specific profile — mention the sector, real demand and specific context of this candidate",\n' +
+    '    "dimensionRelacional": "networks and connections visible in THIS resume — organizations, clients, institutions explicitly mentioned",\n' +
+    '    "dimensionSubjetiva": "work identity inferred from THIS specific resume — how they position themselves, what work values they communicate",\n' +
+    '    "dimensionColectiva": "organizations, sectors or movements where this profile can generate collective impact — based on their real experience",\n' +
+    '    "posicionamientoMercado": "positioning vs current market — specific for this profile, sector and moment in time",\n' +
+    '    "tensiones": ["real and specific tension this profile faces — not generic"]},\n' +
     '  "versionIngles": {"nota": "rewrite not translation", "titular": "Professional Title", "perfilProfesional": "Professional summary", "experiencias": [], "habilidades": {"tecnicas": [], "blandas": []}, "logrosDestacados": [], "sugerenciasAdaptacion": []}\n'
   ) : '';
 
