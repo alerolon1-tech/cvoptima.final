@@ -33,20 +33,44 @@ export async function onRequest(context) {
     const canalesProhibidos = ['computrabajo', 'bumeran', 'zonajobs', 'indeed'];
 
     // ── Extraer empleadores actuales del CV para excluirlos de sugerencias ────
+    // Maneja dos patrones comunes:
+    //   Patrón A: "Empresa Mes Año - Present"  (empresa + fecha en la misma línea)
+    //   Patrón B: línea anterior a "Mes Año - Present" contiene la empresa
     const empleadoresActuales = [];
     if (cvText) {
-      cvText.split('\n').forEach((linea, i, arr) => {
-        if (/present|actual|actualidad|2025|2026/i.test(linea)) {
-          const contexto = arr.slice(Math.max(0, i-2), i+2).join(' ');
-          (contexto.match(/([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ+]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ+]*){0,3})/g) || [])
-            .forEach(m => {
-              if (m.length > 3 && !['Partner','Present','Current','Actual','April','March','October'].includes(m))
-                empleadoresActuales.push(m.trim());
-            });
+      const lineas = cvText.split('\n').map(l => l.trim()).filter(Boolean);
+      const meses = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December';
+      const resFecha = new RegExp(`(?:Present|Actualidad|\\b202[4-9]\\b)`, 'i');
+      const resMes = new RegExp(`\\b(${meses})\\b`, 'i');
+
+      lineas.forEach((linea, i) => {
+        if (!resFecha.test(linea) || !resMes.test(linea)) return;
+
+        // Patrón A: la empresa está antes del mes en la misma línea
+        // "Emic+ Consultora April 2024 - Present" → extraer "Emic+ Consultora"
+        const sinFecha = linea.replace(new RegExp(`\\b(${meses})\\b.*`, 'i'), '').trim();
+        if (sinFecha.length > 2 && sinFecha.length < 50) {
+          const esCargo = /^(Partner|Manager|Director|Coordinator|Consultant|Researcher|Professor|Lecturer|Fellow|Analyst|Associate|Senior|Junior|Head|Chief|Lead)/i.test(sinFecha);
+          if (!esCargo) {
+            empleadoresActuales.push(sinFecha);
+            return;
+          }
+        }
+
+        // Patrón B: la empresa está en la línea anterior
+        for (let j = i - 1; j >= Math.max(0, i - 2); j--) {
+          const candidata = lineas[j];
+          const esCargo = /^(Partner|Manager|Director|Coordinator|Consultant|Researcher|Professor|Lecturer|Fellow|Analyst|Associate|Senior|Junior|Head|Chief|Lead)/i.test(candidata);
+          const esSeccion = /^(EXPERIENCE|EDUCATION|SKILLS|WORK|EMPLOYMENT|PROFESSIONAL)/i.test(candidata);
+          if (!esCargo && !esSeccion && candidata.length > 2 && candidata.length < 60) {
+            empleadoresActuales.push(candidata.trim());
+            break;
+          }
         }
       });
     }
-    const empleadoresStr = [...new Set(empleadoresActuales)].slice(0, 5).join(', ');
+    const empleadoresUnicos = [...new Set(empleadoresActuales)];
+    const empleadoresStr = empleadoresUnicos.join(', ');
 
     // ── Búsquedas Tavily ─────────────────────────────────────────────────────
     let contextoMercado = '';
@@ -123,7 +147,7 @@ REGLAS OBLIGATORIAS:
 
 Respondé SOLO con JSON válido, sin texto adicional ni markdown:
 
-{"demanda":{"nivel":"Alta|Media|Baja","diagnostico":"situación real de la demanda para este perfil específico — en segunda persona: 'Tu perfil...' o 'En tu sector...'","tendencia":"creciente|estable|decreciente|sin datos suficientes","justificacion":"por qué — con fuente o aclaración"},"competencia":{"nivel":"Alta|Media|Baja","diagnostico":"quiénes compiten con este candidato — en segunda persona: 'Tu competencia directa son...'","diferenciadores":["diferenciador real de este candidato basado en su CV"]},"skillsRequeridos":{"criticos":["skill técnico real que demanda el mercado para este rol"],"deseables":["skill deseable concreto"],"emergentes":["skill emergente verificable"]},"remuneracion":{"rango":"rango en ARS o USD con fuente — o exactamente: Sin datos verificables disponibles","modalidad":"estructura real de remuneración en este segmento (honorarios por proyecto, fee mensual, etc.)","nota":"fuente del dato o: Sin datos verificables — consultá con reclutadores del sector"},"canalesRecomendados":[{"canal":"canal específico y apropiado para este segmento — nunca Computrabajo, Bumeran, ZonaJobs ni Indeed","razon":"por qué este canal para este perfil exacto — en segunda persona"}],"empresasOrganizaciones":[{"nombre":"nombre real y específico de una organización en Argentina que contrate este perfil — NO genérico","tipo":"consultora|organismo internacional|ONG|empresa|universidad|think tank","por_que":"conexión específica con la experiencia real del CV del candidato — en segunda persona: 'Tu experiencia en X te conecta con...'","como_aplicar":"canal concreto: LinkedIn directo, web de la organización, referido, etc."}],"rutasPosibles":[{"ruta":"ruta basada en lo que ya hace el candidato según su CV — no en el rol ingresado en el formulario si no condice con el perfil","descripcion":"extensión natural de su trayectoria actual — en segunda persona","organizaciones_tipo":"tipo específico de organizaciones","tiempo_estimado":"estimación realista","acciones":["acción concreta y específica — en segunda persona"]}],"estrategiaRecomendada":{"acciones":["acción concreta y accionable — en segunda persona, sin generalidades"],"tiempoEstimado":"estimación realista para este perfil en este mercado","alertas":["riesgo real y específico — en segunda persona"]},"resumenMercado":"síntesis de 3-4 oraciones en SEGUNDA PERSONA sobre el panorama real para este perfil — ejemplo: 'Tu perfil como investigador social aplicado tiene demanda en...' — nunca en tercera persona, nunca genérico"}`;
+{"demanda":{"nivel":"Alta|Media|Baja","diagnostico":"situación real de la demanda para este perfil específico — en segunda persona: 'Tu perfil...' o 'En tu sector...'","tendencia":"creciente|estable|decreciente|sin datos suficientes","justificacion":"por qué — con fuente o aclaración"},"competencia":{"nivel":"Alta|Media|Baja","diagnostico":"quiénes compiten con este candidato — en segunda persona: 'Tu competencia directa son...'","diferenciadores":["diferenciador real de este candidato basado en su CV"]},"skillsRequeridos":{"criticos":["skill técnico real que demanda el mercado para este rol"],"deseables":["skill deseable concreto"],"emergentes":["skill emergente verificable"]},"remuneracion":{"rango":"rango en ARS o USD con fuente — o exactamente: Sin datos verificables disponibles","modalidad":"estructura real de remuneración en este segmento (honorarios por proyecto, fee mensual, etc.)","nota":"fuente del dato o: Sin datos verificables — consultá con reclutadores del sector"},"canalesRecomendados":[{"canal":"canal específico y apropiado para este segmento — nunca Computrabajo, Bumeran, ZonaJobs ni Indeed","razon":"por qué este canal para este perfil exacto — en segunda persona"}],"empresasOrganizaciones":[{"nombre":"nombre real y específico de una organización en Argentina que contrate este perfil — NO genérico","tipo":"consultora|organismo internacional|ONG|empresa|universidad|think tank","fuente":"URL del resultado de búsqueda donde encontraste esta organización — o exactamente: Conocimiento propio — verificar","por_que":"conexión específica con la experiencia real del CV del candidato — en segunda persona: 'Tu experiencia en X te conecta con...'","como_aplicar":"canal concreto: LinkedIn directo, web de la organización, referido, etc."}],"rutasPosibles":[{"ruta":"ruta basada en lo que ya hace el candidato según su CV — no en el rol ingresado en el formulario si no condice con el perfil","descripcion":"extensión natural de su trayectoria actual — en segunda persona","organizaciones_tipo":"tipo específico de organizaciones","tiempo_estimado":"estimación realista","acciones":["acción concreta y específica — en segunda persona"]}],"estrategiaRecomendada":{"acciones":["acción concreta y accionable — en segunda persona, sin generalidades"],"tiempoEstimado":"estimación realista para este perfil en este mercado","alertas":["riesgo real y específico — en segunda persona"]},"resumenMercado":"síntesis de 3-4 oraciones en SEGUNDA PERSONA sobre el panorama real para este perfil — ejemplo: 'Tu perfil como investigador social aplicado tiene demanda en...' — nunca en tercera persona, nunca genérico"}`;
 
     // ── Llamar a Groq con manejo robusto de JSON ─────────────────────────────
     const models = [
@@ -178,7 +202,7 @@ Respondé SOLO con JSON válido, sin texto adicional ni markdown:
           }
         }
 
-        // Post-procesamiento: filtrar canales y organizaciones inapropiadas
+        // Post-procesamiento: filtrar canales prohibidos y empleadores actuales
         if (result.canalesRecomendados) {
           result.canalesRecomendados = result.canalesRecomendados.filter(c =>
             !canalesProhibidos.some(ci => (c.canal || '').toLowerCase().includes(ci))
@@ -187,11 +211,16 @@ Respondé SOLO con JSON válido, sin texto adicional ni markdown:
         if (result.empresasOrganizaciones) {
           result.empresasOrganizaciones = result.empresasOrganizaciones.filter(o => {
             const nombre = (o.nombre || '').toLowerCase();
-            // Filtrar staffing genérico
+            // Filtrar canales masivos
             if (['staffing', 'bpo', 'reclutamiento masivo'].some(t => nombre.includes(t))) return false;
-            // Filtrar empleadores actuales del candidato
-            if (empleadoresActuales.length > 0 &&
-                empleadoresActuales.some(e => nombre.includes(e.toLowerCase().slice(0, 6)))) return false;
+            // Filtrar empleadores actuales del candidato con matching mejorado
+            if (empleadoresUnicos.some(e => {
+              const emp = e.toLowerCase().replace(/[^a-z0-9áéíóúñü]/g, ' ').trim();
+              // Excluir palabras genéricas que no identifican una empresa específica
+              const genericWords = new Set(['consultora','consulting','associates','partners','group','solutions','services','internacional','argentina','buenos','aires','universidad','national','business','equality','research','social','applied']);
+              const palabras = emp.split(/\s+/).filter(p => p.length > 3 && !genericWords.has(p));
+              return palabras.length > 0 && palabras.some(p => nombre.includes(p));
+            })) return false;
             return true;
           });
         }
