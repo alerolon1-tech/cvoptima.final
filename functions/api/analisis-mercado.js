@@ -26,10 +26,10 @@ export async function onRequest(context) {
 
     // ── 1. Búsqueda en tiempo real con Tavily ─────────────────────────────
     const queries = [
-      `demanda laboral ${rol} ${sector} Argentina 2026`,
-      `skills requeridos ${rol} ${sector} mercado laboral actual`,
-      `salario ${rol} ${sector} ${ubicacion || 'Argentina'} 2026`,
-      `tendencias ${sector} empleo ${tipoEmpresa || ''} 2026`,
+      `"${rol}" "${sector}" Argentina empleo demanda 2026`,
+      `"${rol}" OR "${sector}" consultoras empresas contratan Argentina 2026`,
+      `salario sueldo "${rol}" "${sector}" Argentina 2025 2026`,
+      `"${sector}" Argentina tendencias mercado laboral oportunidades 2026`,
     ];
 
     const tavilyResults = await Promise.all(
@@ -59,7 +59,7 @@ export async function onRequest(context) {
       .slice(0, 6000); // Limitar contexto
 
     // ── 2. Generar análisis con el modelo ─────────────────────────────────
-    const prompt = `Sos un experto en mercado laboral y empleabilidad. Analizá la situación del mercado para el siguiente perfil y generá recomendaciones estratégicas de búsqueda.
+    const prompt = `Sos un experto en mercado laboral con conocimiento profundo del mercado argentino. Analizá la situación real del mercado para el siguiente perfil y generá recomendaciones estratégicas concretas y verificables.
 
 PERFIL:
 - Nombre: ${candidateName || 'Candidato'}
@@ -71,41 +71,52 @@ PERFIL:
 ${resumenPerfil ? `- Resumen del perfil: ${resumenPerfil}` : ''}
 
 DATOS DEL MERCADO EN TIEMPO REAL:
-${contextoMercado || 'No se encontraron datos específicos. Usá tu conocimiento del mercado laboral actual.'}
+${contextoMercado || 'No se encontraron datos específicos de fuentes externas.'}
+
+REGLAS CRÍTICAS — INCUMPLIRLAS INVALIDA EL ANÁLISIS:
+1. ESPECIFICIDAD OBLIGATORIA: Cada campo debe ser específico para este perfil exacto. Prohibido usar frases genéricas como "el mercado es competitivo", "debes desarrollar habilidades en liderazgo", "hay oportunidades para destacarse". Si no tenés datos específicos, decilo explícitamente.
+2. FUENTES: En cada campo donde uses datos de las búsquedas, indicá la fuente entre paréntesis — por ejemplo "(Fuente: LinkedIn Jobs Argentina, junio 2026)" o "(Fuente: estimación basada en mercado regional)". Si es conocimiento propio, escribí "(Estimación del modelo, verificar con fuentes actuales)".
+3. EMPRESAS CONCRETAS: En canalesRecomendados y estrategiaRecomendada, nombrá empresas, consultoras, organizaciones o plataformas específicas donde este perfil puede aplicar. No uses nombres genéricos.
+4. REMUNERACIÓN: Si no tenés datos concretos de remuneración para este rol en Argentina, escribilo explícitamente en el campo "nota". No inventes rangos.
+5. SKILLS: Los skills críticos deben ser los que realmente busca el mercado para este rol específico — no skills genéricos de "comunicación" o "trabajo en equipo".
+6. TENDENCIA: Solo escribí "creciente", "estable" o "decreciente" si podés justificarlo con datos de las búsquedas. Si no, escribí "sin datos suficientes".
 
 Devolvé SOLO este JSON en español rioplatense, en segunda persona:
 
 {
   "demanda": {
     "nivel": "Alta|Media|Baja",
-    "diagnostico": "cómo está la demanda para este rol y sector hoy",
-    "tendencia": "creciente|estable|decreciente",
-    "justificacion": "por qué está así la demanda"
+    "diagnostico": "situación real de demanda para este rol y sector específico hoy — con datos concretos o aclaración de incertidumbre",
+    "tendencia": "creciente|estable|decreciente|sin datos suficientes",
+    "justificacion": "por qué está así la demanda — con fuente o estimación explícita"
   },
   "competencia": {
     "nivel": "Alta|Media|Baja",
-    "diagnostico": "cuánta oferta de candidatos hay para este perfil",
-    "diferenciadores": ["qué te diferencia o qué necesitás desarrollar para diferenciarte"]
+    "diagnostico": "cuánta oferta de candidatos hay para este perfil específico",
+    "diferenciadores": ["diferenciador concreto y específico para este perfil"]
   },
   "skillsRequeridos": {
-    "criticos": ["skill crítico 1", "skill crítico 2"],
-    "deseables": ["skill deseable 1", "skill deseable 2"],
-    "emergentes": ["skill emergente 1"]
+    "criticos": ["skill técnico o metodológico real que busca el mercado para este rol"],
+    "deseables": ["skill deseable concreto para este sector"],
+    "emergentes": ["skill emergente con evidencia de demanda creciente"]
   },
   "remuneracion": {
-    "rango": "rango estimado en ARS o USD según corresponda",
+    "rango": "rango estimado en ARS o USD — o 'Sin datos confiables disponibles' si no tenés información verificable",
     "modalidad": "cómo se suele pagar en este sector",
-    "nota": "aclaración sobre la variabilidad o fuente"
+    "nota": "aclaración sobre la fuente, variabilidad o limitaciones del dato"
   },
   "canalesRecomendados": [
-    {"canal": "nombre del canal", "razon": "por qué este canal es efectivo para este perfil"}
+    {"canal": "nombre específico del canal, empresa o plataforma", "razon": "por qué este canal es efectivo para este perfil concreto"}
+  ],
+  "empresasOrganizaciones": [
+    {"nombre": "nombre real de empresa, consultora u organización en Argentina", "por_que": "por qué este perfil encaja con esta organización", "como_aplicar": "LinkedIn, web, referido, etc."}
   ],
   "estrategiaRecomendada": {
-    "acciones": ["acción concreta 1", "acción concreta 2", "acción concreta 3"],
-    "tiempoEstimado": "estimación realista del tiempo de búsqueda",
-    "alertas": ["riesgo o desafío específico para este perfil en este mercado"]
+    "acciones": ["acción concreta, específica y verificable para este perfil"],
+    "tiempoEstimado": "estimación realista del tiempo de búsqueda para este perfil en este mercado",
+    "alertas": ["riesgo o desafío específico y real para este perfil en este mercado"]
   },
-  "resumenMercado": "síntesis de 3-4 oraciones sobre el panorama real para este perfil hoy"
+  "resumenMercado": "síntesis de 3-4 oraciones sobre el panorama real para este perfil hoy — con honestidad sobre qué es verificable y qué es estimación"
 }`;
 
     // Llamar a Groq
@@ -128,7 +139,7 @@ Devolvé SOLO este JSON en español rioplatense, en segunda persona:
           body: JSON.stringify({
             model,
             messages: [
-              { role: "system", content: "Sos un experto en mercado laboral. Respondé SOLO con el JSON solicitado, sin texto adicional ni markdown." },
+              { role: "system", content: "Sos un experto en mercado laboral argentino. Respondé SOLO con el JSON solicitado, sin texto adicional ni markdown. Sé específico, honesto sobre la incertidumbre, y citá fuentes cuando uses datos externos. Nunca uses frases genéricas ni inventes datos." },
               { role: "user", content: prompt },
             ],
             temperature: 0.3,
