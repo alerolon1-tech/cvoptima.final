@@ -25,6 +25,7 @@ export async function onRequest(context) {
     const role      = fd.get("role")      || "";
     const sector    = fd.get("sector")    || "";
     const seniority = fd.get("seniority") || "";
+    const situacion = fd.get("situacion") || "";
     const modo      = fd.get("modo")      || "cv";
     const userId    = fd.get("userId")    || null;
 
@@ -113,7 +114,7 @@ export async function onRequest(context) {
       "10. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo."
     );
 
-    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma);
+    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma, situacion);
 
     // Pre-calcular valores del radar desde el texto (no depender del modelo)
     const atsDetalleCalculado = modo !== 'li' ? calcularAtsDetalle(cvText) : calcularAtsDetalle(liText);
@@ -659,19 +660,28 @@ function normalizeResult(result, cvText, isEnglish) {
   return result;
 }
 
-function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma = 'es') {
+function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma = 'es', situacion = '') {
   const isEnglish = idioma === 'en';
   return isEnglish
-    ? buildPromptEN(cvText, liText, modo, role, sector, seniority, plan)
-    : buildPromptES(cvText, liText, modo, role, sector, seniority, plan);
+    ? buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situacion)
+    : buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situacion);
 }
 
-function buildPromptES(cvText, liText, modo, role, sector, seniority, plan) {
+function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situacion = '') {
   const ctx = [
     role      && "Rol objetivo: " + role,
     sector    && "Sector: " + sector,
     seniority && "Seniority: " + seniority,
   ].filter(Boolean).join(" | ");
+
+  const FOCOS_SITUACION = {
+    no_entrevistas: "La persona confirmó que no está consiguiendo entrevistas. Priorizá en tu lectura por qué el perfil puede no estar siendo detectado o convocado: claridad del titular, estructura, keywords del sector, densidad de habilidades visibles.",
+    entrevistas_sin_avance: "La persona confirmó que consigue entrevistas pero no avanza en los procesos. El perfil ya pasa el primer filtro — priorizá en tu lectura la profundidad y evidencia de los logros, y qué tan sólida es la narrativa que sostiene su valor una vez que ya lo miraron de cerca.",
+    cambio_sector: "La persona confirmó que quiere cambiar de sector o rol. Priorizá en tu lectura qué habilidades y logros de la trayectoria actual son transferibles a otro contexto, y qué roles objetivo tienen mejor encaje real.",
+    no_me_representa: "La persona confirmó que siente que su perfil no la representa. Priorizá en tu lectura la coherencia entre lo que la trayectoria real muestra y cómo está siendo comunicada — dónde hay una desalineación entre lo vivido y lo escrito.",
+    actualizar: "La persona confirmó que quiere actualizar lo que tiene. Priorizá en tu lectura qué quedó desactualizado: redacción, logros antiguos sin cifras recientes, secciones o keywords que ya no reflejan su momento actual.",
+    transicion_profunda: "La persona confirmó que está pensando una transición laboral profunda. Priorizá en tu lectura las habilidades transferibles fuera del campo actual y cómo se traduce la experiencia a un contexto distinto — sin dar por sentado que el camino es lineal.",
+  };
 
   let docBlock = "";
   if (cvText && cvText.length >= 30) docBlock += "=== CV A ANALIZAR ===\n" + cvText.slice(0, 4500) + "\n=== FIN CV ===\n\n";
@@ -679,6 +689,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan) {
 
   let instrBlock = "";
   if (ctx) instrBlock += "Contexto: " + ctx + "\n\n";
+  if (FOCOS_SITUACION[situacion]) instrBlock += "SITUACIÓN CONFIRMADA: " + FOCOS_SITUACION[situacion] + "\n\n";
   instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
   instrBlock += "- atsScore: calidad global del documento. Un CV sin titular, sin perfil profesional y sin logros NO puede superar 50.\n";
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
@@ -863,12 +874,21 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan) {
   );
 }
 
-function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan) {
+function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situacion = '') {
   const ctx = [
     role      && "Target role: " + role,
     sector    && "Sector: " + sector,
     seniority && "Seniority: " + seniority,
   ].filter(Boolean).join(" | ");
+
+  const FOCOS_SITUACION = {
+    no_entrevistas: "The person confirmed they are not getting interviews. Prioritize in your reading why the profile may not be getting noticed or shortlisted: headline clarity, structure, sector keywords, density of visible skills.",
+    entrevistas_sin_avance: "The person confirmed they get interviews but do not move forward in the process. The profile already passes the first filter — prioritize in your reading the depth and evidence of achievements, and how solid the narrative is once someone looks closely.",
+    cambio_sector: "The person confirmed they want to change sector or role. Prioritize in your reading which skills and achievements from the current trajectory are transferable to another context, and which target roles have the best real fit.",
+    no_me_representa: "The person confirmed they feel their profile does not represent them. Prioritize in your reading the coherence between what the real trajectory shows and how it is being communicated — where there is a misalignment between lived experience and what is written.",
+    actualizar: "The person confirmed they want to update what they have. Prioritize in your reading what is outdated: wording, old achievements without recent figures, sections or keywords that no longer reflect their current moment.",
+    transicion_profunda: "The person confirmed they are considering a deep career transition. Prioritize in your reading transferable skills outside their current field and how their experience translates to a different context — without assuming the path is linear.",
+  };
 
   let docBlock = "";
   if (cvText && cvText.length >= 30) docBlock += "=== RESUME TO ANALYZE ===\n" + cvText.slice(0, 4500) + "\n=== END RESUME ===\n\n";
@@ -876,6 +896,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan) {
 
   let instrBlock = "";
   if (ctx) instrBlock += "Context: " + ctx + "\n\n";
+  if (FOCOS_SITUACION[situacion]) instrBlock += "CONFIRMED SITUATION: " + FOCOS_SITUACION[situacion] + "\n\n";
   instrBlock += "Calculate these scores before writing the JSON (scale 0-100, NEVER leave at 0):\n";
   instrBlock += "- atsScore: overall document quality. A resume without headline, professional summary and achievements CANNOT exceed 50.\n";
   instrBlock += "- scorePotencial: possible score if improvements are implemented (always higher than atsScore)\n";
