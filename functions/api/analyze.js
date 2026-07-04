@@ -336,7 +336,7 @@ function applyTierVisibility(data, plan, modo) {
     alertas:             data.alertas || [],
     recomendaciones:     [...recsAlta, ...recsMedia],
     fortalezas:          data.fortalezas || [],
-    debilidades:         data.debilidades || [],
+    debilidades:         (data.debilidades || []).slice(0, 2).map(g => ({ titulo: g.titulo, detalle: g.detalle })),
     perfilEmpleabilidad: data.perfilEmpleabilidad || null,
     linkedin_analysis:   liAnticipo,
     _preview: {
