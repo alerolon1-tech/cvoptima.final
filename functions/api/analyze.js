@@ -1,3 +1,12 @@
+const SITUACIONES_VALIDAS = [
+  "no_entrevistas",
+  "entrevistas_sin_avance",
+  "cambio_sector",
+  "no_me_representa",
+  "actualizar",
+  "transicion_profunda",
+];
+
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -25,7 +34,8 @@ export async function onRequest(context) {
     const role      = fd.get("role")      || "";
     const sector    = fd.get("sector")    || "";
     const seniority = fd.get("seniority") || "";
-    const situacion = fd.get("situacion") || "";
+    const situacionRaw = fd.get("situacion") || "";
+    const situacion = SITUACIONES_VALIDAS.includes(situacionRaw) ? situacionRaw : "";
     const modo      = fd.get("modo")      || "cv";
     const userId    = fd.get("userId")    || null;
 
@@ -209,6 +219,12 @@ export async function onRequest(context) {
     result._modelUsed = groqData._modelUsed || 'unknown';
     result.atsDetalle = atsDetalleCalculado;
     if (!result.linkedin_analysis) result.linkedin_analysis = null;
+
+    // Si la situación ya venía confirmada, no hace falta que el modelo la vuelva
+    // a justificar — se arma acá directamente para mantener el campo consistente.
+    if (situacion && (modo === "cv" || modo === "li" || modo === "ambos") && !result.situacionDetectada) {
+      result.situacionDetectada = { codigo: situacion, justificacion: null };
+    }
 
     // ── NORMALIZACIÓN CENTRALIZADA ────────────────────────────────────────────
     result = normalizeResult(result, cvText, isEnglish);
@@ -683,13 +699,32 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     transicion_profunda: "La persona confirmó que está pensando una transición laboral profunda. Priorizá en tu lectura las habilidades transferibles fuera del campo actual y cómo se traduce la experiencia a un contexto distinto — sin dar por sentado que el camino es lineal.",
   };
 
+  const SITUACIONES_INFERENCIA = {
+    no_entrevistas: "No consigue entrevistas — la narrativa no logra transmitir con claridad el valor del perfil: título poco claro, estructura confusa, palabras clave del sector ausentes.",
+    entrevistas_sin_avance: "Consigue entrevistas pero no avanza — el perfil capta la atención inicial, pero los logros están narrados sin suficiente profundidad o evidencia que sostenga el valor una vez que lo miran de cerca.",
+    cambio_sector: "Quiere cambiar de sector o rol — la trayectoria está narrada dentro de un sector o rol específico, sin traducir explícitamente las habilidades a otros contextos posibles.",
+    no_me_representa: "Su perfil no lo representa — hay una desalineación entre lo que la trayectoria real muestra (logros, responsabilidades) y cómo está comunicada (títulos, descripciones genéricas o desactualizadas).",
+    actualizar: "Quiere actualizar lo que tiene — la redacción, los logros o las secciones reflejan un momento anterior de la carrera, sin las cifras o el lenguaje del rol/sector actual.",
+    transicion_profunda: "Está pensando una transición laboral profunda — la trayectoria está narrada dentro de un campo, pero hay señales (formación, intereses, proyectos paralelos) de una salida hacia otro campo distinto.",
+  };
+
+  const situacionField = situacion
+    ? ''
+    : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 oraciones basadas en la narrativa concreta de este documento"},\n';
+
   let docBlock = "";
   if (cvText && cvText.length >= 30) docBlock += "=== CV A ANALIZAR ===\n" + cvText.slice(0, 4500) + "\n=== FIN CV ===\n\n";
   if (liText && liText.length >= 30) docBlock += "=== PERFIL LINKEDIN A ANALIZAR ===\n" + liText.slice(0, 4500) + "\n=== FIN LINKEDIN ===\n\n";
 
   let instrBlock = "";
   if (ctx) instrBlock += "Contexto: " + ctx + "\n\n";
-  if (FOCOS_SITUACION[situacion]) instrBlock += "SITUACIÓN CONFIRMADA: " + FOCOS_SITUACION[situacion] + "\n\n";
+  if (FOCOS_SITUACION[situacion]) {
+    instrBlock += "SITUACIÓN CONFIRMADA: " + FOCOS_SITUACION[situacion] + "\n\n";
+  } else if (modo === "cv" || modo === "li" || modo === "ambos") {
+    instrBlock += "Antes de armar el análisis, determiná cuál de estas seis situaciones describe mejor lo que la narrativa de este documento deja ver. No le preguntes nada a la persona: elegí en base a cómo está contada la trayectoria — qué se prioriza, qué se omite, cómo se explican los cambios de rol o los períodos.\n\n" +
+      Object.entries(SITUACIONES_INFERENCIA).map(([codigo, desc]) => "- " + codigo + ": " + desc).join("\n") +
+      "\n\nIncluí el código elegido y una justificación de 1-2 oraciones basada en la narrativa concreta de este documento (nunca genérica) en el campo situacionDetectada del JSON. Orientá el resto del análisis según la situación que elegiste, con el mismo criterio que aplicarías si la persona la hubiera confirmado.\n\n";
+  }
   instrBlock += "Calcula estos scores antes de escribir el JSON (escala 0-100, NUNCA dejes en 0):\n";
   instrBlock += "- atsScore: calidad global del documento. Un CV sin titular, sin perfil profesional y sin logros NO puede superar 50.\n";
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
@@ -749,6 +784,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
       '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
       '  "resumenEjecutivo": "Nombre + titular + diagnóstico del LinkedIn como herramienta. 3-4 oraciones.",\n' +
+      situacionField +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto específico"}],\n' +
       '  "fortalezas": [{"titulo": "aspecto específico del perfil", "detalle": "evidencia concreta del LinkedIn"}],\n' +
       '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta"}],\n' +
@@ -782,6 +818,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
         '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
         '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
         '  "resumenEjecutivo": "Nombre + rol + diagnóstico del CV. 3-4 oraciones.",\n' +
+        situacionField +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto específico"}],\n' +
         '  "fortalezas": [{"titulo": "fortaleza específica con datos del documento", "detalle": "por qué es una fortaleza con evidencia"}],\n' +
         '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta"}],\n' +
@@ -806,6 +843,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
       '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
       '  "resumenEjecutivo": "Nombre + rol + empresa + diagnóstico específico. 3-4 oraciones.",\n' +
+      situacionField +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
       '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
       '  "seccionesFaltantes": [],\n' +
@@ -840,6 +878,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
     '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
     '  "resumenEjecutivo": "Nombre + rol + empresa + diagnóstico. 3-4 oraciones.",\n' +
+    situacionField +
     '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
     '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
     '  "seccionesFaltantes": [],\n' +
@@ -890,13 +929,32 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     transicion_profunda: "The person confirmed they are considering a deep career transition. Prioritize in your reading transferable skills outside their current field and how their experience translates to a different context — without assuming the path is linear.",
   };
 
+  const SITUACIONES_INFERENCIA = {
+    no_entrevistas: "Not getting interviews — the narrative fails to clearly convey the profile's value: unclear title, confusing structure, missing sector keywords.",
+    entrevistas_sin_avance: "Gets interviews but doesn't move forward — the profile catches initial attention, but achievements are narrated without enough depth or evidence to sustain that value once someone looks closely.",
+    cambio_sector: "Wants to change sector or role — the trajectory is narrated within a specific sector or role, without explicitly translating skills to other possible contexts.",
+    no_me_representa: "Feels their profile doesn't represent them — there is a mismatch between what the real trajectory shows (achievements, responsibilities) and how it is communicated (generic or outdated titles, descriptions).",
+    actualizar: "Wants to update what they have — the wording, achievements, or sections reflect an earlier moment in their career, without the figures or language of their current role/sector.",
+    transicion_profunda: "Considering a deep career transition — the trajectory is narrated within one field, but there are signs (education, interests, side projects) of a move toward a different field.",
+  };
+
+  const situacionField = situacion
+    ? ''
+    : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 sentence justification based on this document\\'s concrete narrative"},\n';
+
   let docBlock = "";
   if (cvText && cvText.length >= 30) docBlock += "=== RESUME TO ANALYZE ===\n" + cvText.slice(0, 4500) + "\n=== END RESUME ===\n\n";
   if (liText && liText.length >= 30) docBlock += "=== LINKEDIN PROFILE TO ANALYZE ===\n" + liText.slice(0, 4500) + "\n=== END LINKEDIN ===\n\n";
 
   let instrBlock = "";
   if (ctx) instrBlock += "Context: " + ctx + "\n\n";
-  if (FOCOS_SITUACION[situacion]) instrBlock += "CONFIRMED SITUATION: " + FOCOS_SITUACION[situacion] + "\n\n";
+  if (FOCOS_SITUACION[situacion]) {
+    instrBlock += "CONFIRMED SITUATION: " + FOCOS_SITUACION[situacion] + "\n\n";
+  } else if (modo === "cv" || modo === "li" || modo === "ambos") {
+    instrBlock += "Before writing the analysis, determine which of these six situations best describes what this document's narrative reveals. Do not ask the person anything: choose based on how the trajectory is told — what is emphasized, what is omitted, how role changes or gaps are explained.\n\n" +
+      Object.entries(SITUACIONES_INFERENCIA).map(([codigo, desc]) => "- " + codigo + ": " + desc).join("\n") +
+      "\n\nInclude the chosen code and a 1-2 sentence justification based on this document's concrete narrative (never generic) in the situacionDetectada field of the JSON. Orient the rest of the analysis according to the situation you chose, using the same criteria you would apply if the person had confirmed it.\n\n";
+  }
   instrBlock += "Calculate these scores before writing the JSON (scale 0-100, NEVER leave at 0):\n";
   instrBlock += "- atsScore: overall document quality. A resume without headline, professional summary and achievements CANNOT exceed 50.\n";
   instrBlock += "- scorePotencial: possible score if improvements are implemented (always higher than atsScore)\n";
@@ -966,6 +1024,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
       '  "impactDensityDiagnostico": "quote 1-2 phrases justifying the score",\n' +
       '  "resumenEjecutivo": "Name + current headline + LinkedIn profile diagnosis as employability tool. 3-4 sentences.",\n' +
+      situacionField +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the profile"}],\n' +
       '  "fortalezas": [{"titulo": "specific aspect of the profile", "detalle": "concrete evidence from LinkedIn"}],\n' +
       '  "debilidades": [{"titulo": "specific weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve"}],\n' +
@@ -1000,6 +1059,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
         '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
         '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score",\n' +
         '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences in English.",\n' +
+        situacionField +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the document"}],\n' +
         '  "fortalezas": [{"titulo": "specific strength with data from the document", "detalle": "why it is a strength with concrete evidence"}],\n' +
         '  "debilidades": [{"titulo": "weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve"}],\n' +
@@ -1024,6 +1084,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
       '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score",\n' +
       '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences in English.",\n' +
+      situacionField +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
       '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
       '  "seccionesFaltantes": [],\n' +
@@ -1058,6 +1119,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
     '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score",\n' +
     '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences in English.",\n' +
+    situacionField +
     '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
     '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
     '  "seccionesFaltantes": [],\n' +
