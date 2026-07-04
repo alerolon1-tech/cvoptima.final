@@ -1,5 +1,5 @@
 const SITUACIONES_VALIDAS = [
-  "no_entrevistas", 
+  "no_entrevistas",
   "entrevistas_sin_avance",
   "cambio_sector",
   "no_me_representa",
@@ -325,6 +325,7 @@ function applyTierVisibility(data, plan, modo) {
     seniority:           data.seniority,
     yearsExperience:     data.yearsExperience,
     currentRole:         data.currentRole,
+    situacionDetectada:  data.situacionDetectada || null,
     atsScore:            data.atsScore,
     scorePotencial:      data.scorePotencial,
     impactDensityScore:  data.impactDensityScore,
