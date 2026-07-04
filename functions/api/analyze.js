@@ -1,5 +1,5 @@
 const SITUACIONES_VALIDAS = [
-  "no_entrevistas",
+  "no_entrevistas", 
   "entrevistas_sin_avance",
   "cambio_sector",
   "no_me_representa",
