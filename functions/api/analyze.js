@@ -940,7 +940,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
 
   const situacionField = situacion
     ? ''
-    : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 sentence justification based on this document\\'s concrete narrative"},\n';
+    : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 sentence justification based on the concrete narrative of this document"},\n';
 
   let docBlock = "";
   if (cvText && cvText.length >= 30) docBlock += "=== RESUME TO ANALYZE ===\n" + cvText.slice(0, 4500) + "\n=== END RESUME ===\n\n";
