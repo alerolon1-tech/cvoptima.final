@@ -151,33 +151,35 @@ Respondé SOLO con JSON válido, sin texto adicional ni markdown:
 
     // ── Llamar a Groq con manejo robusto de JSON ─────────────────────────────
     const models = [
-      "llama-3.3-70b-versatile",
-      "llama-3.1-70b-versatile",
-      "llama3-70b-8192",
-      "llama3-8b-8192",
+      "openai/gpt-oss-120b",
+      "qwen/qwen3.6-27b",
+      "openai/gpt-oss-20b",
     ];
 
     let result = null;
     for (const model of models) {
       try {
+        const bodyReq = {
+          model,
+          messages: [
+            {
+              role: "system",
+              content: "Sos un consultor senior de empleabilidad para perfiles altamente calificados en Argentina. Todo tu análisis va en SEGUNDA PERSONA — 'tu perfil', 'tu experiencia', 'tu sector' — nunca en tercera persona. Respondé SOLO con JSON válido y completo. Nunca uses canales masivos de empleo (Computrabajo, Bumeran, ZonaJobs, Indeed). Nunca inventes remuneraciones sin fuente verificable. Nunca sugerás como destino las organizaciones donde el candidato ya trabaja. Solo nombrá organizaciones reales y específicas que existan en Argentina.",
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 6000,
+        };
+        if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "medium";
+
         const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${env.GROQ_API_KEY}`,
           },
-          body: JSON.stringify({
-            model,
-            messages: [
-              {
-                role: "system",
-                content: "Sos un consultor senior de empleabilidad para perfiles altamente calificados en Argentina. Todo tu análisis va en SEGUNDA PERSONA — 'tu perfil', 'tu experiencia', 'tu sector' — nunca en tercera persona. Respondé SOLO con JSON válido y completo. Nunca uses canales masivos de empleo (Computrabajo, Bumeran, ZonaJobs, Indeed). Nunca inventes remuneraciones sin fuente verificable. Nunca sugerás como destino las organizaciones donde el candidato ya trabaja. Solo nombrá organizaciones reales y específicas que existan en Argentina.",
-              },
-              { role: "user", content: prompt },
-            ],
-            temperature: 0.2,
-            max_tokens: 2500,
-          }),
+          body: JSON.stringify(bodyReq),
         });
 
         if (!groqRes.ok) continue;
