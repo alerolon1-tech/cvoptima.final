@@ -136,7 +136,10 @@ export async function onRequest(context) {
     ];
 
     // Starter usa menos tokens para reducir consumo y rate limit
-    const maxTokens = plan === "starter" ? 3200 : 4000;
+    // Subido para dar espacio al razonamiento interno de los modelos gpt-oss/qwen —
+    // antes de escribir la respuesta "piensan", y esa lectura interpretativa es
+    // justo lo que sostiene la calidad del producto, así que no se reduce.
+    const maxTokens = plan === "starter" ? 6000 : 9000;
 
     let groqData = null;
     let lastError = null;
@@ -145,21 +148,26 @@ export async function onRequest(context) {
       const model = MODELS[i];
       if (i > 0) await new Promise(r => setTimeout(r, 2000));
 
+      const bodyReq = {
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user",   content: userPrompt   },
+        ],
+        temperature: 0.2,
+        max_tokens: maxTokens,
+      };
+      // Razonamiento en profundidad (el valor por defecto de Groq) — la lectura
+      // interpretativa del CV se beneficia de que el modelo delibere, no al revés.
+      if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "medium";
+
       const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Authorization": "Bearer " + env.GROQ_API_KEY,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user",   content: userPrompt   },
-          ],
-          temperature: 0.2,
-          max_tokens: maxTokens,
-        }),
+        body: JSON.stringify(bodyReq),
       });
 
       if (groqRes.ok) {
