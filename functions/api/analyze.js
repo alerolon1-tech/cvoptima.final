@@ -134,11 +134,10 @@ export async function onRequest(context) {
       "openai/gpt-oss-20b",
     ];
 
-    // Starter usa menos tokens para reducir consumo y rate limit
-    // Subido para dar espacio al razonamiento interno de los modelos gpt-oss/qwen —
-    // antes de escribir la respuesta "piensan", y esa lectura interpretativa es
-    // justo lo que sostiene la calidad del producto, así que no se reduce.
-    const maxTokens = plan === "starter" ? 6000 : 9000;
+    // Ajustado al límite gratuito de Groq (8.000 tokens/minuto para gpt-oss-120b/20b).
+    // Groq calcula el "Requested" como prompt + max_tokens (no lo que se usa en
+    // realidad), así que hay que dejar margen real, no solo bajar el razonamiento.
+    const maxTokens = plan === "starter" ? 3800 : 2800;
 
     let groqData = null;
     let lastError = null;
@@ -156,9 +155,10 @@ export async function onRequest(context) {
         temperature: 0.2,
         max_tokens: maxTokens,
       };
-      // Razonamiento en profundidad (el valor por defecto de Groq) — la lectura
-      // interpretativa del CV se beneficia de que el modelo delibere, no al revés.
-      if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "medium";
+      // Razonamiento liviano — necesario para quedar dentro del límite gratuito
+      // de Groq (8.000 tokens/minuto). No es una decisión de calidad, es el
+      // presupuesto que permite el plan gratuito mientras se evalúa subir de plan.
+      if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "low";
 
       const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
