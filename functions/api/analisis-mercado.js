@@ -152,7 +152,6 @@ Respondé SOLO con JSON válido, sin texto adicional ni markdown:
     // ── Llamar a Groq con manejo robusto de JSON ─────────────────────────────
     const models = [
       "openai/gpt-oss-120b",
-      "qwen/qwen3.6-27b",
       "openai/gpt-oss-20b",
     ];
 
