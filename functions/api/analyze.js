@@ -186,11 +186,14 @@ export async function onRequest(context) {
         errJson?.error?.type === "tokens" ||
         errJson?.error?.code === "model_decommissioned";
 
+      console.error(`Groq falló con ${model} (status ${groqRes.status}):`, errText);
+
       if (!isRateLimit) throw new Error("Groq error: " + errText);
     }
 
     if (!groqData) {
-      throw new Error("El servicio de analisis esta temporalmente saturado. Intenta de nuevo en unos minutos.");
+      console.error("Todos los modelos fallaron. Último error:", lastError);
+      throw new Error("El servicio de analisis esta temporalmente saturado. Detalle: " + (lastError || "sin detalle"));
     }
 
     const raw = groqData.choices[0].message.content;
