@@ -112,30 +112,32 @@ Generate a complete, professional English CV with this exact JSON structure:
 }`;
 
     const models = [
-      "llama-3.3-70b-versatile",
-      "llama-3.1-70b-versatile",
-      "llama3-70b-8192",
-      "llama3-8b-8192",
+      "openai/gpt-oss-120b",
+      "qwen/qwen3.6-27b",
+      "openai/gpt-oss-20b",
     ];
 
     let result = null;
     for (const model of models) {
       try {
+        const bodyReq = {
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 6500,
+        };
+        if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "medium";
+
         const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${env.GROQ_API_KEY}`,
           },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userPrompt },
-            ],
-            temperature: 0.2,
-            max_tokens: 3000,
-          }),
+          body: JSON.stringify(bodyReq),
         });
 
         if (!groqRes.ok) continue;
