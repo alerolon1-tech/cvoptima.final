@@ -131,7 +131,6 @@ export async function onRequest(context) {
 
     const MODELS = [
       "openai/gpt-oss-120b",
-      "qwen/qwen3.6-27b",
       "openai/gpt-oss-20b",
     ];
 
