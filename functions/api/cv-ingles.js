@@ -113,7 +113,6 @@ Generate a complete, professional English CV with this exact JSON structure:
 
     const models = [
       "openai/gpt-oss-120b",
-      "qwen/qwen3.6-27b",
       "openai/gpt-oss-20b",
     ];
 
