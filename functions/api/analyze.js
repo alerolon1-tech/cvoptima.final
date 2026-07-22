@@ -740,6 +740,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
   instrBlock += "- impactDensityScore: cuenta cuántas experiencias tienen logros cuantitativos (números, porcentajes, cifras) o cualitativos (verbo de acción + resultado concreto). Usá esta escala: 0-2 logros totales → 15-30. 3-4 logros → 35-50. 5-7 logros → 50-65. 8-12 logros → 65-80. Más de 12 logros o más de 3 cuantitativos → 75-90. Si ninguna experiencia tiene logros → menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto. Si no la encontras, escribi 'No detectado en el documento'.\n\n";
+  instrBlock += "CÓMO ESCRIBIR resumenEjecutivo (el veredicto principal): la interpretación va primero, siempre — nunca empieces la oración con un número ni lo uses como sujeto de la frase. Los scores (atsScore, scorePotencial, impactDensityScore) aparecen únicamente entre paréntesis, como dato subordinado que respalda lo que ya dijiste en palabras, nunca como punto de partida. Ejemplo del patrón exacto a seguir (adaptalo a los datos reales de este documento, no lo copies literal): \"Hoy tu trayectoria está siendo leída con [síntesis de cómo se lee: claridad parcial / con fuerza / de forma fragmentada, etc.] — [qué funciona y qué no, en una frase] (atsScore sobre 100). Con los ajustes que se muestran más abajo, ese margen podría [cerrarse / ampliarse] [casi por completo / de forma significativa] (hasta scorePotencial). Lo que más pesa en esa diferencia es [la razón concreta basada en el documento]: hoy está en un nivel [impactDensityLabel en minúscula], [comparación o consecuencia concreta].\"\n\n";
   instrBlock += "ESTRUCTURA ÓPTIMA: (1) Titular específico, (2) Perfil profesional 3-4 líneas, (3) Experiencias con empresa/rol/fechas y logros cuantificados, (4) Educación con institución/título/año, (5) Habilidades, (6) Contacto completo.\n";
   instrBlock += "PENALIZACIÓN: sin titular → max 55. Sin perfil profesional → max 60. Sin logros cuantificados → max 50.\n\n";
   instrBlock += "SEGUNDA PERSONA: todo el texto en 'tu perfil', 'tus logros'. NUNCA tercera persona.\n";
@@ -793,7 +794,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "candidateName": "nombre", "seniority": "nivel", "yearsExperience": "numero", "currentRole": "rol + empresa",\n' +
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
       '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
-      '  "resumenEjecutivo": "Nombre + titular + diagnóstico del LinkedIn como herramienta. 3-4 oraciones.",\n' +
+      '  "resumenEjecutivo": "Nombre + titular + diagnóstico del LinkedIn como herramienta, siguiendo el patrón indicado arriba (interpretación primero, scores solo entre paréntesis). 3-4 oraciones.",\n' +
       situacionField +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto específico"}],\n' +
       '  "fortalezas": [{"titulo": "aspecto específico del perfil", "detalle": "evidencia concreta del LinkedIn"}],\n' +
@@ -827,7 +828,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
         '  "candidateName": "nombre completo", "seniority": "nivel", "yearsExperience": "numero", "currentRole": "rol + empresa",\n' +
         '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
         '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
-        '  "resumenEjecutivo": "Nombre + rol + diagnóstico del CV. 3-4 oraciones.",\n' +
+        '  "resumenEjecutivo": "Nombre + rol + diagnóstico del CV, siguiendo el patrón indicado arriba (interpretación primero, scores solo entre paréntesis). 3-4 oraciones.",\n' +
         situacionField +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto específico"}],\n' +
         '  "fortalezas": [{"titulo": "fortaleza específica con datos del documento", "detalle": "por qué es una fortaleza con evidencia"}],\n' +
@@ -852,7 +853,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "candidateName": "nombre completo", "seniority": "nivel", "yearsExperience": "numero", "currentRole": "rol + empresa",\n' +
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
       '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
-      '  "resumenEjecutivo": "Nombre + rol + empresa + diagnóstico específico. 3-4 oraciones.",\n' +
+      '  "resumenEjecutivo": "Nombre + rol + empresa + diagnóstico específico, siguiendo el patrón indicado arriba (interpretación primero, scores solo entre paréntesis). 3-4 oraciones.",\n' +
       situacionField +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
       '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
@@ -887,7 +888,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     '  "candidateName": "nombre del CV", "seniority": "nivel", "yearsExperience": "numero", "currentRole": "rol + empresa",\n' +
     '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "Alta|Media|Baja",\n' +
     '  "impactDensityDiagnostico": "cita 1-2 frases del documento",\n' +
-    '  "resumenEjecutivo": "Nombre + rol + empresa + diagnóstico. 3-4 oraciones.",\n' +
+    '  "resumenEjecutivo": "Nombre + rol + empresa + diagnóstico, siguiendo el patrón indicado arriba (interpretación primero, scores solo entre paréntesis). 3-4 oraciones.",\n' +
     situacionField +
     '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
     '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
@@ -970,6 +971,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "- scorePotencial: possible score if improvements are implemented (always higher than atsScore)\n";
   instrBlock += "- impactDensityScore: count how many experiences have quantitative achievements (numbers, percentages, figures) or qualitative ones (action verb + concrete result). Use this scale: 0-2 total achievements → 15-30. 3-4 achievements → 35-50. 5-7 achievements → 50-65. 8-12 achievements → 65-80. More than 12 or more than 3 quantitative → 75-90. If no experience has achievements → below 20.\n\n";
   instrBlock += "CRITICAL: before writing any diagnostic field, look for evidence in the document. If not found, write 'Not detected in document'.\n\n";
+  instrBlock += "HOW TO WRITE resumenEjecutivo (the main verdict): the interpretation always comes first — never start the sentence with a number or use it as the subject. Scores (atsScore, scorePotencial, impactDensityScore) appear only in parentheses, as a subordinate detail that backs up what you already said in words, never as the starting point. Example of the exact pattern to follow (adapt it to this document's real data, do not copy it literally): \"Today your trajectory is being read with [synthesis of how it reads: partial clarity / strongly / in a fragmented way, etc.] — [what works and what doesn't, in one sentence] (atsScore out of 100). With the adjustments shown below, that gap could [close / widen] [almost entirely / significantly] (up to scorePotencial). What weighs most in that difference is [the concrete reason based on the document]: it's currently at a [impactDensityLabel in lowercase] level, [concrete comparison or consequence].\"\n\n";
   instrBlock += "OPTIMAL RESUME STRUCTURE: (1) Specific headline, (2) Professional summary 3-4 lines, (3) Experience with company/role/dates and quantified achievements, (4) Education with institution/degree/year, (5) Skills, (6) Complete contact info.\n";
   instrBlock += "SCORE PENALTY: no headline → max 55. No professional summary → max 60. No quantified achievements → max 50.\n\n";
   instrBlock += "SECOND PERSON: all text as 'your profile', 'your achievements'. NEVER third person.\n";
@@ -1033,7 +1035,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "candidateName": "name", "seniority": "level", "yearsExperience": "number", "currentRole": "role + company",\n' +
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
       '  "impactDensityDiagnostico": "quote 1-2 phrases justifying the score",\n' +
-      '  "resumenEjecutivo": "Name + current headline + LinkedIn profile diagnosis as employability tool. 3-4 sentences.",\n' +
+      '  "resumenEjecutivo": "Name + current headline + LinkedIn profile diagnosis as employability tool, following the pattern described above (interpretation first, scores only in parentheses). 3-4 sentences.",\n' +
       situacionField +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the profile"}],\n' +
       '  "fortalezas": [{"titulo": "specific aspect of the profile", "detalle": "concrete evidence from LinkedIn"}],\n' +
@@ -1068,7 +1070,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
         '  "candidateName": "full name", "seniority": "level", "yearsExperience": "number", "currentRole": "role + company",\n' +
         '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
         '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score",\n' +
-        '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences in English.",\n' +
+        '  "resumenEjecutivo": "Name + current role + company + specific diagnosis, following the pattern described above (interpretation first, scores only in parentheses). 3-4 sentences in English.",\n' +
         situacionField +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the document"}],\n' +
         '  "fortalezas": [{"titulo": "specific strength with data from the document", "detalle": "why it is a strength with concrete evidence"}],\n' +
@@ -1093,7 +1095,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "candidateName": "full name", "seniority": "level", "yearsExperience": "number", "currentRole": "role + company",\n' +
       '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
       '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score",\n' +
-      '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences in English.",\n' +
+      '  "resumenEjecutivo": "Name + current role + company + specific diagnosis, following the pattern described above (interpretation first, scores only in parentheses). 3-4 sentences in English.",\n' +
       situacionField +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
       '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
@@ -1128,7 +1130,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     '  "candidateName": "name", "seniority": "level", "yearsExperience": "number", "currentRole": "role + company",\n' +
     '  "atsScore": 65, "scorePotencial": 80, "impactDensityScore": 55, "impactDensityLabel": "High|Medium|Low",\n' +
     '  "impactDensityDiagnostico": "quote 1-2 phrases from the document justifying the score",\n' +
-    '  "resumenEjecutivo": "Name + current role + company + specific diagnosis. 3-4 sentences in English.",\n' +
+    '  "resumenEjecutivo": "Name + current role + company + specific diagnosis, following the pattern described above (interpretation first, scores only in parentheses). 3-4 sentences in English.",\n' +
     situacionField +
     '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
     '  "seccionesDetectadas": {"perfilProfesional": false, "experienciaLaboral": false, "educacion": false, "habilidades": false, "logros": false, "herramientas": false, "idiomas": false},\n' +
