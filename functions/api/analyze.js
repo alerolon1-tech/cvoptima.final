@@ -740,6 +740,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "- scorePotencial: score posible si implementa las mejoras (siempre mayor que atsScore)\n";
   instrBlock += "- impactDensityScore: cuenta cuántas experiencias tienen logros cuantitativos (números, porcentajes, cifras) o cualitativos (verbo de acción + resultado concreto). Usá esta escala: 0-2 logros totales → 15-30. 3-4 logros → 35-50. 5-7 logros → 50-65. 8-12 logros → 65-80. Más de 12 logros o más de 3 cuantitativos → 75-90. Si ninguna experiencia tiene logros → menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto. Si no la encontras, escribi 'No detectado en el documento'.\n\n";
+  instrBlock += "CITAS TEXTUALES: cada fortaleza y cada debilidad tiene que incluir un campo 'cita' con un fragmento copiado LITERAL del documento (nunca parafraseado), de 8 a 25 palabras, que sostenga esa observación puntual. Si no encontrás un fragmento exacto que la sostenga, dejá 'cita' como cadena vacía — nunca inventes ni parafrasees una cita.\n\n";
   instrBlock += "CÓMO ESCRIBIR resumenEjecutivo (el veredicto principal): la interpretación va primero, siempre — nunca empieces la oración con un número ni lo uses como sujeto de la frase. Los scores (atsScore, scorePotencial, impactDensityScore) aparecen únicamente entre paréntesis, como dato subordinado que respalda lo que ya dijiste en palabras, nunca como punto de partida. Ejemplo del patrón exacto a seguir (adaptalo a los datos reales de este documento, no lo copies literal): \"Hoy tu trayectoria está siendo leída con [síntesis de cómo se lee: claridad parcial / con fuerza / de forma fragmentada, etc.] — [qué funciona y qué no, en una frase] (atsScore sobre 100). Con los ajustes que se muestran más abajo, ese margen podría [cerrarse / ampliarse] [casi por completo / de forma significativa] (hasta scorePotencial). Lo que más pesa en esa diferencia es [la razón concreta basada en el documento]: hoy está en un nivel [impactDensityLabel en minúscula], [comparación o consecuencia concreta].\"\n";
   instrBlock += "OBLIGATORIO — no es opcional: los tres números (el valor exacto de atsScore, el valor exacto de scorePotencial, y el valor exacto de impactDensityScore) tienen que aparecer escritos literalmente, en cifras, dentro del texto de resumenEjecutivo, cada uno entre paréntesis como se muestra en el ejemplo. Un resumenEjecutivo que no contenga estos tres números entre paréntesis está mal escrito — revisalo antes de responder.\n\n";
   instrBlock += "ESTRUCTURA ÓPTIMA: (1) Titular específico, (2) Perfil profesional 3-4 líneas, (3) Experiencias con empresa/rol/fechas y logros cuantificados, (4) Educación con institución/título/año, (5) Habilidades, (6) Contacto completo.\n";
@@ -798,8 +799,8 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "resumenEjecutivo": "Nombre + titular + diagnóstico del LinkedIn como herramienta, siguiendo el patrón indicado arriba (interpretación primero, scores solo entre paréntesis). 3-4 oraciones.",\n' +
       situacionField +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto específico"}],\n' +
-      '  "fortalezas": [{"titulo": "aspecto específico del perfil", "detalle": "evidencia concreta del LinkedIn"}],\n' +
-      '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta"}],\n' +
+      '  "fortalezas": [{"titulo": "aspecto específico del perfil", "detalle": "evidencia concreta del LinkedIn", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+      '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
       '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Titular|Extracto|Experiencias|Aptitudes|Completitud|Narrativa|Logros", "titulo": "mejora concreta del LinkedIn", "detalle": "cómo aplicarla a este perfil", "impactoScore": "+N"}],\n' +
       '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oración"}, "coherencia": {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oración"}, "movilidad": {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oración"}},\n' +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
@@ -832,8 +833,8 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
         '  "resumenEjecutivo": "Nombre + rol + diagnóstico del CV, siguiendo el patrón indicado arriba (interpretación primero, scores solo entre paréntesis). 3-4 oraciones.",\n' +
         situacionField +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "texto específico"}],\n' +
-        '  "fortalezas": [{"titulo": "fortaleza específica con datos del documento", "detalle": "por qué es una fortaleza con evidencia"}],\n' +
-        '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta"}],\n' +
+        '  "fortalezas": [{"titulo": "fortaleza específica con datos del documento", "detalle": "por qué es una fortaleza con evidencia", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+        '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
         '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta del CV", "detalle": "cómo aplicarla en este documento — NUNCA sugerir buscar empleo", "impactoScore": "+N"}],\n' +
         '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta"}, "coherencia": {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta"}, "movilidad": {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta"}},\n' +
         '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
@@ -871,8 +872,8 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
       '  "areasProfesionales": [],\n' +
       '  "rolesObjetivo": [{"titulo": "rol y roles similares/adyacentes", "matchPct": 75, "seniority": "nivel", "sector": "sector compatible", "justificacion": "por qué este rol y sector encajan con la trayectoria", "skills": ["skill que ya tiene", "skill a desarrollar"]}],\n' +
-      '  "fortalezas": [{"titulo": "fortaleza específica con datos del documento", "detalle": "evidencia concreta del CV"}],\n' +
-      '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta"}],\n' +
+      '  "fortalezas": [{"titulo": "fortaleza específica con datos del documento", "detalle": "evidencia concreta del CV", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+      '  "debilidades": [{"titulo": "aspecto débil o ausente", "detalle": "por qué afecta la empleabilidad", "accion": "acción concreta", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
       '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta", "detalle": "cómo aplicarla en este documento específico — NUNCA sugerir buscar empleo", "impactoScore": "+N"}],\n' +
       '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta"}, "coherencia": {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta"}, "movilidad": {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oración concreta"}},\n' +
       '  "linkedin_analysis": null\n' +
@@ -901,8 +902,8 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
     '  "areasProfesionales": [],\n' +
     '  "rolesObjetivo": [{"titulo": "rol y similares/adyacentes", "matchPct": 75, "seniority": "nivel", "sector": "sector compatible", "justificacion": "por qué encaja con la trayectoria", "skills": []}],\n' +
-    '  "fortalezas": [{"titulo": "fortaleza específica", "detalle": "evidencia del CV"}],\n' +
-    '  "debilidades": [{"titulo": "aspecto débil", "detalle": "por qué afecta", "accion": "acción concreta"}],\n' +
+    '  "fortalezas": [{"titulo": "fortaleza específica", "detalle": "evidencia del CV", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+    '  "debilidades": [{"titulo": "aspecto débil", "detalle": "por qué afecta", "accion": "acción concreta", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
     '  "recomendaciones": [{"prioridad": "Alta|Media|Baja", "categoria": "Redaccion|Estructura|Logros|Keywords|Secciones|Verbos|Formato", "titulo": "mejora concreta", "detalle": "cómo aplicarla — NUNCA sugerir buscar empleo", "impactoScore": "+N"}],\n' +
     '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "Alta|Media|Baja", "diagnostico": "1 oración"}, "coherencia": {"score": 70, "label": "Alta|Media|Baja", "diagnostico": "1 oración"}, "movilidad": {"score": 60, "label": "Alta|Media|Baja", "diagnostico": "1 oración"}},\n' +
     '  "linkedin_analysis": {\n' +
@@ -972,6 +973,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "- scorePotencial: possible score if improvements are implemented (always higher than atsScore)\n";
   instrBlock += "- impactDensityScore: count how many experiences have quantitative achievements (numbers, percentages, figures) or qualitative ones (action verb + concrete result). Use this scale: 0-2 total achievements → 15-30. 3-4 achievements → 35-50. 5-7 achievements → 50-65. 8-12 achievements → 65-80. More than 12 or more than 3 quantitative → 75-90. If no experience has achievements → below 20.\n\n";
   instrBlock += "CRITICAL: before writing any diagnostic field, look for evidence in the document. If not found, write 'Not detected in document'.\n\n";
+  instrBlock += "VERBATIM QUOTES: every strength and every weakness must include a 'cita' field with a fragment copied LITERALLY from the document (never paraphrased), 8 to 25 words long, that supports that specific observation. If you cannot find an exact fragment that supports it, leave 'cita' as an empty string — never invent or paraphrase a quote.\n\n";
   instrBlock += "HOW TO WRITE resumenEjecutivo (the main verdict): the interpretation always comes first — never start the sentence with a number or use it as the subject. Scores (atsScore, scorePotencial, impactDensityScore) appear only in parentheses, as a subordinate detail that backs up what you already said in words, never as the starting point. Example of the exact pattern to follow (adapt it to this document's real data, do not copy it literally): \"Today your trajectory is being read with [synthesis of how it reads: partial clarity / strongly / in a fragmented way, etc.] — [what works and what doesn't, in one sentence] (atsScore out of 100). With the adjustments shown below, that gap could [close / widen] [almost entirely / significantly] (up to scorePotencial). What weighs most in that difference is [the concrete reason based on the document]: it's currently at a [impactDensityLabel in lowercase] level, [concrete comparison or consequence].\"\n";
   instrBlock += "MANDATORY — not optional: all three numbers (the exact value of atsScore, the exact value of scorePotencial, and the exact value of impactDensityScore) must appear literally, as digits, inside the resumenEjecutivo text, each one in parentheses as shown in the example. A resumenEjecutivo that does not contain these three numbers in parentheses is incorrectly written — check it before responding.\n\n";
   instrBlock += "OPTIMAL RESUME STRUCTURE: (1) Specific headline, (2) Professional summary 3-4 lines, (3) Experience with company/role/dates and quantified achievements, (4) Education with institution/degree/year, (5) Skills, (6) Complete contact info.\n";
@@ -1040,8 +1042,8 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "resumenEjecutivo": "Name + current headline + LinkedIn profile diagnosis as employability tool, following the pattern described above (interpretation first, scores only in parentheses). 3-4 sentences.",\n' +
       situacionField +
       '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the profile"}],\n' +
-      '  "fortalezas": [{"titulo": "specific aspect of the profile", "detalle": "concrete evidence from LinkedIn"}],\n' +
-      '  "debilidades": [{"titulo": "specific weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve"}],\n' +
+      '  "fortalezas": [{"titulo": "specific aspect of the profile", "detalle": "concrete evidence from LinkedIn", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+      '  "debilidades": [{"titulo": "specific weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
       '  "recomendaciones": [{"prioridad": "High|Medium|Low", "categoria": "Headline|Summary|Experience|Skills|Completeness|Narrative|Achievements", "titulo": "specific LinkedIn improvement", "detalle": "how to apply it to this profile", "impactoScore": "+N"}],\n' +
       '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}, "coherencia": {"score": 70, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}, "movilidad": {"score": 60, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}},\n' +
       '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
@@ -1075,8 +1077,8 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
         '  "resumenEjecutivo": "Name + current role + company + specific diagnosis, following the pattern described above (interpretation first, scores only in parentheses). 3-4 sentences in English.",\n' +
         situacionField +
         '  "alertas": [{"tipo": "error|warning|info", "mensaje": "specific text about the document"}],\n' +
-        '  "fortalezas": [{"titulo": "specific strength with data from the document", "detalle": "why it is a strength with concrete evidence"}],\n' +
-        '  "debilidades": [{"titulo": "weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve"}],\n' +
+        '  "fortalezas": [{"titulo": "specific strength with data from the document", "detalle": "why it is a strength with concrete evidence", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+        '  "debilidades": [{"titulo": "weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
         '  "recomendaciones": [{"prioridad": "High|Medium|Low", "categoria": "Headline|Structure|Achievements|Keywords|Sections|Verbs|Format", "titulo": "specific improvement", "detalle": "how to apply it to this specific document — NEVER suggest job hunting", "impactoScore": "+N"}],\n' +
         '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}, "coherencia": {"score": 70, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}, "movilidad": {"score": 60, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}},\n' +
         '  "atsDetalle": {"keywords": 60, "verbosAccion": 50, "metricas": 40, "estructura": 70, "densidadHabilidades": 55, "claridadRoles": 65},\n' +
@@ -1114,8 +1116,8 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
       '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
       '  "areasProfesionales": [],\n' +
       '  "rolesObjetivo": [{"titulo": "exact role and similar/adjacent roles", "matchPct": 75, "seniority": "level", "sector": "compatible sector", "justificacion": "why this role and sector fit the trajectory", "skills": ["existing skill", "skill to develop"]}],\n' +
-      '  "fortalezas": [{"titulo": "specific strength with data from the document", "detalle": "concrete evidence from the resume"}],\n' +
-      '  "debilidades": [{"titulo": "weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve"}],\n' +
+      '  "fortalezas": [{"titulo": "specific strength with data from the document", "detalle": "concrete evidence from the resume", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+      '  "debilidades": [{"titulo": "weak or missing aspect", "detalle": "why it affects employability", "accion": "concrete action to improve", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
       '  "recomendaciones": [{"prioridad": "High|Medium|Low", "categoria": "Headline|Structure|Achievements|Keywords|Sections|Verbs|Format", "titulo": "specific improvement", "detalle": "how to apply it to this specific document — NEVER suggest job hunting", "impactoScore": "+N"}],\n' +
       '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}, "coherencia": {"score": 70, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}, "movilidad": {"score": 60, "label": "High|Medium|Low", "diagnostico": "1 concrete sentence"}},\n' +
       '  "linkedin_analysis": null\n' +
@@ -1144,8 +1146,8 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
     '  "areasProfesionales": [],\n' +
     '  "rolesObjetivo": [{"titulo": "role and similar/adjacent roles", "matchPct": 75, "seniority": "level", "sector": "compatible sector", "justificacion": "why it fits the trajectory", "skills": []}],\n' +
-    '  "fortalezas": [{"titulo": "specific strength", "detalle": "evidence from the resume"}],\n' +
-    '  "debilidades": [{"titulo": "weak aspect", "detalle": "why it affects employability", "accion": "concrete action"}],\n' +
+    '  "fortalezas": [{"titulo": "specific strength", "detalle": "evidence from the resume", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
+    '  "debilidades": [{"titulo": "weak aspect", "detalle": "why it affects employability", "accion": "concrete action", \"cita\": \"fragmento textual exacto que sostiene esto, o vacio\"}],\n' +
     '  "recomendaciones": [{"prioridad": "High|Medium|Low", "categoria": "Headline|Structure|Achievements|Keywords|Sections|Verbs|Format", "titulo": "specific improvement", "detalle": "how to apply it — NEVER suggest job hunting", "impactoScore": "+N"}],\n' +
     '  "perfilEmpleabilidad": {"visibilidad": {"score": 65, "label": "High|Medium|Low", "diagnostico": "1 sentence"}, "coherencia": {"score": 70, "label": "High|Medium|Low", "diagnostico": "1 sentence"}, "movilidad": {"score": 60, "label": "High|Medium|Low", "diagnostico": "1 sentence"}},\n' +
     '  "linkedin_analysis": {\n' +
