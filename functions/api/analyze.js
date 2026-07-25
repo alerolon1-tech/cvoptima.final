@@ -211,6 +211,19 @@ export async function onRequest(context) {
       if (!m) throw new Error('no-json');
       let jsonStr = m[0];
 
+      // Blindaje: a veces el modelo escribe un número en palabras en vez de dígitos
+      // (ej: "atsScore": fifty) — eso rompe el JSON. Lo corregimos antes de parsear.
+      const numWords = {
+        zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
+        eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17,
+        eighteen:18, nineteen:19, twenty:20, thirty:30, forty:40, fifty:50, sixty:60,
+        seventy:70, eighty:80, ninety:90, hundred:100,
+      };
+      jsonStr = jsonStr.replace(/:\s*([a-zA-Z]+)(?=\s*[,}])/g, (match, word) => {
+        const n = numWords[word.toLowerCase()];
+        return n !== undefined ? ': ' + n : match;
+      });
+
       // Cerrar llaves faltantes si el JSON está truncado
       let open = 0;
       for (const c of jsonStr) {
@@ -741,6 +754,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "- impactDensityScore: cuenta cuántas experiencias tienen logros cuantitativos (números, porcentajes, cifras) o cualitativos (verbo de acción + resultado concreto). Usá esta escala: 0-2 logros totales → 15-30. 3-4 logros → 35-50. 5-7 logros → 50-65. 8-12 logros → 65-80. Más de 12 logros o más de 3 cuantitativos → 75-90. Si ninguna experiencia tiene logros → menor a 20.\n\n";
   instrBlock += "CRITICO: antes de escribir cualquier campo de diagnostico, buscá la evidencia en el texto. Si no la encontras, escribi 'No detectado en el documento'.\n\n";
   instrBlock += "CITAS TEXTUALES: cada fortaleza y cada debilidad tiene que incluir un campo 'cita' con un fragmento copiado LITERAL del documento (nunca parafraseado), de 8 a 25 palabras, que sostenga esa observación puntual. Si no encontrás un fragmento exacto que la sostenga, dejá 'cita' como cadena vacía — nunca inventes ni parafrasees una cita.\n\n";
+  instrBlock += "FORMATO NUMÉRICO: todos los campos que son puntajes (atsScore, scorePotencial, impactDensityScore, y cualquier otro campo numérico) tienen que escribirse siempre como dígitos (ej: 50), nunca como palabras (nunca 'fifty', nunca 'cincuenta'). Un dígito escrito como palabra rompe el JSON.\n\n";
   instrBlock += "CÓMO ESCRIBIR resumenEjecutivo (el veredicto principal): la interpretación va primero, siempre — nunca empieces la oración con un número ni lo uses como sujeto de la frase. Los scores (atsScore, scorePotencial, impactDensityScore) aparecen únicamente entre paréntesis, como dato subordinado que respalda lo que ya dijiste en palabras, nunca como punto de partida. Ejemplo del patrón exacto a seguir (adaptalo a los datos reales de este documento, no lo copies literal): \"Hoy tu trayectoria está siendo leída con [síntesis de cómo se lee: claridad parcial / con fuerza / de forma fragmentada, etc.] — [qué funciona y qué no, en una frase] (atsScore sobre 100). Con los ajustes que se muestran más abajo, ese margen podría [cerrarse / ampliarse] [casi por completo / de forma significativa] (hasta scorePotencial). Lo que más pesa en esa diferencia es [la razón concreta basada en el documento]: hoy está en un nivel [impactDensityLabel en minúscula], [comparación o consecuencia concreta].\"\n";
   instrBlock += "OBLIGATORIO — no es opcional: los tres números (el valor exacto de atsScore, el valor exacto de scorePotencial, y el valor exacto de impactDensityScore) tienen que aparecer escritos literalmente, en cifras, dentro del texto de resumenEjecutivo, cada uno entre paréntesis como se muestra en el ejemplo. Un resumenEjecutivo que no contenga estos tres números entre paréntesis está mal escrito — revisalo antes de responder.\n\n";
   instrBlock += "ESTRUCTURA ÓPTIMA: (1) Titular específico, (2) Perfil profesional 3-4 líneas, (3) Experiencias con empresa/rol/fechas y logros cuantificados, (4) Educación con institución/título/año, (5) Habilidades, (6) Contacto completo.\n";
@@ -974,6 +988,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "- impactDensityScore: count how many experiences have quantitative achievements (numbers, percentages, figures) or qualitative ones (action verb + concrete result). Use this scale: 0-2 total achievements → 15-30. 3-4 achievements → 35-50. 5-7 achievements → 50-65. 8-12 achievements → 65-80. More than 12 or more than 3 quantitative → 75-90. If no experience has achievements → below 20.\n\n";
   instrBlock += "CRITICAL: before writing any diagnostic field, look for evidence in the document. If not found, write 'Not detected in document'.\n\n";
   instrBlock += "VERBATIM QUOTES: every strength and every weakness must include a 'cita' field with a fragment copied LITERALLY from the document (never paraphrased), 8 to 25 words long, that supports that specific observation. If you cannot find an exact fragment that supports it, leave 'cita' as an empty string — never invent or paraphrase a quote.\n\n";
+  instrBlock += "NUMERIC FORMAT: all score fields (atsScore, scorePotencial, impactDensityScore, and any other numeric field) must always be written as digits (e.g. 50), never as words (never 'fifty'). A number spelled out as a word breaks the JSON.\n\n";
   instrBlock += "HOW TO WRITE resumenEjecutivo (the main verdict): the interpretation always comes first — never start the sentence with a number or use it as the subject. Scores (atsScore, scorePotencial, impactDensityScore) appear only in parentheses, as a subordinate detail that backs up what you already said in words, never as the starting point. Example of the exact pattern to follow (adapt it to this document's real data, do not copy it literally): \"Today your trajectory is being read with [synthesis of how it reads: partial clarity / strongly / in a fragmented way, etc.] — [what works and what doesn't, in one sentence] (atsScore out of 100). With the adjustments shown below, that gap could [close / widen] [almost entirely / significantly] (up to scorePotencial). What weighs most in that difference is [the concrete reason based on the document]: it's currently at a [impactDensityLabel in lowercase] level, [concrete comparison or consequence].\"\n";
   instrBlock += "MANDATORY — not optional: all three numbers (the exact value of atsScore, the exact value of scorePotencial, and the exact value of impactDensityScore) must appear literally, as digits, inside the resumenEjecutivo text, each one in parentheses as shown in the example. A resumenEjecutivo that does not contain these three numbers in parentheses is incorrectly written — check it before responding.\n\n";
   instrBlock += "OPTIMAL RESUME STRUCTURE: (1) Specific headline, (2) Professional summary 3-4 lines, (3) Experience with company/role/dates and quantified achievements, (4) Education with institution/degree/year, (5) Skills, (6) Complete contact info.\n";
