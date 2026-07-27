@@ -137,7 +137,7 @@ export async function onRequest(context) {
     // Ajustado al límite gratuito de Groq (8.000 tokens/minuto para gpt-oss-120b/20b).
     // Groq calcula el "Requested" como prompt + max_tokens (no lo que se usa en
     // realidad), así que hay que dejar margen real, no solo bajar el razonamiento.
-    const maxTokens = plan === "starter" ? 3800 : 2800;
+    const maxTokens = plan === "starter" ? 3400 : 2500;
 
     let groqData = null;
     let lastError = null;
