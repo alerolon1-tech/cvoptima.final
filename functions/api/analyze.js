@@ -212,15 +212,25 @@ export async function onRequest(context) {
       let jsonStr = m[0];
 
       // Blindaje: a veces el modelo escribe un número en palabras en vez de dígitos
-      // (ej: "atsScore": fifty) — eso rompe el JSON. Lo corregimos antes de parsear.
-      const numWords = {
-        zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10,
-        eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17,
-        eighteen:18, nineteen:19, twenty:20, thirty:30, forty:40, fifty:50, sixty:60,
-        seventy:70, eighty:80, ninety:90, hundred:100,
+      // (ej: "atsScore": fifty, o "seventyfive", "seventy-five", "seventy five") —
+      // eso rompe el JSON. Lo corregimos antes de parsear, cubriendo simples y compuestos.
+      const unidades = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9 };
+      const especiales = {
+        ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16,
+        seventeen:17, eighteen:18, nineteen:19, hundred:100,
       };
-      jsonStr = jsonStr.replace(/:\s*([a-zA-Z]+)(?=\s*[,}])/g, (match, word) => {
-        const n = numWords[word.toLowerCase()];
+      const decenas = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
+      const numWords = { ...unidades, ...especiales, ...decenas };
+      // Generar compuestos (veintiuno..noventaynueve) normalizados sin espacios/guiones
+      for (const [dName, dVal] of Object.entries(decenas)) {
+        for (const [uName, uVal] of Object.entries(unidades)) {
+          if (uVal === 0) continue;
+          numWords[dName + uName] = dVal + uVal;
+        }
+      }
+      jsonStr = jsonStr.replace(/:\s*([a-zA-Z][a-zA-Z\- ]*[a-zA-Z])(?=\s*[,}])/g, (match, phrase) => {
+        const clave = phrase.toLowerCase().replace(/[\s-]/g, '');
+        const n = numWords[clave];
         return n !== undefined ? ': ' + n : match;
       });
 
