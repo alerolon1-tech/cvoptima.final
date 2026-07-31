@@ -136,8 +136,10 @@ export async function onRequest(context) {
 
     // Ajustado al límite gratuito de Groq (8.000 tokens/minuto para gpt-oss-120b/20b).
     // Groq calcula el "Requested" como prompt + max_tokens (no lo que se usa en
-    // realidad), así que hay que dejar margen real, no solo bajar el razonamiento.
-    const maxTokens = plan === "starter" ? 3400 : 2900;
+    // realidad), así que hay que dejar margen real. Pro tiene un esquema mucho
+    // más grande que Diagnóstico (capital relacional, trayectoria, posicionamiento),
+    // por eso recibe más margen de respuesta a costa de un CV más recortado.
+    const maxTokens = plan === "starter" ? 3400 : plan === "pro" ? 3600 : 2900;
 
     let groqData = null;
     let lastError = null;
@@ -746,7 +748,8 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 oraciones basadas en la narrativa concreta de este documento"},\n';
 
   let docBlock = "";
-  if (cvText && cvText.length >= 30) docBlock += "=== CV A ANALIZAR ===\n" + cvText.slice(0, 3800) + "\n=== FIN CV ===\n\n";
+  const cvSliceLen = plan === "pro" ? 2800 : 3800;
+  if (cvText && cvText.length >= 30) docBlock += "=== CV A ANALIZAR ===\n" + cvText.slice(0, cvSliceLen) + "\n=== FIN CV ===\n\n";
   if (liText && liText.length >= 30) docBlock += "=== PERFIL LINKEDIN A ANALIZAR ===\n" + liText.slice(0, 4500) + "\n=== FIN LINKEDIN ===\n\n";
 
   let instrBlock = "";
@@ -981,7 +984,8 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 sentence justification based on the concrete narrative of this document"},\n';
 
   let docBlock = "";
-  if (cvText && cvText.length >= 30) docBlock += "=== RESUME TO ANALYZE ===\n" + cvText.slice(0, 3800) + "\n=== END RESUME ===\n\n";
+  const cvSliceLen = plan === "pro" ? 2800 : 3800;
+  if (cvText && cvText.length >= 30) docBlock += "=== RESUME TO ANALYZE ===\n" + cvText.slice(0, cvSliceLen) + "\n=== END RESUME ===\n\n";
   if (liText && liText.length >= 30) docBlock += "=== LINKEDIN PROFILE TO ANALYZE ===\n" + liText.slice(0, 4500) + "\n=== END LINKEDIN ===\n\n";
 
   let instrBlock = "";
