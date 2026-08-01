@@ -257,11 +257,16 @@ export async function onRequest(context) {
 
     if (isPro && modo !== "comparativa") {
       try {
+        // Espera antes del segundo pedido: el límite de Groq es por minuto
+        // acumulado entre pedidos, no por pedido individual — si van pegados,
+        // compiten por el mismo balde de tokens y el segundo puede rebotar
+        // aunque individualmente entre bien.
+        await new Promise(r => setTimeout(r, 10000));
         const proSystemPrompt = isEnglish
           ? "You are a senior employability expert. Return ONLY valid JSON, no extra text, no markdown."
           : "Sos un experto senior en empleabilidad. Respondé SOLO con JSON válido, sin texto extra, sin markdown.";
         const proUserPrompt = buildProExtraPrompt(cvText, idioma, situacion);
-        const { result: proResult } = await callGroqJSON(proSystemPrompt, proUserPrompt, 3200);
+        const { result: proResult } = await callGroqJSON(proSystemPrompt, proUserPrompt, 2400);
         result = { ...result, ...proResult };
       } catch (e) {
         // Si el pedido extra de Pro falla, seguimos con el resultado base —
@@ -741,7 +746,7 @@ function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma
 
 function buildProExtraPrompt(cvText, idioma, situacion = '') {
   const isEnglish = idioma === 'en';
-  const cvSlice = cvText.slice(0, 3000);
+  const cvSlice = cvText.slice(0, 1500);
 
   if (isEnglish) {
     return (
