@@ -263,12 +263,12 @@ export async function onRequest(context) {
         // aunque individualmente entre bien. 10s no alcanzó (el primer pedido
         // varía cuánto usa realmente); se sube a 45s para tener margen real
         // sobre la ventana de 60 segundos de Groq.
-        await new Promise(r => setTimeout(r, 45000));
+        await new Promise(r => setTimeout(r, 55000));
         const proSystemPrompt = isEnglish
           ? "You are a senior employability expert. Return ONLY valid JSON, no extra text, no markdown."
           : "Sos un experto senior en empleabilidad. Respondé SOLO con JSON válido, sin texto extra, sin markdown.";
         const proUserPrompt = buildProExtraPrompt(cvText, idioma, situacion);
-        const { result: proResult } = await callGroqJSON(proSystemPrompt, proUserPrompt, 2400);
+        const { result: proResult } = await callGroqJSON(proSystemPrompt, proUserPrompt, 2000);
         result = { ...result, ...proResult };
       } catch (e) {
         // Si el pedido extra de Pro falla, seguimos con el resultado base —
