@@ -124,133 +124,154 @@ export async function onRequest(context) {
       "10. Responde SOLO con el JSON. Sin texto extra, sin markdown, sin bloques de codigo."
     );
 
-    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma, situacion);
-
-    // Pre-calcular valores del radar desde el texto (no depender del modelo)
-    const atsDetalleCalculado = modo !== 'li' ? calcularAtsDetalle(cvText) : calcularAtsDetalle(liText);
-
     const MODELS = [
       "openai/gpt-oss-120b",
       "openai/gpt-oss-20b",
     ];
 
+    async function callGroqJSON(sysPrompt, usrPrompt, maxTok) {
+      let groqData = null;
+      let lastErr = null;
+
+      for (let i = 0; i < MODELS.length; i++) {
+        const model = MODELS[i];
+        if (i > 0) await new Promise(r => setTimeout(r, 2000));
+
+        const bodyReq = {
+          model,
+          messages: [
+            { role: "system", content: sysPrompt },
+            { role: "user",   content: usrPrompt  },
+          ],
+          temperature: 0.2,
+          max_tokens: maxTok,
+        };
+        // Razonamiento liviano — necesario para quedar dentro del límite gratuito
+        // de Groq (8.000 tokens/minuto). No es una decisión de calidad, es el
+        // presupuesto que permite el plan gratuito mientras se evalúa subir de plan.
+        if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "low";
+
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + env.GROQ_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyReq),
+        });
+
+        if (groqRes.ok) {
+          groqData = await groqRes.json();
+          groqData._modelUsed = model;
+          break;
+        }
+
+        const errText = await groqRes.text();
+        lastErr = errText;
+
+        let errJson;
+        try { errJson = JSON.parse(errText); } catch { errJson = null; }
+        const isRateLimit =
+          groqRes.status === 429 ||
+          errJson?.error?.code === "rate_limit_exceeded" ||
+          errJson?.error?.type === "tokens" ||
+          errJson?.error?.code === "model_decommissioned";
+
+        console.error(`Groq falló con ${model} (status ${groqRes.status}):`, errText);
+
+        if (!isRateLimit) throw new Error("Groq error: " + errText);
+      }
+
+      if (!groqData) {
+        console.error("Todos los modelos fallaron. Último error:", lastErr);
+        throw new Error("El servicio de analisis esta temporalmente saturado. Detalle: " + (lastErr || "sin detalle"));
+      }
+
+      const raw = groqData.choices[0].message.content;
+
+      try {
+        let clean = raw
+          .replace(/```(?:json)?\s*/gi, '')
+          .replace(/```\s*/g, '')
+          .trim();
+
+        const m = clean.match(/\{[\s\S]*/);
+        if (!m) throw new Error('no-json');
+        let jsonStr = m[0];
+
+        // Blindaje: a veces el modelo escribe un número en palabras en vez de dígitos
+        // (ej: "atsScore": fifty, o "seventyfive", "seventy-five", "seventy five") —
+        // eso rompe el JSON. Lo corregimos antes de parsear, cubriendo simples y compuestos.
+        const unidades = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9 };
+        const especiales = {
+          ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16,
+          seventeen:17, eighteen:18, nineteen:19, hundred:100,
+        };
+        const decenas = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
+        const numWords = { ...unidades, ...especiales, ...decenas };
+        for (const [dName, dVal] of Object.entries(decenas)) {
+          for (const [uName, uVal] of Object.entries(unidades)) {
+            if (uVal === 0) continue;
+            numWords[dName + uName] = dVal + uVal;
+          }
+        }
+        jsonStr = jsonStr.replace(/:\s*([a-zA-Z][a-zA-Z\- ]*[a-zA-Z])(?=\s*[,}])/g, (match, phrase) => {
+          const clave = phrase.toLowerCase().replace(/[\s-]/g, '');
+          const n = numWords[clave];
+          return n !== undefined ? ': ' + n : match;
+        });
+
+        // Cerrar llaves faltantes si el JSON está truncado
+        let open = 0;
+        for (const c of jsonStr) {
+          if (c === '{') open++;
+          else if (c === '}') open--;
+        }
+        if (open > 0) jsonStr += '}'.repeat(open);
+
+        const parsed = JSON.parse(jsonStr);
+        return { result: parsed, modelUsed: groqData._modelUsed || 'unknown' };
+      } catch (e) {
+        throw new Error("No se pudo parsear la respuesta del modelo: " + raw.slice(0, 300));
+      }
+    }
+
     // Ajustado al límite gratuito de Groq (8.000 tokens/minuto para gpt-oss-120b/20b).
     // Groq calcula el "Requested" como prompt + max_tokens (no lo que se usa en
-    // realidad), así que hay que dejar margen real. Pro tiene un esquema mucho
-    // más grande que Diagnóstico (capital relacional, trayectoria, posicionamiento),
-    // por eso recibe más margen de respuesta a costa de un CV más recortado.
-    const maxTokens = plan === "starter" ? 3400 : plan === "pro" ? 3000 : 2900;
+    // realidad), así que hay que dejar margen real.
+    const maxTokens = plan === "starter" ? 3400 : 2900;
 
-    let groqData = null;
-    let lastError = null;
+    // Para Pro: el pedido principal usa el MISMO esquema que Diagnóstico (liviano,
+    // con margen cómodo). Los 5 campos exclusivos de Pro (capital relacional,
+    // trayectoria, posicionamiento, narrativa, ECS) se piden aparte, en una
+    // segunda llamada más chica — así ninguno de los dos pedidos choca contra
+    // el límite gratuito de Groq, que no alcanza para pedir todo junto.
+    const isPro = plan === "pro" || plan === "professional";
+    const userPrompt = buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma, situacion, false);
 
-    for (let i = 0; i < MODELS.length; i++) {
-      const model = MODELS[i];
-      if (i > 0) await new Promise(r => setTimeout(r, 2000));
+    // Pre-calcular valores del radar desde el texto (no depender del modelo)
+    const atsDetalleCalculado = modo !== 'li' ? calcularAtsDetalle(cvText) : calcularAtsDetalle(liText);
 
-      const bodyReq = {
-        model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user",   content: userPrompt   },
-        ],
-        temperature: 0.2,
-        max_tokens: maxTokens,
-      };
-      // Razonamiento liviano — necesario para quedar dentro del límite gratuito
-      // de Groq (8.000 tokens/minuto). No es una decisión de calidad, es el
-      // presupuesto que permite el plan gratuito mientras se evalúa subir de plan.
-      if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "low";
+    const { result: mainResult, modelUsed } = await callGroqJSON(systemPrompt, userPrompt, maxTokens);
+    let result = mainResult;
 
-      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + env.GROQ_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bodyReq),
-      });
-
-      if (groqRes.ok) {
-        groqData = await groqRes.json();
-        groqData._modelUsed = model;
-        break;
+    if (isPro && modo !== "comparativa") {
+      try {
+        const proSystemPrompt = isEnglish
+          ? "You are a senior employability expert. Return ONLY valid JSON, no extra text, no markdown."
+          : "Sos un experto senior en empleabilidad. Respondé SOLO con JSON válido, sin texto extra, sin markdown.";
+        const proUserPrompt = buildProExtraPrompt(cvText, idioma, situacion);
+        const { result: proResult } = await callGroqJSON(proSystemPrompt, proUserPrompt, 3200);
+        result = { ...result, ...proResult };
+      } catch (e) {
+        // Si el pedido extra de Pro falla, seguimos con el resultado base —
+        // mejor un análisis completo sin los módulos Pro que ningún análisis.
+        console.error("Pedido extra de Pro falló, se sigue sin esos módulos:", e.message);
       }
-
-      const errText = await groqRes.text();
-      lastError = errText;
-
-      let errJson;
-      try { errJson = JSON.parse(errText); } catch { errJson = null; }
-      const isRateLimit =
-        groqRes.status === 429 ||
-        errJson?.error?.code === "rate_limit_exceeded" ||
-        errJson?.error?.type === "tokens" ||
-        errJson?.error?.code === "model_decommissioned";
-
-      console.error(`Groq falló con ${model} (status ${groqRes.status}):`, errText);
-
-      if (!isRateLimit) throw new Error("Groq error: " + errText);
-    }
-
-    if (!groqData) {
-      console.error("Todos los modelos fallaron. Último error:", lastError);
-      throw new Error("El servicio de analisis esta temporalmente saturado. Detalle: " + (lastError || "sin detalle"));
-    }
-
-    const raw = groqData.choices[0].message.content;
-
-    let result;
-    try {
-      // Limpiar bloques markdown — al principio Y en cualquier lugar
-      let clean = raw
-        .replace(/```(?:json)?\s*/gi, '')
-        .replace(/```\s*/g, '')
-        .trim();
-
-      // Extraer desde la primera llave
-      const m = clean.match(/\{[\s\S]*/);
-      if (!m) throw new Error('no-json');
-      let jsonStr = m[0];
-
-      // Blindaje: a veces el modelo escribe un número en palabras en vez de dígitos
-      // (ej: "atsScore": fifty, o "seventyfive", "seventy-five", "seventy five") —
-      // eso rompe el JSON. Lo corregimos antes de parsear, cubriendo simples y compuestos.
-      const unidades = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9 };
-      const especiales = {
-        ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16,
-        seventeen:17, eighteen:18, nineteen:19, hundred:100,
-      };
-      const decenas = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
-      const numWords = { ...unidades, ...especiales, ...decenas };
-      // Generar compuestos (veintiuno..noventaynueve) normalizados sin espacios/guiones
-      for (const [dName, dVal] of Object.entries(decenas)) {
-        for (const [uName, uVal] of Object.entries(unidades)) {
-          if (uVal === 0) continue;
-          numWords[dName + uName] = dVal + uVal;
-        }
-      }
-      jsonStr = jsonStr.replace(/:\s*([a-zA-Z][a-zA-Z\- ]*[a-zA-Z])(?=\s*[,}])/g, (match, phrase) => {
-        const clave = phrase.toLowerCase().replace(/[\s-]/g, '');
-        const n = numWords[clave];
-        return n !== undefined ? ': ' + n : match;
-      });
-
-      // Cerrar llaves faltantes si el JSON está truncado
-      let open = 0;
-      for (const c of jsonStr) {
-        if (c === '{') open++;
-        else if (c === '}') open--;
-      }
-      if (open > 0) jsonStr += '}'.repeat(open);
-
-      result = JSON.parse(jsonStr);
-    } catch (e) {
-      throw new Error("No se pudo parsear la respuesta del modelo: " + raw.slice(0, 300));
     }
 
     result.has_linkedin = liText.length > 30;
-    result._modelUsed = groqData._modelUsed || 'unknown';
+    result._modelUsed = modelUsed;
     result.atsDetalle = atsDetalleCalculado;
     if (!result.linkedin_analysis) result.linkedin_analysis = null;
 
@@ -711,14 +732,65 @@ function normalizeResult(result, cvText, isEnglish) {
   return result;
 }
 
-function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma = 'es', situacion = '') {
+function buildPrompt(cvText, liText, modo, role, sector, seniority, plan, idioma = 'es', situacion = '', includeProExtra = true) {
   const isEnglish = idioma === 'en';
   return isEnglish
-    ? buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situacion)
-    : buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situacion);
+    ? buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situacion, includeProExtra)
+    : buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situacion, includeProExtra);
 }
 
-function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situacion = '') {
+function buildProExtraPrompt(cvText, idioma, situacion = '') {
+  const isEnglish = idioma === 'en';
+  const cvSlice = cvText.slice(0, 3000);
+
+  if (isEnglish) {
+    return (
+      "You are a senior employability expert analyzing this specific resume for a Pro-tier deep dive.\n\n" +
+      "=== RESUME ===\n" + cvSlice + "\n=== END RESUME ===\n\n" +
+      "CRITICAL: base every field on THIS document's real content — never generic. Respond ONLY with this JSON:\n\n{\n" +
+      '  "capitalRelacional": {"score": 60, "diagnostico": "specific diagnosis about visibility of collaborative work in THIS resume — mention specific verbs and organizations from the document", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": ["specific action based on this profile, not generic"]},\n' +
+      '  "diagnosticoTrayectoria": {"tipo": "Consistent|Growing|In transition|Scattered", "descripcion": "what this specific trajectory communicates today — using the real roles and companies from the resume", "patrones": ["real pattern detected in the resume"], "oportunidades": ["concrete opportunity based on this specific trajectory"], "riesgos": ["real risk detected"]},\n' +
+      '  "posicionamiento": {\n' +
+      '    "movilidadVertical": {"posible": true, "diagnostico": "concrete diagnosis about vertical mobility for THIS specific profile — what senior role is reachable and why, based on the real experience in the resume. NEVER mention leadership or team management unless the resume shows concrete evidence of managing people.", "acciones": ["concrete and specific action for this profile"]},\n' +
+      '    "movilidadLateral": {"posible": true, "diagnostico": "concrete diagnosis about lateral mobility — which sectors or equivalent roles are accessible for THIS specific profile and why. NEVER mention leadership or team management unless the resume shows concrete evidence of managing people.", "acciones": ["concrete and specific action"]},\n' +
+      '    "transicionSector": {"posible": false, "diagnostico": "concrete diagnosis about sector transition for this profile — which sectors are reachable and which are not, based on the real skills in the resume. NEVER mention leadership or team management unless the resume shows concrete evidence.", "acciones": ["concrete and specific action"]}},\n' +
+      '  "recomendacionesNarrativa": [{"tipo": "headline|profile|experience|linkedin", "actual": "exact current text from the resume — copy it literally", "sugerido": "rewritten text ready to use — concrete and specific", "justificacion": "why this rewrite improves positioning for this specific profile", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}],\n' +
+      '  "moduloEmpleabilidadClaveSocial": {\n' +
+      '    "lectura": "4-5 concrete sentences about this specific profile — using their real experiences, sectors and achievements",\n' +
+      '    "dimensionEstructural": "market impact on this specific profile — mention the sector, real demand and specific context of this candidate",\n' +
+      '    "dimensionRelacional": "networks and connections visible in THIS resume — organizations, clients, institutions explicitly mentioned",\n' +
+      '    "dimensionSubjetiva": "work identity inferred from THIS specific resume — how they position themselves, what work values they communicate",\n' +
+      '    "dimensionColectiva": "organizations, sectors or movements where this profile can generate collective impact — based on their real experience",\n' +
+      '    "posicionamientoMercado": "positioning vs current market — specific for this profile, sector and moment in time",\n' +
+      '    "tensiones": ["real and specific tension this profile faces — not generic"]}\n' +
+      "}\nRespond ONLY with the JSON, no extra text, no markdown."
+    );
+  }
+
+  return (
+    "Sos un experto senior en empleabilidad analizando este CV específico para el módulo profundo de Pro.\n\n" +
+    "=== CV ===\n" + cvSlice + "\n=== FIN CV ===\n\n" +
+    "CRITICO: basá cada campo en el contenido real de ESTE documento — nunca genérico. Respondé SOLO con este JSON:\n\n{\n" +
+    '  "capitalRelacional": {"score": 60, "diagnostico": "diagnóstico concreto sobre visibilidad del trabajo colaborativo en este CV — mencioná verbos y organizaciones específicas del documento", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": ["acción específica basada en este perfil, no genérica"]},\n' +
+    '  "diagnosticoTrayectoria": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "qué comunica esta trayectoria específica hoy — usando los roles y empresas reales del CV", "patrones": ["patrón real detectado en el CV"], "oportunidades": ["oportunidad concreta basada en esta trayectoria"], "riesgos": ["riesgo real detectado"]},\n' +
+    '  "posicionamiento": {\n' +
+    '    "movilidadVertical": {"posible": true, "diagnostico": "diagnóstico concreto sobre movilidad vertical para ESTE perfil — qué rol superior es alcanzable y por qué, basándote en la experiencia real del CV. NUNCA menciones liderazgo o gestión de equipos salvo que el CV muestre evidencia concreta de gestión de personas.", "acciones": ["acción concreta y específica para este perfil"]},\n' +
+    '    "movilidadLateral": {"posible": true, "diagnostico": "diagnóstico concreto sobre movilidad lateral — qué sectores o roles equivalentes son accesibles para ESTE perfil específico y por qué. NUNCA menciones liderazgo o gestión de equipos salvo que el CV muestre evidencia concreta de gestión de personas.", "acciones": ["acción concreta y específica"]},\n' +
+    '    "transicionSector": {"posible": false, "diagnostico": "diagnóstico concreto sobre transición sectorial para este perfil — qué sectores son alcanzables y cuáles no, basándote en las habilidades reales del CV. NUNCA menciones liderazgo o gestión de equipos salvo que el CV muestre evidencia concreta.", "acciones": ["acción concreta y específica"]}},\n' +
+    '  "recomendacionesNarrativa": [{"tipo": "titular|perfil|experiencia|linkedin", "actual": "texto actual exacto del CV — copialo literalmente", "sugerido": "texto reescrito listo para usar — concreto y específico", "justificacion": "por qué esta reescritura mejora el posicionamiento de este perfil", "impacto": "Alto|Medio", "urgencia": "Inmediata|Proximo mes"}],\n' +
+    '  "moduloEmpleabilidadClaveSocial": {\n' +
+    '    "lectura": "4-5 oraciones concretas sobre este perfil específico — usando sus experiencias, sectores y logros reales",\n' +
+    '    "dimensionEstructural": "impacto del mercado en este perfil concreto — mencioná el sector, la demanda real y el contexto específico de este candidato",\n' +
+    '    "dimensionRelacional": "redes y vínculos visibles en este CV — organizaciones, clientes, instituciones mencionadas explícitamente",\n' +
+    '    "dimensionSubjetiva": "identidad laboral que se infiere de este CV específico — cómo se posiciona, qué valores laborales comunica",\n' +
+    '    "dimensionColectiva": "organizaciones, sectores o movimientos donde este perfil puede generar impacto colectivo — basado en su experiencia real",\n' +
+    '    "posicionamientoMercado": "posición frente al mercado actual — específica para este perfil, sector y momento",\n' +
+    '    "tensiones": ["tensión real y específica que enfrenta este perfil — no genérica"]}\n' +
+    "}\nRespondé SOLO con el JSON, sin texto extra, sin markdown."
+  );
+}
+
+function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situacion = '', includeProExtra = true) {
   const ctx = [
     role      && "Rol objetivo: " + role,
     sector    && "Sector: " + sector,
@@ -748,7 +820,8 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 oraciones basadas en la narrativa concreta de este documento"},\n';
 
   let docBlock = "";
-  const cvSliceLen = plan === "pro" ? 1200 : 3800;
+  const wantsProExtra = includeProExtra && (plan === "pro" || plan === "professional");
+  const cvSliceLen = wantsProExtra ? 1200 : 3800;
   if (cvText && cvText.length >= 30) docBlock += "=== CV A ANALIZAR ===\n" + cvText.slice(0, cvSliceLen) + "\n=== FIN CV ===\n\n";
   if (liText && liText.length >= 30) docBlock += "=== PERFIL LINKEDIN A ANALIZAR ===\n" + liText.slice(0, 4500) + "\n=== FIN LINKEDIN ===\n\n";
 
@@ -780,7 +853,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "SIN LIDERAZGO: no recomendés liderazgo salvo que haya evidencia concreta de gestión de personas.\n\n";
   instrBlock += "Devuelve SOLO el siguiente JSON:\n\n";
 
-  const proSchema = plan === "pro" || plan === "professional" ? (
+  const proSchema = wantsProExtra ? (
     '  "capitalRelacional": {"score": 60, "diagnostico": "diagnóstico concreto sobre visibilidad del trabajo colaborativo en este CV — mencioná verbos y organizaciones específicas del documento", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": ["acción específica basada en este perfil, no genérica"]},\n' +
     '  "diagnosticoTrayectoria": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "qué comunica esta trayectoria específica hoy — usando los roles y empresas reales del CV", "patrones": ["patrón real detectado en el CV"], "oportunidades": ["oportunidad concreta basada en esta trayectoria"], "riesgos": ["riesgo real detectado"]},\n' +
     '  "posicionamiento": {\n' +
@@ -795,8 +868,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
     '    "dimensionSubjetiva": "identidad laboral que se infiere de este CV específico — cómo se posiciona, qué valores laborales comunica",\n' +
     '    "dimensionColectiva": "organizaciones, sectores o movimientos donde este perfil puede generar impacto colectivo — basado en su experiencia real",\n' +
     '    "posicionamientoMercado": "posición frente al mercado actual — específica para este perfil, sector y momento",\n' +
-    '    "tensiones": ["tensión real y específica que enfrenta este perfil — no genérica"]},\n' +
-    '  "versionIngles": {"nota": "reescritura no traduccion", "titular": "Professional Title", "perfilProfesional": "Professional summary", "experiencias": [], "habilidades": {"tecnicas": [], "blandas": []}, "logrosDestacados": [], "sugerenciasAdaptacion": []}\n'
+    '    "tensiones": ["tensión real y específica que enfrenta este perfil — no genérica"]}\n'
   ) : '';
 
   if (modo === "comparativa") {
@@ -954,7 +1026,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
   );
 }
 
-function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situacion = '') {
+function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situacion = '', includeProExtra = true) {
   const ctx = [
     role      && "Target role: " + role,
     sector    && "Sector: " + sector,
@@ -984,7 +1056,8 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     : '  "situacionDetectada": {"codigo": "no_entrevistas|entrevistas_sin_avance|cambio_sector|no_me_representa|actualizar|transicion_profunda", "justificacion": "1-2 sentence justification based on the concrete narrative of this document"},\n';
 
   let docBlock = "";
-  const cvSliceLen = plan === "pro" ? 1200 : 3800;
+  const wantsProExtra = includeProExtra && (plan === "pro" || plan === "professional");
+  const cvSliceLen = wantsProExtra ? 1200 : 3800;
   if (cvText && cvText.length >= 30) docBlock += "=== RESUME TO ANALYZE ===\n" + cvText.slice(0, cvSliceLen) + "\n=== END RESUME ===\n\n";
   if (liText && liText.length >= 30) docBlock += "=== LINKEDIN PROFILE TO ANALYZE ===\n" + liText.slice(0, 4500) + "\n=== END LINKEDIN ===\n\n";
 
@@ -1026,7 +1099,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
   instrBlock += "  If a section exists but uses a different header name, still mark it as true. Only mark false if the section is genuinely absent from the document.\n\n";
   instrBlock += "Return ONLY the following JSON:\n\n";
 
-  const proSchema = plan === "pro" || plan === "professional" ? (
+  const proSchema = wantsProExtra ? (
     '  "capitalRelacional": {"score": 60, "diagnostico": "specific diagnosis about visibility of collaborative work in THIS resume — mention specific verbs and organizations from the document", "verbosRelacionales": [], "organizacionesVinculadas": [], "recomendaciones": ["specific action based on this profile, not generic"]},\n' +
     '  "diagnosticoTrayectoria": {"tipo": "Consistent|Growing|In transition|Scattered", "descripcion": "what this specific trajectory communicates today — using the real roles and companies from the resume", "patrones": ["real pattern detected in the resume"], "oportunidades": ["concrete opportunity based on this specific trajectory"], "riesgos": ["real risk detected"]},\n' +
     '  "posicionamiento": {\n' +
@@ -1041,8 +1114,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
     '    "dimensionSubjetiva": "work identity inferred from THIS specific resume — how they position themselves, what work values they communicate",\n' +
     '    "dimensionColectiva": "organizations, sectors or movements where this profile can generate collective impact — based on their real experience",\n' +
     '    "posicionamientoMercado": "positioning vs current market — specific for this profile, sector and moment in time",\n' +
-    '    "tensiones": ["real and specific tension this profile faces — not generic"]},\n' +
-    '  "versionIngles": {"nota": "rewrite not translation", "titular": "Professional Title", "perfilProfesional": "Professional summary", "experiencias": [], "habilidades": {"tecnicas": [], "blandas": []}, "logrosDestacados": [], "sugerenciasAdaptacion": []}\n'
+    '    "tensiones": ["real and specific tension this profile faces — not generic"]}\n'
   ) : '';
 
   if (modo === "comparativa") {
