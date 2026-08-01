@@ -260,8 +260,10 @@ export async function onRequest(context) {
         // Espera antes del segundo pedido: el límite de Groq es por minuto
         // acumulado entre pedidos, no por pedido individual — si van pegados,
         // compiten por el mismo balde de tokens y el segundo puede rebotar
-        // aunque individualmente entre bien.
-        await new Promise(r => setTimeout(r, 10000));
+        // aunque individualmente entre bien. 10s no alcanzó (el primer pedido
+        // varía cuánto usa realmente); se sube a 45s para tener margen real
+        // sobre la ventana de 60 segundos de Groq.
+        await new Promise(r => setTimeout(r, 45000));
         const proSystemPrompt = isEnglish
           ? "You are a senior employability expert. Return ONLY valid JSON, no extra text, no markdown."
           : "Sos un experto senior en empleabilidad. Respondé SOLO con JSON válido, sin texto extra, sin markdown.";
