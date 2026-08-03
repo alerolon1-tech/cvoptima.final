@@ -75,55 +75,74 @@ export async function onRequest(context) {
 
     const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
     let result = null;
-
     let lastErr = null;
 
-    for (const model of models) {
-      try {
-        const bodyReq = {
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.2,
-          max_tokens: 2400,
-        };
-        if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "low";
+    async function intentar(model) {
+      const bodyReq = {
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.2,
+        max_tokens: 2400,
+      };
+      if (model.startsWith("openai/gpt-oss")) bodyReq.reasoning_effort = "low";
 
-        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${env.GROQ_API_KEY}`,
-          },
-          body: JSON.stringify(bodyReq),
-        });
+      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify(bodyReq),
+      });
 
-        if (!groqRes.ok) {
-          const errText = await groqRes.text();
-          lastErr = errText;
-          console.error(`Groq falló con ${model}:`, errText);
-          continue;
-        }
-        const groqData = await groqRes.json();
-        let raw = groqData.choices?.[0]?.message?.content || "";
-        raw = raw.replace(/```json|```/g, "").trim();
-
-        try {
-          result = JSON.parse(raw);
-        } catch {
-          const jsonMatch = raw.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            try { result = JSON.parse(jsonMatch[0]); } catch (e2) { lastErr = "JSON invalido: " + raw.slice(0,200); continue; }
-          } else { lastErr = "Sin JSON en la respuesta: " + raw.slice(0,200); continue; }
-        }
-        break;
-      } catch (e) {
-        lastErr = e.message;
-        await new Promise(r => setTimeout(r, 800));
-        continue;
+      if (!groqRes.ok) {
+        const errText = await groqRes.text();
+        // Groq indica en su propio mensaje cuánto hay que esperar
+        // (ej: "Please try again in 22.8s") — usamos ese dato exacto
+        // en vez de una espera fija pensada para el peor caso.
+        const m = errText.match(/try again in ([\d.]+)s/i);
+        const waitSeconds = m ? parseFloat(m[1]) : null;
+        return { ok: false, errText, waitSeconds };
       }
+      const groqData = await groqRes.json();
+      let raw = groqData.choices?.[0]?.message?.content || "";
+      raw = raw.replace(/```json|```/g, "").trim();
+      try {
+        return { ok: true, result: JSON.parse(raw) };
+      } catch {
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try { return { ok: true, result: JSON.parse(jsonMatch[0]) }; }
+          catch { return { ok: false, errText: "JSON invalido: " + raw.slice(0,200), waitSeconds: null }; }
+        }
+        return { ok: false, errText: "Sin JSON en la respuesta: " + raw.slice(0,200), waitSeconds: null };
+      }
+    }
+
+    for (const model of models) {
+      let intentos = 0;
+      while (intentos < 2) {
+        intentos++;
+        try {
+          const r = await intentar(model);
+          if (r.ok) { result = r.result; break; }
+          lastErr = r.errText;
+          console.error(`Groq falló con ${model} (intento ${intentos}):`, r.errText);
+          if (r.waitSeconds && r.waitSeconds < 40 && intentos < 2) {
+            await new Promise(res => setTimeout(res, (r.waitSeconds + 1) * 1000));
+            continue; // reintenta el mismo modelo
+          }
+          break; // sin tiempo de espera indicado, o ya se reintentó — pasar al siguiente modelo
+        } catch (e) {
+          lastErr = e.message;
+          await new Promise(res => setTimeout(res, 800));
+          break;
+        }
+      }
+      if (result) break;
     }
 
     if (!result) throw new Error("No se pudieron generar los módulos Pro. Detalle: " + (lastErr || "sin detalle"));
