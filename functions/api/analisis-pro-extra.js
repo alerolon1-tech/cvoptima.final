@@ -76,6 +76,8 @@ export async function onRequest(context) {
     const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
     let result = null;
 
+    let lastErr = null;
+
     for (const model of models) {
       try {
         const bodyReq = {
@@ -100,6 +102,7 @@ export async function onRequest(context) {
 
         if (!groqRes.ok) {
           const errText = await groqRes.text();
+          lastErr = errText;
           console.error(`Groq falló con ${model}:`, errText);
           continue;
         }
@@ -112,17 +115,18 @@ export async function onRequest(context) {
         } catch {
           const jsonMatch = raw.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            try { result = JSON.parse(jsonMatch[0]); } catch { continue; }
-          } else continue;
+            try { result = JSON.parse(jsonMatch[0]); } catch (e2) { lastErr = "JSON invalido: " + raw.slice(0,200); continue; }
+          } else { lastErr = "Sin JSON en la respuesta: " + raw.slice(0,200); continue; }
         }
         break;
       } catch (e) {
+        lastErr = e.message;
         await new Promise(r => setTimeout(r, 800));
         continue;
       }
     }
 
-    if (!result) throw new Error("No se pudieron generar los módulos Pro por ahora — probá de nuevo en un minuto.");
+    if (!result) throw new Error("No se pudieron generar los módulos Pro. Detalle: " + (lastErr || "sin detalle"));
 
     return new Response(JSON.stringify({ ok: true, ...result }), { headers });
 
