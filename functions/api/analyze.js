@@ -133,10 +133,7 @@ export async function onRequest(context) {
       let groqData = null;
       let lastErr = null;
 
-      for (let i = 0; i < MODELS.length; i++) {
-        const model = MODELS[i];
-        if (i > 0) await new Promise(r => setTimeout(r, 2000));
-
+      async function intentoUnico(model) {
         const bodyReq = {
           model,
           messages: [
@@ -161,14 +158,12 @@ export async function onRequest(context) {
         });
 
         if (groqRes.ok) {
-          groqData = await groqRes.json();
-          groqData._modelUsed = model;
-          break;
+          const data = await groqRes.json();
+          data._modelUsed = model;
+          return { ok: true, data };
         }
 
         const errText = await groqRes.text();
-        lastErr = errText;
-
         let errJson;
         try { errJson = JSON.parse(errText); } catch { errJson = null; }
         const isRateLimit =
@@ -176,10 +171,29 @@ export async function onRequest(context) {
           errJson?.error?.code === "rate_limit_exceeded" ||
           errJson?.error?.type === "tokens" ||
           errJson?.error?.code === "model_decommissioned";
+        // Groq indica en su propio mensaje cuánto hay que esperar
+        // (ej: "Please try again in 30.4s") — usamos ese dato exacto
+        // en vez de una espera fija.
+        const m = errText.match(/try again in ([\d.]+)s/i);
+        const waitSeconds = m ? parseFloat(m[1]) : null;
+        return { ok: false, errText, isRateLimit, waitSeconds };
+      }
 
-        console.error(`Groq falló con ${model} (status ${groqRes.status}):`, errText);
+      for (let i = 0; i < MODELS.length; i++) {
+        const model = MODELS[i];
+        if (i > 0) await new Promise(r => setTimeout(r, 2000));
 
-        if (!isRateLimit) throw new Error("Groq error: " + errText);
+        let r = await intentoUnico(model);
+        if (!r.ok && r.isRateLimit && r.waitSeconds && r.waitSeconds < 20) {
+          await new Promise(res => setTimeout(res, (r.waitSeconds + 1) * 1000));
+          r = await intentoUnico(model);
+        }
+
+        if (r.ok) { groqData = r.data; break; }
+
+        lastErr = r.errText;
+        console.error(`Groq falló con ${model}:`, r.errText);
+        if (!r.isRateLimit) throw new Error("Groq error: " + r.errText);
       }
 
       if (!groqData) {
