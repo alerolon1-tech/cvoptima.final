@@ -396,6 +396,7 @@ function applyTierVisibility(data, plan, modo) {
     fortalezas:          data.fortalezas || [],
     debilidades:         (data.debilidades || []).slice(0, 2).map(g => ({ titulo: g.titulo, detalle: g.detalle })),
     perfilEmpleabilidad: data.perfilEmpleabilidad || null,
+    direccionesPosibles: (data.direccionesPosibles || []).slice(0, 2),
     linkedin_analysis:   liAnticipo,
     _preview: {
       radarDescripcion,
@@ -898,6 +899,7 @@ function buildPromptES(cvText, liText, modo, role, sector, seniority, plan, situ
         '  },\n' +
         '  "narrativaProfesional": {"tipo": "Consistente|En crecimiento|En transicion|Dispersa", "descripcion": "1 oración sobre el hilo conductor", "progresion": "", "oportunidades": []},\n' +
         '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
+        '  "direccionesPosibles": [{"rol": "rol o área hacia la que se inclina la trayectoria", "justificacion": "1 oración breve, basada en patrones de demanda del mercado, no en una búsqueda en vivo"}],\n' +
         '  "linkedin_analysis": null\n' +
         "}"
       );
@@ -1145,6 +1147,7 @@ function buildPromptEN(cvText, liText, modo, role, sector, seniority, plan, situ
         '  },\n' +
         '  "narrativaProfesional": {"tipo": "Consistent|Growing|In transition|Scattered", "descripcion": "1 sentence about the profile thread", "progresion": "", "oportunidades": []},\n' +
         '  "mapaHabilidades": {"declaradas": [], "detectadas": [], "aIncorporar": []},\n' +
+        '  "direccionesPosibles": [{"rol": "role or area the trajectory leans toward", "justificacion": "1 brief sentence, based on market demand patterns, not a live search"}],\n' +
         '  "linkedin_analysis": null\n' +
         "}"
       );
